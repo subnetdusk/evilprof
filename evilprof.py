@@ -388,6 +388,4 @@ if generate_button:
 
 # --- Footer con Link GitHub ---
 st.markdown("---")
-# Link effettivo fornito dall'utente
 st.markdown("EvilProf v1.0 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit")
-# --- Fine Applicazione ---
