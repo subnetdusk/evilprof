@@ -24,22 +24,26 @@ except ImportError:
 # ================================================================
 INTRO_TEXT = """
 EvilProf è un'applicazione web realizzata con Streamlit che permette di generare rapidamente file PDF contenenti verifiche personalizzate.
+
 L'applicazione legge le domande (a scelta multipla e/o aperte) da un file Excel strutturato in modo specifico e crea un numero definito di verifiche, ciascuna contenente un mix casuale di domande scelte dall'utente.
+
 Genera un singolo file PDF contenente il numero desiderato di verifiche. Ogni verifica contiene un numero specifico di domande a scelta multipla e aperte, mescolate casualmente.
+
 Le risposte (se presenti) sono in ordine casuale. Ogni verifica inizia su una nuova pagina.
+
 E' possibile assicurarsi che i test adiacenti non abbiano nessuna domanda in comune scegliendo l'opzione "Garantire test adiacenti diversi"
 
 Funzionalità chiave è la possibilità di generare test adiacenti completamente diversi (con nessuna domanda in comune 😈).
 
 Le caratteristiche principali includono:
 
-Input da Excel: Carica facilmente le tue domande da un file .xlsx o .xls.
-Tipi di Domande: Supporta sia domande a scelta multipla (con risposte casualizzate) sia domande a risposta aperta.
-Personalizzazione: Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
-Randomizzazione: Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. Anche l'ordine delle risposte multiple è casuale.
-Opzione "Garantire Test Diversi": Possibilità di assicurare che due verifiche consecutive non utilizzino lo stesso set di domande (richiede un numero sufficiente di domande nel file sorgente).
-Output PDF: Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
-Interfaccia Web Semplice: Grazie a Streamlit, l'interfaccia è intuitiva e facile da usare direttamente nel browser.
+- Input da Excel: Carica facilmente le tue domande da un file .xlsx o .xls.
+- Tipi di Domande: Supporta sia domande a scelta multipla (con risposte casualizzate) sia domande a risposta aperta.
+- Personalizzazione: Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
+- Randomizzazione: Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. Anche l'ordine delle risposte multiple è casuale.
+- Opzione "Garantire Test Diversi": Possibilità di assicurare che due verifiche consecutive non utilizzino lo stesso set di domande (richiede un numero sufficiente di domande nel file sorgente).
+- Output PDF: Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
+- Interfaccia Web Semplice: Grazie a Streamlit, l'interfaccia è intuitiva e facile da usare direttamente nel browser.
 
 Struttura del File Excel
 
