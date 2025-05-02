@@ -32,9 +32,9 @@ Le caratteristiche principali includono:
 - **Personalizzazione:** Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
 - **Randomizzazione Avanzata:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
 - **Diversità Migliorata (con Fallback):** L'applicazione tenta di utilizzare una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)** basata sull'algoritmo A di Efraimidis e Spirakis (descritto in [questo paper](https://ethz.ch/content/dam/ethz/special-interest/baug/ivt/ivt-dam/vpl/reports/1101-1200/ab1141.pdf)) per selezionare le domande. Questo metodo:
-    - Tenta di **garantire** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*.
-    - Tenta di **favorire statisticamente** la selezione di domande che non vengono utilizzate da più tempo.
-    - **Fallback:** Se non ci sono abbastanza domande uniche disponibili per garantire la diversità rispetto al test precedente, l'applicazione **passerà a un campionamento casuale semplice** da *tutte* le domande disponibili per quel tipo, **perdendo la garanzia di diversità** tra test adiacenti. Verrà mostrato un avviso in tal caso. Per una buona diversità, è consigliato avere `n >= 3k` domande totali.
+    - Tenta di **garantire** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*. Ciò richiede che il numero totale di domande di un certo tipo (`n`) sia strettamente maggiore del numero di domande di quel tipo richieste per verifica (`k`), ovvero `n > k`.
+    - Tenta di **favorire statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k` (e se non ci sono errori più gravi).
+    - **Fallback:** Se non ci sono abbastanza domande uniche disponibili per garantire la diversità rispetto al test precedente (`n <= k`), l'applicazione **passerà a un campionamento casuale semplice** da *tutte* le domande disponibili per quel tipo, **perdendo la garanzia di diversità** tra test adiacenti. Verrà mostrato un avviso rosso prominente in tal caso.
 - **Output PDF:** Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
 
 **Struttura del File Excel**
@@ -114,7 +114,7 @@ def generate_pdf_data(tests_data_lists, timestamp, subject_name, status_placehol
         if status_placeholder: status_placeholder.info(message)
         else: st.info(message)
     update_status("⚙️ Avvio generazione PDF...")
-    css_style = """@page { size: A4; margin: 2cm; } body { font-family: Verdana, sans-serif; font-size: 11pt; line-height: 1.4; } .test-container { } .page-break { page-break-before: always; } h2 { margin-bottom: 0.8em; font-size: 1.1em; color: #000; font-weight: bold; } .pdf-header-info { margin-bottom: 2.5em; font-size: 1em; font-weight: normal; line-height: 1.1; } .header-line { display: flex; align-items: baseline; width: 100%; margin-bottom: 0.6em; } .header-label { white-space: nowrap; margin-right: 0.5em; flex-shrink: 0; } .header-underline { flex-grow: 1; border-bottom: 1px solid black; position: relative; top: -2px; min-width: 40px; } .class-label { margin-left: 2.5em; } .question { margin-top: 1.8em; margin-bottom: 0.8em; font-weight: bold; } .answer { display: flex; align-items: baseline; margin-left: 2.5em; margin-top: 0.1em; margin-bottom: 0.3em; padding-left: 0; text-indent: 0; } .checkbox { flex-shrink: 0; margin-right: 0.6em; } .answer-text { } .open-answer-space { min-height: 3em; margin-left: 1em; margin-top: 0.5em; margin-bottom: 1.5em; }"""
+    css_style = """@page { size: A4; margin: 2cm; } body { font-family: Verdana, sans-serif; font-size: 11pt; line-height: 1.4; } .test-container { } .page-break { page-break-before: always; } h2 { margin-bottom: 0.8em; font-size: 1.6em; color: #000; font-weight: bold; } .pdf-header-info { margin-bottom: 2.5em; font-size: 1em; font-weight: normal; line-height: 1.6; } .header-line { display: flex; align-items: baseline; width: 100%; margin-bottom: 0.6em; } .header-label { white-space: nowrap; margin-right: 0.5em; flex-shrink: 0; } .header-underline { flex-grow: 1; border-bottom: 1px solid black; position: relative; top: -2px; min-width: 40px; } .class-label { margin-left: 2.5em; } .question { margin-top: 1.8em; margin-bottom: 0.8em; font-weight: bold; } .answer { display: flex; align-items: baseline; margin-left: 2.5em; margin-top: 0.1em; margin-bottom: 0.3em; padding-left: 0; text-indent: 0; } .checkbox { flex-shrink: 0; margin-right: 0.6em; } .answer-text { } .open-answer-space { min-height: 3em; margin-left: 1em; margin-top: 0.5em; margin-bottom: 1.5em; }"""
     update_status("⚙️ Costruzione documento HTML...")
     html_parts = []; checkbox_char = "☐"; safe_subject_name = subject_name.replace('<', '&lt;').replace('>', '&gt;')
     for index, single_test_data in enumerate(tests_data_lists):
@@ -183,10 +183,18 @@ validation_button = st.sidebar.button(
 st.sidebar.markdown("---")
 st.sidebar.subheader("Codice Sorgente")
 try:
-    script_name = os.path.basename(__file__) if '__file__' in locals() else "evilprof_app.py"
-    script_path = os.path.abspath(__file__)
-    with open(script_path, 'r', encoding='utf-8') as f: source_code = f.read()
-    st.sidebar.download_button(label="📥 Scarica Codice App (.py)", data=source_code, file_name=script_name, mime="text/x-python")
+    # Determina il nome del file corrente in modo sicuro
+    script_name = "evilprof_app.py" # Default
+    if '__file__' in locals() and os.path.exists(__file__):
+         script_name = os.path.basename(__file__)
+         script_path = os.path.abspath(__file__)
+         with open(script_path, 'r', encoding='utf-8') as f: source_code = f.read()
+    else: # Fallback se __file__ non è definito (es. in alcuni ambienti interattivi)
+         source_code = "# Impossibile leggere il codice sorgente automaticamente in questo ambiente."
+         st.sidebar.warning("Download codice sorgente non disponibile in questo ambiente.")
+
+    if '__file__' in locals() and os.path.exists(__file__): # Mostra bottone solo se il codice è stato letto
+        st.sidebar.download_button(label="📥 Scarica Codice App (.py)", data=source_code, file_name=script_name, mime="text/x-python")
 except Exception as e: st.sidebar.warning(f"Impossibile leggere codice sorgente: {e}")
 # --- Fine Sidebar ---
 
@@ -230,22 +238,18 @@ if validation_button:
                             current_test_unshuffled = []; selected_mc_current = set(); selected_oe_current = set()
                             if test_num_mc > 0:
                                 candidates = list(mc_by_idx.keys() - prev_mc_idx_test); weights = [i_test - last_used_mc_test[idx] + 1 for idx in candidates]
-                                # --- Fallback per Test ---
                                 if len(candidates) < test_num_mc:
                                      st.warning(f"[Test] Fallback attivo per Scelta Multipla test {i_test}: campiono da tutti.")
                                      sampled_mc = random.sample(list(mc_by_idx.keys()), test_num_mc)
-                                else:
-                                     sampled_mc = weighted_random_sample_without_replacement(candidates, weights, test_num_mc)
+                                else: sampled_mc = weighted_random_sample_without_replacement(candidates, weights, test_num_mc)
                                 selected_mc_current = set(sampled_mc)
                                 for idx in selected_mc_current: current_test_unshuffled.append(mc_by_idx[idx]); last_used_mc_test[idx] = i_test
                             if test_num_open > 0:
                                 candidates = list(oe_by_idx.keys() - prev_oe_idx_test); weights = [i_test - last_used_oe_test[idx] + 1 for idx in candidates]
-                                # --- Fallback per Test ---
                                 if len(candidates) < test_num_open:
                                      st.warning(f"[Test] Fallback attivo per Aperte test {i_test}: campiono da tutti.")
                                      sampled_oe = random.sample(list(oe_by_idx.keys()), test_num_open)
-                                else:
-                                     sampled_oe = weighted_random_sample_without_replacement(candidates, weights, test_num_open)
+                                else: sampled_oe = weighted_random_sample_without_replacement(candidates, weights, test_num_open)
                                 selected_oe_current = set(sampled_oe)
                                 for idx in selected_oe_current: current_test_unshuffled.append(oe_by_idx[idx]); last_used_oe_test[idx] = i_test
                             random.shuffle(current_test_unshuffled); test_results_data.append(current_test_unshuffled)
@@ -257,9 +261,8 @@ if validation_button:
                                 if len(test_data) != expected_total: st.error(f"❌ Validazione Fallita: Test {i_val+1} ha {len(test_data)} domande invece di {expected_total}."); test_passed_overall = False
                             q_set_test1 = set(q['original_index'] for q in test_results_data[0]); q_set_test2 = set(q['original_index'] for q in test_results_data[1])
                             intersection = q_set_test1.intersection(q_set_test2)
-                            # Nel test, ora l'intersezione POTREBBE non essere vuota se il fallback è scattato
                             if not intersection: st.success("✅ Validazione Passata: Test 1 e Test 2 non hanno domande in comune.")
-                            else: st.warning(f"⚠️ Validazione: Test 1 e Test 2 hanno domande in comune (indici: {intersection}). Questo è atteso se il fallback è stato attivato.")
+                            else: st.warning(f"⚠️ Validazione: Test 1 e Test 2 hanno domande in comune (indici: {intersection}). Atteso se fallback attivo.")
                         else: st.error("❌ Validazione Fallita: Numero di test generati non corretto."); test_passed_overall = False
                         if test_passed_overall: test_status_placeholder.success("🎉 Test di validazione completato!")
                         else: test_status_placeholder.error("⚠️ Test di validazione fallito o con avvisi. Controllare i messaggi.")
@@ -273,17 +276,13 @@ if validation_button:
 # Logica Principale di Generazione (PDF Effettivo - MODIFICATA)
 # ================================================================
 if generate_button:
-    status_placeholder = st.empty() # Placeholder per messaggi di stato
-
-    # Reset flag avviso fallback all'inizio di ogni generazione
-    if 'fallback_warning_shown' in st.session_state:
-        del st.session_state['fallback_warning_shown']
+    status_placeholder = st.empty()
+    if 'fallback_warning_shown' in st.session_state: del st.session_state['fallback_warning_shown']
 
     if uploaded_file is None: st.warning("⚠️ Carica prima un file Excel.")
     else:
         if 'excel_df' not in st.session_state or st.session_state.loaded_file_name != uploaded_file.name:
-             with st.spinner("⏳ Caricamento dati Excel..."):
-                 all_questions = load_questions_from_excel(uploaded_file, status_placeholder)
+             with st.spinner("⏳ Caricamento dati Excel..."): all_questions = load_questions_from_excel(uploaded_file, status_placeholder)
         else:
              status_placeholder.info("ℹ️ Utilizzo dati Excel dalla sessione corrente.")
              df_main = st.session_state.excel_df; all_questions = []; mc_main_count = 0; oe_main_count = 0
@@ -294,7 +293,7 @@ if generate_button:
                      else: all_questions.append({'question': question_text, 'answers': [], 'original_index': index, 'type': 'open_ended'}); oe_main_count += 1
              status_placeholder.info(f"✅ Dati pronti: {len(all_questions)} domande ({mc_main_count} a scelta multipla, {oe_main_count} aperte). Validazione parametri...")
 
-        if not all_questions: st.error("❌ Errore nel caricamento/elaborazione dei dati. Impossibile generare.")
+        if not all_questions: st.error("❌ Errore nel caricamento/elaborazione dati. Impossibile generare.")
         else:
              num_q_per_test = num_mc_q + num_open_q
              if num_q_per_test <= 0: st.error("ERRORE: N. domande totali per test deve essere > 0.")
@@ -305,17 +304,25 @@ if generate_button:
                  total_mc = len(mc_questions); total_open = len(open_questions); error_found_main = False
 
                  # --- Controlli di Fattibilità e Warning ---
+                 # Controlli Critici (bloccano la generazione)
                  if total_mc == 0 and num_mc_q > 0: st.error(f"ERRORE: {num_mc_q} domande a scelta multipla richieste, 0 trovate."); error_found_main = True
                  if total_open == 0 and num_open_q > 0: st.error(f"ERRORE: {num_open_q} Aperte richieste, 0 trovate."); error_found_main = True
                  if total_mc < num_mc_q: st.error(f"ERRORE CRITICO: Non abbastanza domande a scelta multipla ({total_mc}) per {num_mc_q} richieste."); error_found_main = True
                  if total_open < num_open_q: st.error(f"ERRORE CRITICO: Non abbastanza Aperte ({total_open}) per {num_open_q} richieste."); error_found_main = True
                  # Rimosso controllo n > k perché ora gestito dal fallback
-                 # Warning per bassa diversità potenziale (n < 3k)
+
+                 # Warning per bassa diversità potenziale (n < 3k) - Mostrato solo se non ci sono errori critici
                  if not error_found_main:
-                     if num_mc_q > 0 and total_mc < 3 * num_mc_q:
-                         st.warning(f"⚠️ Attenzione: Il numero totale di domande a scelta multipla ({total_mc}) è inferiore al triplo delle richieste per test ({num_mc_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
-                     if num_open_q > 0 and total_open < 3 * num_open_q:
-                         st.warning(f"⚠️ Attenzione: Il numero totale di domande aperte ({total_open}) è inferiore al triplo delle richieste per test ({num_open_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
+                     show_mc_warning = num_mc_q > 0 and total_mc < 3 * num_mc_q
+                     show_oe_warning = num_open_q > 0 and total_open < 3 * num_open_q
+
+                     # Mostra warning solo se non è già stato mostrato l'errore di fallback
+                     # (Questo controllo avviene DOPO il loop, ma lo mettiamo qui per riferimento logico)
+                     # if 'fallback_warning_shown' not in st.session_state: # Controllo effettivo dopo il loop
+                     if show_mc_warning:
+                         st.warning(f"⚠️ Attenzione: Il numero totale di domande a scelta multipla ({total_mc}) è inferiore al triplo ({3*num_mc_q}) delle richieste per test ({num_mc_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
+                     if show_oe_warning:
+                         st.warning(f"⚠️ Attenzione: Il numero totale di domande aperte ({total_open}) è inferiore al triplo ({3*num_open_q}) delle richieste per test ({num_open_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
                  # --- Fine Controlli ---
 
                  if not error_found_main:
@@ -328,29 +335,22 @@ if generate_button:
                          for i in range(1, num_tests + 1):
                              status_placeholder.info(f"⚙️ Generazione dati test {i}/{num_tests}...")
                              current_test_data_unshuffled = []; selected_mc_indices_current = set(); selected_open_indices_current = set()
-                             fallback_active_mc = False; fallback_active_oe = False # Flag per tracciare il fallback in questo ciclo
+                             fallback_active_mc = False; fallback_active_oe = False
 
                              # --- Selezione Scelta Multipla con Fallback ---
                              if num_mc_q > 0:
                                  candidate_mc_indices = list(mc_by_index.keys() - prev_mc_indices)
-                                 # Verifica se ci sono abbastanza candidati UNICI
                                  if len(candidate_mc_indices) < num_mc_q:
                                      fallback_active_mc = True
-                                     # Mostra avviso solo la prima volta che accade
                                      if 'fallback_warning_shown' not in st.session_state:
                                          st.error(f"‼️ ATTENZIONE: Domande insufficienti per garantire test {i} diverso dal precedente per le domande a scelta multipla. Si procede con campionamento casuale semplice da TUTTE le domande disponibili. I test successivi potrebbero contenere ripetizioni.")
-                                         st.session_state.fallback_warning_shown = True # Imposta il flag
-                                     # Campionamento semplice da TUTTE le domande MC
-                                     try:
-                                         sampled_mc_indices = random.sample(list(mc_by_index.keys()), num_mc_q)
-                                     except ValueError: # Se num_mc_q > total_mc (già controllato prima, ma per sicurezza)
-                                          st.error(f"Errore Imprevisto: Impossibile campionare {num_mc_q} da {total_mc} domande totali."); break # Esce dal loop
+                                         st.session_state.fallback_warning_shown = True
+                                     try: sampled_mc_indices = random.sample(list(mc_by_index.keys()), num_mc_q)
+                                     except ValueError: st.error(f"Errore Imprevisto: Impossibile campionare {num_mc_q} da {total_mc} domande totali."); break
                                  else:
-                                     # Procedi con campionamento ponderato
                                      weights_mc = [i - last_used_mc[idx] + 1 for idx in candidate_mc_indices]
                                      try: sampled_mc_indices = weighted_random_sample_without_replacement(candidate_mc_indices, weights_mc, num_mc_q)
-                                     except ValueError as e: st.error(f"Errore campionamento ponderato Scelta Multipla test {i}: {e}"); break # Esce dal loop
-                                 # Aggiorna stato
+                                     except ValueError as e: st.error(f"Errore campionamento ponderato Scelta Multipla test {i}: {e}"); break
                                  selected_mc_indices_current = set(sampled_mc_indices)
                                  for idx in selected_mc_indices_current: current_test_data_unshuffled.append(mc_by_index[idx]); last_used_mc[idx] = i
 
@@ -362,8 +362,7 @@ if generate_button:
                                      if 'fallback_warning_shown' not in st.session_state:
                                          st.error(f"‼️ ATTENZIONE: Domande insufficienti per garantire test {i} diverso dal precedente per le domande aperte. Si procede con campionamento casuale semplice da TUTTE le domande disponibili. I test successivi potrebbero contenere ripetizioni.")
                                          st.session_state.fallback_warning_shown = True
-                                     try:
-                                         sampled_oe_indices = random.sample(list(open_by_index.keys()), num_open_q)
+                                     try: sampled_oe_indices = random.sample(list(open_by_index.keys()), num_open_q)
                                      except ValueError: st.error(f"Errore Imprevisto: Impossibile campionare {num_open_q} da {total_open} domande totali."); break
                                  else:
                                      weights_oe = [i - last_used_oe[idx] + 1 for idx in candidate_oe_indices]
@@ -372,27 +371,22 @@ if generate_button:
                                  selected_open_indices_current = set(sampled_oe_indices)
                                  for idx in selected_open_indices_current: current_test_data_unshuffled.append(open_by_index[idx]); last_used_oe[idx] = i
 
-                             # Aggiorna indici precedenti per il prossimo ciclo
-                             prev_mc_indices = selected_mc_indices_current
-                             prev_open_indices = selected_open_indices_current
+                             prev_mc_indices = selected_mc_indices_current; prev_open_indices = selected_open_indices_current
                              random.shuffle(current_test_data_unshuffled); all_tests_question_data.append(current_test_data_unshuffled)
                          # --- Fine Loop Generazione Test ---
 
-                         # Se non ci sono stati errori logici durante il loop
-                         if 'fallback_warning_shown' not in st.session_state: # Controlla se il fallback non è mai scattato
+                         # Messaggio finale prima del PDF
+                         if 'fallback_warning_shown' not in st.session_state:
                               status_placeholder.info(f"✅ Dati per {len(all_tests_question_data)} verifiche preparati (con diversità garantita). Avvio conversione PDF...")
                          else:
-                              # Se il fallback è scattato, messaggio diverso
                               status_placeholder.warning(f"✅ Dati per {len(all_tests_question_data)} verifiche preparati (ATTENZIONE: diversità non garantita per tutti i test). Avvio conversione PDF...")
 
-
                      # --- Generazione PDF ---
-                     # Nessun errore logico grave (es. k > n totale) è avvenuto
-                     with st.spinner("⏳ Conversione in PDF..."): # Secondo spinner per PDF
-                         pdf_data = generate_pdf_data(all_tests_question_data, datetime.now().strftime("%Y%m%d_%H%M%S"), subject_name, status_placeholder) # Passa placeholder
+                     with st.spinner("⏳ Conversione in PDF..."):
+                         pdf_data = generate_pdf_data(all_tests_question_data, datetime.now().strftime("%Y%m%d_%H%M%S"), subject_name, status_placeholder)
 
                      if pdf_data:
-                         status_placeholder.empty() # Pulisce placeholder
+                         status_placeholder.empty()
                          st.success("✅ Generazione PDF completata!")
                          timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                          safe_filename_subject = subject_name.replace(' ','_').replace('/','-').replace('\\','-')
@@ -402,7 +396,6 @@ if generate_button:
                          status_placeholder.empty()
                          st.error("❌ Errore durante la creazione del PDF.")
 
-
 # --- Footer ---
 st.markdown("---")
-st.markdown("EvilProf v1.1 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") # Versione aggiornata
+st.markdown("EvilProf v1.7 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") 
