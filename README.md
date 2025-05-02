@@ -10,15 +10,16 @@ Questa versione è hostata su [evilprof.streamlit.app](https://evilprof.streamli
 
 Funzionalità chiave è la possibilità di generare test adiacenti completamente diversi (con nessuna domanda in comune 😈).
 
-Le caratteristiche principali includono:
+## Caratteristiche Principali
 
 * **Input da Excel:** Carica facilmente le tue domande da un file `.xlsx` o `.xls`.
 * **Tipi di Domande:** Supporta sia domande a scelta multipla (con risposte casualizzate) sia domande a risposta aperta.
 * **Personalizzazione:** Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
-* **Randomizzazione:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. Anche l'ordine delle risposte multiple è casuale.
-* **Opzione "Garantire Test Diversi":** Possibilità di assicurare che due verifiche consecutive non utilizzino lo stesso set di domande (richiede un numero sufficiente di domande nel file sorgente).
+* **Randomizzazione Avanzata:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
+* **Diversità Migliorata:** L'applicazione utilizza una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)** basata sull'algoritmo A di Efraimidis e Spirakis (descritto in [questo paper](https://ethz.ch/content/dam/ethz/special-interest/baug/ivt/ivt-dam/vpl/reports/1101-1200/ab1141.pdf)) per selezionare le domande. Questo metodo:
+    * **Garantisce** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*.
+    * **Favorisce statisticamente** la selezione di domande che non vengono utilizzate da più tempo, promuovendo una maggiore rotazione e diversità tra le verifiche nel lungo periodo, senza richiedere un numero eccessivo di domande nel file di partenza.
 * **Output PDF:** Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
-* **Interfaccia Web Semplice:** Grazie a Streamlit, l'interfaccia è intuitiva e facile da usare direttamente nel browser.
 
 ## Struttura del File Excel
 
@@ -27,6 +28,8 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
 * **Colonna A:** Contiene il testo completo della domanda.
 * **Colonne B, C, D, ...:** Contengono le diverse opzioni di risposta *solo* per le domande a scelta multipla. Devono esserci almeno due opzioni di risposta perché la domanda sia considerata a scelta multipla.
 * **Domande Aperte:** Per una domanda aperta, lasciare semplicemente vuote le celle nelle colonne B, C, D, ...
+
+*Vedi immagine di esempio qui sotto.*
 
 **Esempio Visivo:**
 
