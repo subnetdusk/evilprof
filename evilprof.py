@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # ================================================================
-# EvilProf 😈 - Generatore Verifiche da Excel - v1.9
+# EvilProf 😈 - Generatore Verifiche da Excel - v1.0
 # ================================================================
-# Modifiche v1.9:
+# Modifiche v1.0:
 # - Rimosso footer (nome e numerazione pagine) dai PDF generati
 # - Versione incrementata
 # ================================================================
