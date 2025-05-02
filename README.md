@@ -29,9 +29,7 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
 * **Colonne B, C, D, ...:** Contengono le diverse opzioni di risposta *solo* per le domande a scelta multipla. Devono esserci almeno due opzioni di risposta perché la domanda sia considerata a scelta multipla.
 * **Domande Aperte:** Per una domanda aperta, lasciare semplicemente vuote le celle nelle colonne B, C, D, ...
 
-*Vedi immagine di esempio qui sotto.*
-
-**Esempio Visivo:**
+*Esempio:*
 
 ![Esempio struttura file Excel](excel_example.jpg)
 
