@@ -57,15 +57,16 @@ Per eseguire EvilProf sul tuo computer:
     ```
 4.  **Avvia Streamlit:** Esegui il comando:
     ```bash
-    streamlit run evilprof_app.py
+    streamlit run evilprof.py
     ```
-    (Sostituisci `evilprof_app.py` con il nome effettivo del file Python se diverso).
+    (Sostituisci `evilprof.py` con il nome effettivo del file Python se diverso).
 5.  **Apri nel Browser:** Streamlit dovrebbe aprire automaticamente l'applicazione nel tuo browser web predefinito (solitamente all'indirizzo `http://localhost:8501`).
 
 ---
 
 <a name="english-version"></a>
 ## English Version
+This English Version is hosted at [evilprof-english.streamlit.app](https://evilprof-english.streamlit.app/)
 
 ### Description
 
@@ -118,7 +119,7 @@ To run EvilProf on your computer:
     ```
 4.  **Start Streamlit:** Run the command:
     ```bash
-    streamlit run evilprof_app.py
+    streamlit run evilprof_eng.py
     ```
-    (Replace `evilprof_app.py` with the actual Python file name if different).
+    (Replace `evilprof_eng.py` with the actual Python file name if different).
 5.  **Open in Browser:** Streamlit should automatically open the application in your default web browser (usually at `http://localhost:8501`).
