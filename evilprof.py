@@ -398,4 +398,5 @@ if generate_button:
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("EvilProf v1.7 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") 
+st.markdown("EvilProf v1.1 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") # Versione aggiornata
+# --- Fine Applicazione ---
