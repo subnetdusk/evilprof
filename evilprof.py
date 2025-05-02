@@ -31,26 +31,18 @@ Le caratteristiche principali includono:
 - Tipi di Domande: Supporta sia domande a scelta multipla (con risposte casualizzate) sia domande a risposta aperta.
 - Personalizzazione: Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
 - Randomizzazione: Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. Anche l'ordine delle risposte multiple è casuale.
-- Opzione "Garantire Test Diversi": Possibilità di assicurare che due verifiche consecutive non utilizzino lo stesso set di domande (richiede un numero sufficiente di domande nel file sorgente).
+- Opzione "Garantire Test Diversi": Possibilità di assicurare che due verifiche consecutive non utilizzino lo stesso set di domande. Per ciascun tipo (a scelta multipla / aperte), devi avere nel file **almeno il doppio** delle domande rispetto a quante ne usi in *ogni singola verifica*.
+    * *Esempio Pratico:* Se chiedi 8 domande a scelta multipla per verifica, te ne servono almeno 16 totali nel file Excel (lo stesso vale per le aperte).
 - Output PDF: Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
-- Interfaccia Web Semplice: Grazie a Streamlit, l'interfaccia è intuitiva e facile da usare direttamente nel browser.
 
 Struttura del File Excel
 
 Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la seguente struttura senza intestazioni di colonna:
 
-Colonna A: Contiene il testo completo della domanda.
-Colonne B, C, D, ...: Contengono le diverse opzioni di risposta solo per le domande a scelta multipla. Devono esserci almeno due opzioni di risposta perché la domanda sia considerata a scelta multipla.
-Domande Aperte: Per una domanda aperta, lasciare semplicemente vuote le celle nelle colonne B, C, D, ...
+- Colonna A: Contiene il testo completo della domanda.
+- Colonne B, C, D, ...: Contengono le diverse opzioni di risposta solo per le domande a scelta multipla. Devono esserci almeno due opzioni di risposta perché la domanda sia considerata a scelta multipla.
+- Domande Aperte: Per una domanda aperta, lasciare semplicemente vuote le celle nelle colonne B, C, D, ...
 
-
----
-**Opzione "Garantire test diversi":**
-
-* Se attivi questa opzione, il programma controlla se hai abbastanza domande nel file Excel per variare i test uno dopo l'altro.
-* **Requisito:** Per ciascun tipo (a scelta multipla / aperte), devi avere nel file **almeno il doppio** delle domande rispetto a quante ne usi in *ogni singola verifica*.
-    * *Esempio Pratico:* Se chiedi 8 domande a scelta multipla per verifica, te ne servono almeno 16 totali nel file Excel (lo stesso vale per le aperte).
-* **Motivo:** Serve una "riserva" di domande sufficiente per creare nuovi test senza ripetere subito le domande. L'app verifica questo all'inizio e si ferma con un errore se le domande non bastano.
 ---
 """
 
