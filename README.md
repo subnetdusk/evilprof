@@ -1,5 +1,7 @@
 # EvilProf 😈
 
+[English Version](#english-version)
+
 Generatore di Verifiche Casuali da Excel a PDF - Versione Streamlit
 
 Questa versione è hostata su [evilprof.streamlit.app](https://evilprof.streamlit.app/)
@@ -57,5 +59,66 @@ Per eseguire EvilProf sul tuo computer:
     ```bash
     streamlit run evilprof_app.py
     ```
+    (Sostituisci `evilprof_app.py` con il nome effettivo del file Python se diverso).
 5.  **Apri nel Browser:** Streamlit dovrebbe aprire automaticamente l'applicazione nel tuo browser web predefinito (solitamente all'indirizzo `http://localhost:8501`).
 
+---
+
+<a name="english-version"></a>
+## English Version
+
+### Description
+
+**EvilProf** is a web application built with Streamlit that allows you to quickly generate PDF files containing customized tests. The application reads questions (multiple-choice and/or open-ended) from a specifically structured Excel file and creates a defined number of tests, each containing a random mix of user-selected questions.
+
+A key feature is the ability to generate completely different adjacent tests (with no questions in common 😈).
+
+### Main Features
+
+* **Input from Excel:** Easily upload your questions from an `.xlsx` or `.xls` file.
+* **Question Types:** Supports both multiple-choice questions (with randomized answers) and open-ended questions.
+* **Customization:** Choose the number of tests to generate, the number of questions per type (multiple/open) for each test, and the subject name.
+* **Advanced Randomization:** Questions in each test are randomly selected from the pool available in the Excel file. The order of multiple-choice answers is also randomized.
+* **Enhanced Diversity:** The application uses a **Weighted Random Sampling Without Replacement (WRSwOR)** technique based on a variant of Algorithm A by Efraimidis and Spirakis (described in [this paper](https://ethz.ch/content/dam/ethz/special-interest/baug/ivt/ivt-dam/vpl/reports/1101-1200/ab1141.pdf)) to select questions. This method:
+    * **Guarantees** that questions used in one test are not repeated in the *immediately following* test.
+    * **Statistically favors** the selection of questions that haven't been used for a longer time, promoting greater rotation and diversity among tests over the long run, without requiring an excessive number of questions in the source file.
+* **PDF Output:** Generates a single PDF file ready for printing, with each test starting on a new page and a header for name, date, and class.
+
+### Excel File Structure
+
+For the application to work correctly, the Excel file must adhere to the following structure **without column headers**:
+
+* **Column A:** Contains the full text of the question.
+* **Columns B, C, D, ...:** Contain the different answer options *only* for multiple-choice questions. There must be at least two answer options for the question to be considered multiple-choice.
+* **Open-Ended Questions:** For an open-ended question, simply leave the cells in columns B, C, D, ... blank.
+
+*Example:*
+
+![Example Excel file structure](excel_example.jpg)
+
+### Local Execution
+
+To run EvilProf on your computer:
+
+1.  **Prerequisites:**
+    * Ensure you have **Python** installed (version 3.7 or higher recommended).
+    * You might need to install system dependencies for `WeasyPrint` (like GTK+). Consult the [WeasyPrint documentation](https://doc.courtbouillon.org/weasyprint/stable/install.html) for specific instructions for your operating system (Linux, macOS, Windows).
+2.  **Clone Repository:** Download or clone this GitHub repository:
+    ```bash
+    git clone [https://github.com/subnetdusk/evilprof.git](https://github.com/subnetdusk/evilprof.git)
+    cd evilprof
+    ```
+3.  **Install Python Dependencies:** Create a virtual environment (recommended) and install the necessary libraries from the `requirements.txt` file:
+    ```bash
+    python -m venv venv
+    # Activate the virtual environment (examples)
+    # Windows: .\venv\Scripts\activate
+    # Linux/macOS: source venv/bin/activate
+    pip install -r requirements.txt
+    ```
+4.  **Start Streamlit:** Run the command:
+    ```bash
+    streamlit run evilprof_app.py
+    ```
+    (Replace `evilprof_app.py` with the actual Python file name if different).
+5.  **Open in Browser:** Streamlit should automatically open the application in your default web browser (usually at `http://localhost:8501`).
