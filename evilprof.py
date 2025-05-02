@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ================================================================
-# EvilProf 😈 - Generatore Verifiche da Excel - v1.0
+# EvilProf 😈 - Generatore Verifiche da Excel - v1.2
 # ================================================================
-# Modifiche v1.0:
-# - Rimosso footer (nome e numerazione pagine) dai PDF generati
+# Modifiche v1.2:
+# - Aggiunto riferimento a banner.svg sotto il titolo
 # - Versione incrementata
 # ================================================================
 
@@ -23,7 +23,7 @@ except ImportError:
     WEASYPRINT_AVAILABLE = False
 
 # ================================================================
-# Testo Introduttivo e Istruzioni (Invariato)
+# Testo Introduttivo e Istruzioni
 # ================================================================
 INTRO_TEXT = """
 Questo strumento legge un file Excel contenente domande (colonna A) e le relative risposte multiple (colonne B, C, D, ...) OPPURE domande aperte (senza risposte nelle colonne B, C, D...).
@@ -54,7 +54,7 @@ Genera un singolo file PDF contenente il numero desiderato di verifiche. Ogni ve
 """
 
 # ================================================================
-# Funzione Caricamento Domande da Excel (Invariata)
+# Funzione Caricamento Domande da Excel
 # ================================================================
 def load_questions_from_excel(uploaded_file):
     """Carica domande/risposte da file Excel (UploadedFile)."""
@@ -113,7 +113,7 @@ def load_questions_from_excel(uploaded_file):
         return None
 
 # ================================================================
-# Funzione Generazione PDF (CSS AGGIORNATO)
+# Funzione Generazione PDF
 # ================================================================
 def generate_pdf_data(tests_data_lists, timestamp, subject_name):
     """Genera i dati binari del PDF, senza footer."""
@@ -122,28 +122,25 @@ def generate_pdf_data(tests_data_lists, timestamp, subject_name):
         return None
 
     st.info("Avvio generazione PDF...")
-    # CSS Aggiornato: Rimosse le regole @bottom-center e @bottom-right
     css_style = """
-       @page {
-           size: A4;
-           margin: 2cm;
-           /* Rimosso footer PDF */
-           /* @bottom-right { ... } */
-       }
-       body { font-family: Verdana, sans-serif; font-size: 11pt; line-height: 1.4; }
-       .test-container { }
-       .page-break { page-break-before: always; }
-       h2 { margin-bottom: 0.8em; font-size: 1.6em; color: #000; font-weight: bold; }
-       .pdf-header-info { margin-bottom: 2.5em; font-size: 1em; font-weight: normal; line-height: 1.6; }
-       .header-line { display: flex; align-items: baseline; width: 100%; margin-bottom: 0.6em; }
-       .header-label { white-space: nowrap; margin-right: 0.5em; flex-shrink: 0; }
-       .header-underline { flex-grow: 1; border-bottom: 1px solid black; position: relative; top: -2px; min-width: 40px; }
-       .class-label { margin-left: 2.5em; }
-       .question { margin-top: 1.8em; margin-bottom: 0.8em; font-weight: bold; }
-       .answer { display: flex; align-items: baseline; margin-left: 2.5em; margin-top: 0.1em; margin-bottom: 0.3em; padding-left: 0; text-indent: 0; }
-       .checkbox { flex-shrink: 0; margin-right: 0.6em; }
-       .answer-text { }
-       .open-answer-space { min-height: 3em; margin-left: 1em; margin-top: 0.5em; margin-bottom: 1.5em; }
+         @page {
+             size: A4;
+             margin: 2cm;
+         }
+         body { font-family: Verdana, sans-serif; font-size: 11pt; line-height: 1.4; }
+         .test-container { }
+         .page-break { page-break-before: always; }
+         h2 { margin-bottom: 0.8em; font-size: 1.6em; color: #000; font-weight: bold; }
+         .pdf-header-info { margin-bottom: 2.5em; font-size: 1em; font-weight: normal; line-height: 1.6; }
+         .header-line { display: flex; align-items: baseline; width: 100%; margin-bottom: 0.6em; }
+         .header-label { white-space: nowrap; margin-right: 0.5em; flex-shrink: 0; }
+         .header-underline { flex-grow: 1; border-bottom: 1px solid black; position: relative; top: -2px; min-width: 40px; }
+         .class-label { margin-left: 2.5em; }
+         .question { margin-top: 1.8em; margin-bottom: 0.8em; font-weight: bold; }
+         .answer { display: flex; align-items: baseline; margin-left: 2.5em; margin-top: 0.1em; margin-bottom: 0.3em; padding-left: 0; text-indent: 0; }
+         .checkbox { flex-shrink: 0; margin-right: 0.6em; }
+         .answer-text { }
+         .open-answer-space { min-height: 3em; margin-left: 1em; margin-top: 0.5em; margin-bottom: 1.5em; }
     """
 
     st.info("  Costruzione documento HTML...")
@@ -194,12 +191,26 @@ def generate_pdf_data(tests_data_lists, timestamp, subject_name):
         return None
 
 # ================================================================
-# Interfaccia Utente Streamlit (Invariata, tranne footer)
+# Interfaccia Utente Streamlit
 # ================================================================
 
 st.set_page_config(page_title="EvilProf 😈", layout="wide", initial_sidebar_state="expanded")
 st.title("EvilProf 😈")
 st.subheader("Generatore di Verifiche Casuali da Excel a PDF")
+
+# --- AGGIUNTO BANNER SVG ---
+banner_path = "banner.svg" # Nome del file banner
+try:
+    st.image(banner_path, use_container_width=True)
+except FileNotFoundError:
+    # Non mostrare un errore se il banner non c'è, semplicemente non lo visualizza
+    # Potresti voler aggiungere un st.warning se è importante che ci sia
+    # st.warning(f"Nota: File banner '{banner_path}' non trovato.")
+    pass
+except Exception as e:
+    st.error(f"Errore caricamento banner '{banner_path}': {e}")
+# --- FINE BANNER ---
+
 
 if not WEASYPRINT_AVAILABLE:
     st.error("🚨 **Attenzione:** WeasyPrint non disponibile/funzionante. Generazione PDF bloccata.")
@@ -240,7 +251,7 @@ try:
 except Exception as e:
     st.sidebar.warning(f"Impossibile leggere codice sorgente: {e}")
 
-st.subheader("Output Generazione")
+st.header("Output Generazione")
 if generate_button:
     if uploaded_file is None:
         st.warning("⚠️ Carica prima un file Excel.")
@@ -373,4 +384,4 @@ if generate_button:
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("EvilProf v1.0 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit")
+st.markdown("EvilProf v1.2 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") 
