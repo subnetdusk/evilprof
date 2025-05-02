@@ -373,9 +373,9 @@ if generate_button:
                          # --- Mostra Warning Giallo SOLO se il Fallback NON è scattato ---
                          if 'fallback_warning_shown' not in st.session_state:
                              if st.session_state.get('show_mc_low_diversity_warning', False):
-                                 st.warning(f"⚠️ Attenzione: Il numero totale di domande a scelta multipla ({total_mc}) è inferiore al triplo ({3*num_mc_q}) delle richieste per test ({num_mc_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
+                                 st.warning(f"⚠️ Attenzione: Il numero totale di domande a scelta multipla ({total_mc}) è inferiore al triplo ({3*num_mc_q}) delle richieste per test ({num_mc_q}). La diversità tra i test adiacenti potrebbe essere limitata.")
                              if st.session_state.get('show_oe_low_diversity_warning', False):
-                                 st.warning(f"⚠️ Attenzione: Il numero totale di domande aperte ({total_open}) è inferiore al triplo ({3*num_open_q}) delle richieste per test ({num_open_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
+                                 st.warning(f"⚠️ Attenzione: Il numero totale di domande aperte ({total_open}) è inferiore al triplo ({3*num_open_q}) delle richieste per test ({num_open_q}). La diversità tra i test adiacenti potrebbe essere limitata.")
 
                          # Messaggio finale prima del PDF
                          if 'fallback_warning_shown' not in st.session_state:
