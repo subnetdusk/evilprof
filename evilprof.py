@@ -338,7 +338,7 @@ if generate_button:
                                  if len(candidate_mc_indices) < num_mc_q:
                                      fallback_active_mc = True
                                      if 'fallback_warning_shown' not in st.session_state:
-                                         st.error(f"‼️ ATTENZIONE: Domande insufficienti per garantire test {i} diverso dal precedente per le domande a scelta multipla. Si procede con campionamento casuale semplice da TUTTE le domande disponibili. I test successivi potrebbero contenere ripetizioni.")
+                                         st.error(f"‼️ ATTENZIONE: Domande insufficienti. Si procede con campionamento casuale semplice da TUTTE le domande disponibili. I test adiacenti potrebbero contenere ripetizioni.")
                                          st.session_state.fallback_warning_shown = True # Imposta il flag
                                      try: sampled_mc_indices = random.sample(list(mc_by_index.keys()), num_mc_q)
                                      except ValueError: st.error(f"Errore Imprevisto: Impossibile campionare {num_mc_q} da {total_mc} domande totali."); break
@@ -355,7 +355,7 @@ if generate_button:
                                  if len(candidate_oe_indices) < num_open_q:
                                      fallback_active_oe = True
                                      if 'fallback_warning_shown' not in st.session_state:
-                                         st.error(f"‼️ ATTENZIONE: Domande insufficienti per garantire test {i} diverso dal precedente per le domande aperte. Si procede con campionamento casuale semplice da TUTTE le domande disponibili. I test successivi potrebbero contenere ripetizioni.")
+                                         st.error(f"‼️ ATTENZIONE: Domande insufficienti. Si procede con campionamento casuale semplice da TUTTE le domande disponibili. I test adiacenti potrebbero contenere ripetizioni.")
                                          st.session_state.fallback_warning_shown = True
                                      try: sampled_oe_indices = random.sample(list(open_by_index.keys()), num_open_q)
                                      except ValueError: st.error(f"Errore Imprevisto: Impossibile campionare {num_open_q} da {total_open} domande totali."); break
