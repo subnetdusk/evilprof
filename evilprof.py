@@ -23,12 +23,7 @@ except ImportError:
 # Testo Introduttivo e Istruzioni
 # ================================================================
 INTRO_TEXT = """
-EvilProf è un'applicazione web realizzata con Streamlit che permette di generare rapidamente file PDF contenenti verifiche personalizzate. L'applicazione
-
-- Legge le domande (a scelta multipla e/o aperte) da un file Excel strutturato in modo specifico e crea un numero definito di verifiche, ciascuna contenente un mix casuale di domande scelte dall'utente.
-- Genera un singolo file PDF contenente il numero desiderato di verifiche. Ogni verifica contiene un numero specifico di domande a scelta multipla e aperte, mescolate casualmente.
-- Le risposte (se presenti) sono in ordine casuale. Ogni verifica inizia su una nuova pagina.
-- E' possibile assicurarsi che i test adiacenti non abbiano nessuna domanda in comune scegliendo l'opzione "Garantire test adiacenti diversi"
+EvilProf è un'applicazione web realizzata con Streamlit che permette di generare rapidamente file PDF contenenti verifiche personalizzate. 
 
 Le caratteristiche principali includono:
 
