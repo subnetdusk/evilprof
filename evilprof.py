@@ -6,7 +6,8 @@
 # Modifiche v1.1:
 # - Sostituita logica "Garantire test diversi" con Campionamento Ponderato Ibrido (WRSwOR).
 # - Rimossa opzione checkbox dalla UI.
-# - Aggiornate istruzioni per descrivere il nuovo metodo.
+# - Aggiornate istruzioni per descrivere il nuovo metodo e aggiunto link a paper.
+# - Aggiunto bottone per Test di Validazione funzionale.
 # - Versione incrementata.
 # ================================================================
 
@@ -37,7 +38,7 @@ Le caratteristiche principali includono:
 - **Tipi di Domande:** Supporta sia domande a scelta multipla (con risposte casualizzate) sia domande a risposta aperta.
 - **Personalizzazione:** Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
 - **Randomizzazione Avanzata:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
-- **Diversità Migliorata:** L'applicazione utilizza una tecnica di **Campionamento Casuale Ponderato** per selezionare le domande. Questo metodo:
+- **Diversità Migliorata:** L'applicazione utilizza una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)** basata sull'algoritmo di Efraimidis e Spirakis (descritto anche in [questo paper](https://ethz.ch/content/dam/ethz/special-interest/baug/ivt/ivt-dam/vpl/reports/1101-1200/ab1141.pdf)) per selezionare le domande. Questo metodo:
     - **Garantisce** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*.
     - **Favorisce statisticamente** la selezione di domande che non vengono utilizzate da più tempo, promuovendo una maggiore rotazione e diversità tra le verifiche nel lungo periodo, senza richiedere un numero eccessivo di domande nel file di partenza.
 - **Output PDF:** Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
@@ -62,15 +63,6 @@ def weighted_random_sample_without_replacement(population, weights, k):
     Seleziona k elementi unici da population senza reinserimento,
     rispettando i pesi forniti.
     Implementa l'algoritmo basato su chiavi esponenziali (Efraimsson & Ting).
-    Args:
-        population: Lista o set di elementi da cui campionare.
-        weights: Lista di pesi corrispondenti agli elementi in population.
-        k: Numero di elementi da campionare.
-    Returns:
-        Lista di k elementi campionati.
-    Raises:
-        ValueError: Se k è maggiore della dimensione della popolazione o se
-                    population e weights hanno lunghezze diverse.
     """
     if k > len(population):
         raise ValueError("k non può essere maggiore della dimensione della popolazione")
@@ -79,57 +71,34 @@ def weighted_random_sample_without_replacement(population, weights, k):
     if k == 0:
         return []
     if k == len(population):
-        # Se chiediamo tutti gli elementi, non serve campionare
-        # Restituiamo una copia mischiata per consistenza
         result = list(population)
         random.shuffle(result)
         return result
 
-    # Filtra elementi con peso <= 0 se ce ne sono, potrebbero causare problemi
     valid_indices = [i for i, w in enumerate(weights) if w > 0]
     if not valid_indices:
-         # Se non ci sono pesi positivi, non possiamo campionare
-         # Potrebbe succedere se tutte le domande disponibili sono state appena usate
-         # e la logica precedente le ha escluse. In questo caso, errore logico.
         raise ValueError("Nessun elemento con peso positivo disponibile per il campionamento.")
 
     filtered_population = [population[i] for i in valid_indices]
     filtered_weights = [weights[i] for i in valid_indices]
 
     if k > len(filtered_population):
-         # Se dopo il filtraggio non ci sono abbastanza elementi, errore
          raise ValueError(f"Non ci sono abbastanza elementi con peso positivo ({len(filtered_population)}) per campionare k={k} elementi.")
 
-
-    # Calcola le chiavi basate sui pesi e numeri casuali
     keys = []
     for w in filtered_weights:
         u = random.uniform(0, 1)
-        # Aggiungi un piccolo epsilon per evitare log(0) o divisione per zero se w è piccolissimo
-        # e per gestire il caso limite u=0 -> log(u) = -inf -> key = +inf
         epsilon = 1e-9
         if u < epsilon: u = epsilon
-        # key = math.log(u) / w # Formula originale, sensibile a w piccoli
-        # Formula alternativa più stabile (basata su u^(1/w)):
         try:
-            # Aggiungere epsilon a w previene divisione per zero se w fosse 0 (improbabile dopo filtro)
             key = u**(1.0 / (w + epsilon))
         except OverflowError:
-             # Se w è molto vicino a 0, 1/w può essere enorme, causando overflow in u^(1/w)
-             # In questo caso, assegniamo una chiave molto piccola (bassa priorità)
              key = 0.0
         keys.append(key)
 
-
-    # Abbina popolazione filtrata e chiavi, ordina per chiave decrescente
-    # Usiamo l'indice originale per poter recuperare l'elemento corretto
     indexed_keys = list(zip(keys, range(len(filtered_population))))
     indexed_keys.sort(key=lambda x: x[0], reverse=True)
-
-    # Prendi i primi k indici corrispondenti alle chiavi maggiori
     sampled_indices = [index for key, index in indexed_keys[:k]]
-
-    # Restituisci gli elementi corrispondenti dalla popolazione filtrata
     return [filtered_population[i] for i in sampled_indices]
 
 
@@ -141,8 +110,17 @@ def load_questions_from_excel(uploaded_file):
     if uploaded_file is None:
         return None
     try:
-        st.info(f"Lettura file: {uploaded_file.name}...")
-        df = pd.read_excel(uploaded_file, header=None)
+        # Usa st.session_state per memorizzare il nome file e facilitare il reload per il test
+        if 'loaded_file_name' not in st.session_state or st.session_state.loaded_file_name != uploaded_file.name:
+             st.info(f"Lettura file: {uploaded_file.name}...")
+             st.session_state.loaded_file_name = uploaded_file.name # Memorizza nome
+             # Legge i dati e li memorizza in session_state per evitare ricariche inutili
+             st.session_state.excel_df = pd.read_excel(uploaded_file, header=None)
+        else:
+             # Se il nome file è lo stesso, usa il df già caricato
+             st.info(f"Utilizzo dati già caricati per: {uploaded_file.name}")
+
+        df = st.session_state.excel_df # Usa il DataFrame memorizzato
         questions_data = []
         mc_count_temp = 0
         oe_count_temp = 0
@@ -165,12 +143,13 @@ def load_questions_from_excel(uploaded_file):
         for warning in warnings: st.warning(warning)
         if not questions_data:
             st.error(f"Errore: Nessuna domanda valida trovata nel file."); return None
-        st.info(f"Caricate {len(questions_data)} domande ({mc_count_temp} MC, {oe_count_temp} aperte)."); return questions_data
+        # Non mostrare più il messaggio "Caricate..." qui, lo mostriamo dopo la validazione iniziale
+        return questions_data
     except Exception as e:
         st.error(f"Errore imprevisto lettura Excel: {e}"); return None
 
 # ================================================================
-# Funzione Generazione PDF (Invariata rispetto a v1.0.1)
+# Funzione Generazione PDF (Invariata rispetto a v1.1)
 # ================================================================
 def generate_pdf_data(tests_data_lists, timestamp, subject_name):
     """Genera i dati binari del PDF, senza footer."""
@@ -206,34 +185,27 @@ def generate_pdf_data(tests_data_lists, timestamp, subject_name):
     except Exception as e: st.error(f"ERRORE WeasyPrint: {e}"); return None
 
 # ================================================================
-# Interfaccia Utente Streamlit (AGGIORNATA)
+# Interfaccia Utente Streamlit
 # ================================================================
 
 st.set_page_config(page_title="EvilProf 😈", layout="wide", initial_sidebar_state="expanded")
 st.title("EvilProf 😈")
 st.subheader("Generatore di verifiche casuali e diverse, da Excel a PDF")
 
-# --- AGGIUNTO BANNER SVG ---
-banner_path = "banner.svg" # Nome del file banner
+# --- Banner SVG ---
+banner_path = "banner.svg"
 try:
-    # Legge il contenuto SVG come stringa e lo visualizza
-    # Questo metodo è più robusto per SVG rispetto a st.image
-    with open(banner_path, "r", encoding="utf-8") as f:
-        svg_content = f.read()
+    with open(banner_path, "r", encoding="utf-8") as f: svg_content = f.read()
     st.markdown(svg_content, unsafe_allow_html=True)
-except FileNotFoundError:
-    # Non mostrare un errore se il banner non c'è
-    pass
-except Exception as e:
-    st.error(f"Errore caricamento banner '{banner_path}': {e}")
-# --- FINE BANNER ---
-
+except FileNotFoundError: pass # Non fare nulla se manca il banner
+except Exception as e: st.error(f"Errore caricamento banner '{banner_path}': {e}")
+# --- Fine Banner ---
 
 if not WEASYPRINT_AVAILABLE:
     st.error("🚨 **Attenzione:** WeasyPrint non disponibile/funzionante. Generazione PDF bloccata.")
     st.stop()
 
-# Istruzioni aggiornate
+# --- Istruzioni ---
 with st.expander("ℹ️ Istruzioni e Preparazione File Excel", expanded=False):
     st.markdown(INTRO_TEXT, unsafe_allow_html=True) # Usa INTRO_TEXT aggiornato
     image_path = "excel_example.jpg"
@@ -242,6 +214,7 @@ with st.expander("ℹ️ Istruzioni e Preparazione File Excel", expanded=False):
     except FileNotFoundError: st.warning(f"Nota: Immagine '{image_path}' non trovata.")
     except Exception as e: st.error(f"Errore caricamento immagine '{image_path}': {e}")
 
+# --- Sidebar ---
 st.sidebar.header("Parametri di Generazione")
 uploaded_file = st.sidebar.file_uploader("1. File Excel (.xlsx, .xls)", type=['xlsx', 'xls'], help="Trascina o seleziona il file Excel.")
 subject_name = st.sidebar.text_input("2. Nome della Materia", value="Informatica", help="Apparirà nel titolo delle verifiche.")
@@ -251,6 +224,15 @@ num_open_q = st.sidebar.number_input("5. N. Domande Aperte / Verifica", min_valu
 # Rimossa checkbox "ensure_different"
 generate_button = st.sidebar.button("🚀 Genera Verifiche PDF", type="primary")
 
+# --- Test di Validazione ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("Test Funzionale")
+validation_button = st.sidebar.button(
+    "🧪 Esegui Test di Validazione",
+    help="Genera 2 test con poche domande per verificare la logica base (richiede file caricato)."
+)
+
+# --- Download Codice Sorgente ---
 st.sidebar.markdown("---")
 st.sidebar.subheader("Codice Sorgente")
 try:
@@ -259,166 +241,259 @@ try:
     with open(script_path, 'r', encoding='utf-8') as f: source_code = f.read()
     st.sidebar.download_button(label="📥 Scarica Codice App (.py)", data=source_code, file_name=script_name, mime="text/x-python")
 except Exception as e: st.sidebar.warning(f"Impossibile leggere codice sorgente: {e}")
+# --- Fine Sidebar ---
 
-st.subheader("Output Generazione") # Spostato header qui
+# --- Area Principale ---
+st.subheader("Output Generazione") # Spostato qui per visibilità
+
+# --- Logica Test di Validazione ---
+if validation_button:
+    st.markdown("---") # Separatore per l'output del test
+    st.subheader("Risultato Test di Validazione")
+    if uploaded_file is None:
+        st.warning("⚠️ Carica un file Excel per eseguire il test.")
+    else:
+        # Ricarica i dati o usa quelli in sessione se disponibili
+        # Questo assicura che il test usi i dati attuali senza rieseguire tutto
+        if 'excel_df' not in st.session_state:
+             st.warning("Dati Excel non ancora caricati nella sessione. Ricaricamento...")
+             # Forza ricaricamento per il test (potrebbe essere lento)
+             # Sarebbe meglio gestire lo stato in modo più robusto, ma per ora facciamo così
+             temp_questions = load_questions_from_excel(uploaded_file)
+             if not temp_questions:
+                 st.error("Errore nel caricamento dati per il test.")
+                 st.stop() # Ferma qui se il caricamento fallisce
+        else:
+            # Se df è in sessione, rielabora le domande da lì
+            st.info("Utilizzo dati Excel dalla sessione corrente per il test.")
+            # Questa parte è duplicata da load_questions_from_excel, idealmente andrebbe in una funzione separata
+            df_test = st.session_state.excel_df
+            temp_questions = []
+            mc_test_count = 0; oe_test_count = 0
+            for index, row in df_test.iterrows():
+                row_list = [str(item) if pd.notna(item) else "" for item in row]
+                question_text = row_list[0].strip(); answers = [ans.strip() for ans in row_list[1:] if ans.strip()]
+                if question_text:
+                    if len(answers) >= 2: temp_questions.append({'question': question_text, 'answers': answers, 'original_index': index, 'type': 'multiple_choice'}); mc_test_count += 1
+                    else: temp_questions.append({'question': question_text, 'answers': [], 'original_index': index, 'type': 'open_ended'}); oe_test_count += 1
+            st.info(f"Dati per test: {len(temp_questions)} domande ({mc_test_count} MC, {oe_test_count} aperte).")
+
+
+        if temp_questions:
+            with st.spinner("⏳ Esecuzione test..."):
+                test_num_tests = 2
+                test_num_mc = 2   # Parametri fissi per il test
+                test_num_open = 1
+                st.write(f"Configurazione test: {test_num_tests} verifiche, {test_num_mc} MC, {test_num_open} Aperte.")
+
+                temp_mc = [q for q in temp_questions if q['type'] == 'multiple_choice']
+                temp_oe = [q for q in temp_questions if q['type'] == 'open_ended']
+                temp_total_mc = len(temp_mc)
+                temp_total_oe = len(temp_oe)
+
+                # Controlli preliminari per il test
+                test_error = False
+                if temp_total_mc < test_num_mc: st.error(f"Non abbastanza MC ({temp_total_mc}) per test ({test_num_mc})."); test_error = True
+                if temp_total_oe < test_num_open: st.error(f"Non abbastanza Aperte ({temp_total_oe}) per test ({test_num_open})."); test_error = True
+                # Controllo per la non-ripetizione (serve almeno k+1)
+                if test_num_mc > 0 and temp_total_mc <= test_num_mc: st.error(f"Servono >{test_num_mc} MC totali per testare la non-ripetizione."); test_error = True
+                if test_num_open > 0 and temp_total_oe <= test_num_open: st.error(f"Servono >{test_num_open} Aperte totali per testare la non-ripetizione."); test_error = True
+
+                if not test_error:
+                    try:
+                        # Esegui logica generazione (simile a quella principale ma con parametri test)
+                        mc_by_idx = {q['original_index']: q for q in temp_mc}
+                        oe_by_idx = {q['original_index']: q for q in temp_oe}
+                        last_used_mc_test = {idx: 0 for idx in mc_by_idx.keys()}
+                        last_used_oe_test = {idx: 0 for idx in oe_by_idx.keys()}
+                        test_results_data = []
+                        prev_mc_idx_test = set()
+                        prev_oe_idx_test = set()
+                        test_passed_overall = True # Flag generale
+
+                        for i_test in range(1, test_num_tests + 1):
+                            current_test_unshuffled = []
+                            selected_mc_current = set()
+                            selected_oe_current = set()
+
+                            # MC Selection
+                            if test_num_mc > 0:
+                                candidates = list(mc_by_idx.keys() - prev_mc_idx_test)
+                                weights = [i_test - last_used_mc_test[idx] + 1 for idx in candidates]
+                                sampled_mc = weighted_random_sample_without_replacement(candidates, weights, test_num_mc)
+                                selected_mc_current = set(sampled_mc)
+                                for idx in selected_mc_current:
+                                    current_test_unshuffled.append(mc_by_idx[idx])
+                                    last_used_mc_test[idx] = i_test
+
+                            # OE Selection
+                            if test_num_open > 0:
+                                candidates = list(oe_by_idx.keys() - prev_oe_idx_test)
+                                weights = [i_test - last_used_oe_test[idx] + 1 for idx in candidates]
+                                sampled_oe = weighted_random_sample_without_replacement(candidates, weights, test_num_open)
+                                selected_oe_current = set(sampled_oe)
+                                for idx in selected_oe_current:
+                                    current_test_unshuffled.append(oe_by_idx[idx])
+                                    last_used_oe_test[idx] = i_test
+
+                            random.shuffle(current_test_unshuffled)
+                            test_results_data.append(current_test_unshuffled)
+                            prev_mc_idx_test = selected_mc_current
+                            prev_oe_idx_test = selected_oe_current
+
+                        # Validazione Risultati Test
+                        st.write(f"Generati {len(test_results_data)} test per la validazione.")
+                        if len(test_results_data) == test_num_tests:
+                            # Controllo numero domande per test
+                            for i_val, test_data in enumerate(test_results_data):
+                                expected_total = test_num_mc + test_num_open
+                                if len(test_data) != expected_total:
+                                    st.error(f"❌ Validazione Fallita: Test {i_val+1} ha {len(test_data)} domande invece di {expected_total}.")
+                                    test_passed_overall = False
+                                else:
+                                     st.write(f"Test {i_val+1}: Numero domande corretto ({expected_total}).")
+
+                            # Controllo non-ripetizione tra test 1 e 2
+                            q_set_test1 = set(q['original_index'] for q in test_results_data[0])
+                            q_set_test2 = set(q['original_index'] for q in test_results_data[1])
+                            intersection = q_set_test1.intersection(q_set_test2)
+
+                            if not intersection:
+                                st.success("✅ Validazione Passata: Test 1 e Test 2 non hanno domande in comune.")
+                            else:
+                                st.error(f"❌ Validazione Fallita: Test 1 e Test 2 hanno domande in comune (indici: {intersection}).")
+                                test_passed_overall = False
+
+                        else:
+                            st.error("❌ Validazione Fallita: Numero di test generati non corretto.")
+                            test_passed_overall = False
+
+                        if test_passed_overall:
+                             st.success("🎉 Test di validazione completato con successo!")
+                        else:
+                             st.error("⚠️ Test di validazione fallito. Controllare i messaggi.")
+
+                    except ValueError as e_val: # Cattura errori specifici dal campionamento
+                        st.error(f"❌ Errore durante l'esecuzione del test di validazione (ValueError): {e_val}")
+                    except Exception as e_val: # Cattura altri errori imprevisti
+                        st.error(f"❌ Errore imprevisto durante l'esecuzione del test di validazione: {e_val}")
+                else:
+                     st.error("❌ Impossibile eseguire il test a causa di errori nei prerequisiti.")
+        else:
+             st.error("❌ Errore nel caricamento/elaborazione dati per il test.")
+    st.markdown("---") # Separatore dopo l'output del test
+
 
 # ================================================================
-# Logica Principale di Generazione (AGGIORNATA)
+# Logica Principale di Generazione (PDF Effettivo)
 # ================================================================
 if generate_button:
+    # Questo blocco ora viene eseguito solo per la generazione PDF principale
     if uploaded_file is None:
+        # Questo warning ora dovrebbe apparire solo se si clicca "Genera" senza file
         st.warning("⚠️ Carica prima un file Excel.")
     else:
-        st.info(f"Richiesta per: {uploaded_file.name}")
-        num_q_per_test = num_mc_q + num_open_q
-        if num_q_per_test <= 0:
-            st.error("ERRORE: N. domande totali per test deve essere > 0.")
+        # Assicurati che i dati siano caricati (potrebbero essere già in sessione)
+        if 'excel_df' not in st.session_state or st.session_state.loaded_file_name != uploaded_file.name:
+             # Se non sono in sessione o il file è cambiato, ricarica
+             with st.spinner("⏳ Caricamento dati Excel..."):
+                 all_questions = load_questions_from_excel(uploaded_file)
         else:
-            # Rimosso riferimento a "Diversi" dai parametri mostrati
-            st.info(f"Parametri: {num_tests} verifiche, '{subject_name}', {num_mc_q} MC + {num_open_q} Aperte = {num_q_per_test} Domande/Test")
-            st.info("---")
-
-            with st.spinner("⏳ Caricamento e validazione domande..."):
-                all_questions = load_questions_from_excel(uploaded_file)
-
-            if all_questions:
-                mc_questions = [q for q in all_questions if q['type'] == 'multiple_choice']
-                open_questions = [q for q in all_questions if q['type'] == 'open_ended']
-                total_mc = len(mc_questions)
-                total_open = len(open_questions)
-                error_found = False
-
-                # Controlli di fattibilità minimi (bastano domande per UN test)
-                if total_mc == 0 and num_mc_q > 0: st.error(f"ERRORE: {num_mc_q} MC richieste, 0 trovate."); error_found = True
-                if total_open == 0 and num_open_q > 0: st.error(f"ERRORE: {num_open_q} Aperte richieste, 0 trovate."); error_found = True
-                if total_mc < num_mc_q: st.error(f"ERRORE CRITICO: Non abbastanza MC ({total_mc}) per {num_mc_q} richieste."); error_found = True
-                if total_open < num_open_q: st.error(f"ERRORE CRITICO: Non abbastanza Aperte ({total_open}) per {num_open_q} richieste."); error_found = True
-
-                # Controllo aggiuntivo: servono almeno k+1 domande se num_tests > 1 per garantire N != N-1
-                if num_tests > 1:
-                    if num_mc_q > 0 and total_mc <= num_mc_q:
-                         st.error(f"ERRORE CRITICO: Per generare più test diversi dal precedente, servono più di {num_mc_q} domande MC totali (ne hai {total_mc}).")
-                         error_found = True
-                    if num_open_q > 0 and total_open <= num_open_q:
-                         st.error(f"ERRORE CRITICO: Per generare più test diversi dal precedente, servono più di {num_open_q} domande aperte totali (ne hai {total_open}).")
-                         error_found = True
+             # Altrimenti, rielabora da session_state (più veloce)
+             st.info("Utilizzo dati Excel dalla sessione corrente.")
+             df_main = st.session_state.excel_df
+             all_questions = []
+             mc_main_count = 0; oe_main_count = 0
+             for index, row in df_main.iterrows():
+                 row_list = [str(item) if pd.notna(item) else "" for item in row]
+                 question_text = row_list[0].strip(); answers = [ans.strip() for ans in row_list[1:] if ans.strip()]
+                 if question_text:
+                     if len(answers) >= 2: all_questions.append({'question': question_text, 'answers': answers, 'original_index': index, 'type': 'multiple_choice'}); mc_main_count += 1
+                     else: all_questions.append({'question': question_text, 'answers': [], 'original_index': index, 'type': 'open_ended'}); oe_main_count += 1
+             st.info(f"Dati pronti: {len(all_questions)} domande ({mc_main_count} MC, {oe_main_count} aperte).")
 
 
-                if not error_found:
-                    with st.spinner("⏳ Generazione dati verifiche con campionamento ponderato..."):
-                        # Dizionari per mappare indice originale a dati domanda
-                        mc_by_index = {q['original_index']: q for q in mc_questions}
-                        open_by_index = {q['original_index']: q for q in open_questions}
+        if not all_questions:
+             st.error("❌ Errore nel caricamento/elaborazione dei dati. Impossibile generare.")
+        else:
+             num_q_per_test = num_mc_q + num_open_q
+             if num_q_per_test <= 0:
+                 st.error("ERRORE: N. domande totali per test deve essere > 0.")
+             else:
+                 st.info(f"Parametri Generazione PDF: {num_tests} verifiche, '{subject_name}', {num_mc_q} MC + {num_open_q} Aperte = {num_q_per_test} Domande/Test")
+                 st.info("---")
 
-                        # Strutture per tracciare l'ultimo utilizzo di ogni domanda
-                        # Inizializza a 0 (mai usate)
-                        last_used_mc = {idx: 0 for idx in mc_by_index.keys()}
-                        last_used_oe = {idx: 0 for idx in open_by_index.keys()}
+                 # Esegui controlli di fattibilità per la generazione principale
+                 mc_questions = [q for q in all_questions if q['type'] == 'multiple_choice']
+                 open_questions = [q for q in all_questions if q['type'] == 'open_ended']
+                 total_mc = len(mc_questions)
+                 total_open = len(open_questions)
+                 error_found_main = False
 
-                        all_tests_question_data = [] # Lista finale dei dati dei test
-                        prev_mc_indices = set()      # Indici MC usati nel test N-1
-                        prev_open_indices = set()    # Indici OE usati nel test N-1
-                        generation_logic_error = False
+                 if total_mc == 0 and num_mc_q > 0: st.error(f"ERRORE: {num_mc_q} MC richieste, 0 trovate."); error_found_main = True
+                 if total_open == 0 and num_open_q > 0: st.error(f"ERRORE: {num_open_q} Aperte richieste, 0 trovate."); error_found_main = True
+                 if total_mc < num_mc_q: st.error(f"ERRORE CRITICO: Non abbastanza MC ({total_mc}) per {num_mc_q} richieste."); error_found_main = True
+                 if total_open < num_open_q: st.error(f"ERRORE CRITICO: Non abbastanza Aperte ({total_open}) per {num_open_q} richieste."); error_found_main = True
+                 if num_tests > 1:
+                     if num_mc_q > 0 and total_mc <= num_mc_q: st.error(f"ERRORE CRITICO: Servono >{num_mc_q} MC totali per generare test diversi (ne hai {total_mc})."); error_found_main = True
+                     if num_open_q > 0 and total_open <= num_open_q: st.error(f"ERRORE CRITICO: Servono >{num_open_q} Aperte totali per generare test diversi (ne hai {total_open})."); error_found_main = True
 
-                        # Loop per generare ciascun test
-                        for i in range(1, num_tests + 1):
-                            current_test_data_unshuffled = []
-                            selected_mc_indices_current = set()
-                            selected_open_indices_current = set()
+                 if not error_found_main:
+                     # --- Logica di Generazione Principale (Identica a prima, ma usa i dati caricati/validati) ---
+                     with st.spinner("⏳ Generazione dati verifiche con campionamento ponderato..."):
+                         mc_by_index = {q['original_index']: q for q in mc_questions}
+                         open_by_index = {q['original_index']: q for q in open_questions}
+                         last_used_mc = {idx: 0 for idx in mc_by_index.keys()}
+                         last_used_oe = {idx: 0 for idx in open_by_index.keys()}
+                         all_tests_question_data = []
+                         prev_mc_indices = set()
+                         prev_open_indices = set()
+                         generation_logic_error_main = False
 
-                            # --- Selezione Domande a Scelta Multipla (Ponderata) ---
-                            if num_mc_q > 0:
-                                # Popolazione candidata: tutte le MC tranne quelle usate nel test precedente
-                                candidate_mc_indices = list(mc_by_index.keys() - prev_mc_indices)
-                                if len(candidate_mc_indices) < num_mc_q:
-                                    st.error(f"ERRORE LOGICO MC test {i}: Non abbastanza domande MC disponibili ({len(candidate_mc_indices)}) escludendo il test precedente.")
-                                    generation_logic_error = True; break
+                         for i in range(1, num_tests + 1):
+                             current_test_data_unshuffled = []
+                             selected_mc_indices_current = set()
+                             selected_open_indices_current = set()
 
-                                # Calcola i pesi per i candidati basati sull'età
-                                weights_mc = []
-                                for idx in candidate_mc_indices:
-                                    age = i - last_used_mc[idx]
-                                    weight = age + 1 # Formula peso lineare semplice
-                                    weights_mc.append(weight)
+                             if num_mc_q > 0:
+                                 candidate_mc_indices = list(mc_by_index.keys() - prev_mc_indices)
+                                 if len(candidate_mc_indices) < num_mc_q: st.error(f"ERRORE LOGICO MC test {i}."); generation_logic_error_main = True; break
+                                 weights_mc = [i - last_used_mc[idx] + 1 for idx in candidate_mc_indices]
+                                 try: sampled_mc_indices = weighted_random_sample_without_replacement(candidate_mc_indices, weights_mc, num_mc_q)
+                                 except ValueError as e: st.error(f"Errore campionamento MC test {i}: {e}"); generation_logic_error_main = True; break
+                                 selected_mc_indices_current = set(sampled_mc_indices)
+                                 for idx in selected_mc_indices_current: current_test_data_unshuffled.append(mc_by_index[idx]); last_used_mc[idx] = i
 
-                                # Esegui campionamento ponderato senza reinserimento
-                                try:
-                                    sampled_mc_indices = weighted_random_sample_without_replacement(
-                                        candidate_mc_indices, weights_mc, num_mc_q
-                                    )
-                                except ValueError as e:
-                                     st.error(f"Errore campionamento MC test {i}: {e}")
-                                     generation_logic_error = True; break
+                             if num_open_q > 0:
+                                 candidate_oe_indices = list(open_by_index.keys() - prev_open_indices)
+                                 if len(candidate_oe_indices) < num_open_q: st.error(f"ERRORE LOGICO Aperte test {i}."); generation_logic_error_main = True; break
+                                 weights_oe = [i - last_used_oe[idx] + 1 for idx in candidate_oe_indices]
+                                 try: sampled_oe_indices = weighted_random_sample_without_replacement(candidate_oe_indices, weights_oe, num_open_q)
+                                 except ValueError as e: st.error(f"Errore campionamento Aperte test {i}: {e}"); generation_logic_error_main = True; break
+                                 selected_open_indices_current = set(sampled_oe_indices)
+                                 for idx in selected_open_indices_current: current_test_data_unshuffled.append(open_by_index[idx]); last_used_oe[idx] = i
 
-                                selected_mc_indices_current = set(sampled_mc_indices)
-                                # Aggiungi le domande selezionate e aggiorna last_used
-                                for idx in selected_mc_indices_current:
-                                    current_test_data_unshuffled.append(mc_by_index[idx])
-                                    last_used_mc[idx] = i # Aggiorna l'ultimo utilizzo
+                             if generation_logic_error_main: break
+                             prev_mc_indices = selected_mc_indices_current
+                             prev_open_indices = selected_open_indices_current
+                             random.shuffle(current_test_data_unshuffled)
+                             all_tests_question_data.append(current_test_data_unshuffled)
 
-                            # --- Selezione Domande Aperte (Ponderata - logica analoga) ---
-                            if num_open_q > 0:
-                                candidate_oe_indices = list(open_by_index.keys() - prev_open_indices)
-                                if len(candidate_oe_indices) < num_open_q:
-                                    st.error(f"ERRORE LOGICO Aperte test {i}: Non abbastanza domande Aperte disponibili ({len(candidate_oe_indices)}) escludendo il test precedente.")
-                                    generation_logic_error = True; break
+                         if not generation_logic_error_main: st.info(f"Dati per {len(all_tests_question_data)} verifiche preparati.")
 
-                                weights_oe = []
-                                for idx in candidate_oe_indices:
-                                    age = i - last_used_oe[idx]
-                                    weight = age + 1
-                                    weights_oe.append(weight)
-
-                                try:
-                                    sampled_oe_indices = weighted_random_sample_without_replacement(
-                                        candidate_oe_indices, weights_oe, num_open_q
-                                    )
-                                except ValueError as e:
-                                     st.error(f"Errore campionamento Aperte test {i}: {e}")
-                                     generation_logic_error = True; break
-
-                                selected_open_indices_current = set(sampled_oe_indices)
-                                for idx in selected_open_indices_current:
-                                    current_test_data_unshuffled.append(open_by_index[idx])
-                                    last_used_oe[idx] = i
-
-                            # Se errore logico, esci dal loop
-                            if generation_logic_error: break
-
-                            # Aggiorna i set delle domande precedenti per il prossimo ciclo
-                            prev_mc_indices = selected_mc_indices_current
-                            prev_open_indices = selected_open_indices_current
-
-                            # Mescola le domande all'interno del test corrente
-                            random.shuffle(current_test_data_unshuffled)
-                            all_tests_question_data.append(current_test_data_unshuffled)
-                        # --- Fine Loop Generazione Test ---
-
-                        if not generation_logic_error:
-                            st.info(f"Dati per {len(all_tests_question_data)} verifiche preparati.")
-
-                    # --- Generazione PDF ---
-                    if not generation_logic_error:
-                         with st.spinner("⏳ Conversione in PDF..."):
-                             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                             safe_filename_subject = subject_name.replace(' ','_').replace('/','-').replace('\\','-')
-                             pdf_filename = f"Verifiche_{safe_filename_subject}_{timestamp}.pdf"
-                             pdf_data = generate_pdf_data(all_tests_question_data, timestamp, subject_name)
-
-                         if pdf_data:
-                             st.success("✅ Generazione PDF completata!")
-                             st.download_button(
-                                 label="📥 Scarica PDF Generato",
-                                 data=pdf_data,
-                                 file_name=pdf_filename,
-                                 mime="application/pdf",
-                                 help=f"Clicca per scaricare '{pdf_filename}'"
-                             )
-                         else:
-                             st.error("❌ Errore durante la creazione del PDF.")
-            else:
-                st.error("❌ Impossibile procedere: errore caricamento/validazione domande.")
+                     # --- Generazione PDF ---
+                     if not generation_logic_error_main:
+                          with st.spinner("⏳ Conversione in PDF..."):
+                              timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                              safe_filename_subject = subject_name.replace(' ','_').replace('/','-').replace('\\','-')
+                              pdf_filename = f"Verifiche_{safe_filename_subject}_{timestamp}.pdf"
+                              pdf_data = generate_pdf_data(all_tests_question_data, timestamp, subject_name)
+                          if pdf_data:
+                              st.success("✅ Generazione PDF completata!")
+                              st.download_button(label="📥 Scarica PDF Generato", data=pdf_data, file_name=pdf_filename, mime="application/pdf", help=f"Clicca per scaricare '{pdf_filename}'")
+                          else: st.error("❌ Errore durante la creazione del PDF.")
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("EvilProf v1.1 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") 
+st.markdown("EvilProf v1.1 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") # Versione aggiornata
+# --- Fine Applicazione ---
