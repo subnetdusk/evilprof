@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # ================================================================
-# EvilProf 😈 - Generatore Verifiche da Excel - v1.0
+# EvilProf 😈 - Generatore Verifiche da Excel - v1.9
+# ================================================================
+# Modifiche v1.9:
+# - Rimosso footer (nome e numerazione pagine) dai PDF generati
+# - Versione incrementata
 # ================================================================
 
 import streamlit as st
@@ -19,9 +23,8 @@ except ImportError:
     WEASYPRINT_AVAILABLE = False
 
 # ================================================================
-# Testo Introduttivo e Istruzioni
+# Testo Introduttivo e Istruzioni (Invariato)
 # ================================================================
-# Testo visualizzato nell'expander delle istruzioni
 INTRO_TEXT = """
 Questo strumento legge un file Excel contenente domande (colonna A) e le relative risposte multiple (colonne B, C, D, ...) OPPURE domande aperte (senza risposte nelle colonne B, C, D...).
 
@@ -51,7 +54,7 @@ Genera un singolo file PDF contenente il numero desiderato di verifiche. Ogni ve
 """
 
 # ================================================================
-# Funzione Caricamento Domande da Excel
+# Funzione Caricamento Domande da Excel (Invariata)
 # ================================================================
 def load_questions_from_excel(uploaded_file):
     """Carica domande/risposte da file Excel (UploadedFile)."""
@@ -110,34 +113,22 @@ def load_questions_from_excel(uploaded_file):
         return None
 
 # ================================================================
-# Funzione Generazione PDF
+# Funzione Generazione PDF (CSS AGGIORNATO)
 # ================================================================
 def generate_pdf_data(tests_data_lists, timestamp, subject_name):
-    """Genera i dati binari del PDF."""
+    """Genera i dati binari del PDF, senza footer."""
     if not WEASYPRINT_AVAILABLE:
         st.error("ERRORE: Libreria WeasyPrint non trovata/funzionante.")
         return None
 
     st.info("Avvio generazione PDF...")
+    # CSS Aggiornato: Rimosse le regole @bottom-center e @bottom-right
     css_style = """
        @page {
            size: A4;
            margin: 2cm;
-           /* Aggiunto footer PDF */
-           @bottom-center {
-               content: "EvilProf v1.0"; /* Testo footer PDF */
-               font-size: 9pt;
-               color: #555;
-               vertical-align: top;
-               padding-top: 5pt;
-            }
-           @bottom-right {
-               content: "Pagina " counter(page) " di " counter(pages); /* Numerazione pagine */
-               font-size: 9pt;
-               color: #555;
-               vertical-align: top;
-               padding-top: 5pt;
-           }
+           /* Rimosso footer PDF */
+           /* @bottom-right { ... } */
        }
        body { font-family: Verdana, sans-serif; font-size: 11pt; line-height: 1.4; }
        .test-container { }
@@ -162,7 +153,6 @@ def generate_pdf_data(tests_data_lists, timestamp, subject_name):
 
     for index, single_test_data in enumerate(tests_data_lists):
         test_html = f"<h2>Verifica di {safe_subject_name}</h2>\n"
-        # Intestazione Nome/Data/Classe con Flexbox/CSS
         test_html += '<div class="pdf-header-info">\n'
         test_html += ' <div class="header-line">\n <span class="header-label">Cognome e Nome:</span><span class="header-underline"></span>\n </div>\n'
         test_html += ' <div class="header-line">\n <span class="header-label">Data:</span><span class="header-underline date-line"></span><span class="header-label class-label">Classe:</span><span class="header-underline class-line"></span>\n </div>\n'
@@ -204,7 +194,7 @@ def generate_pdf_data(tests_data_lists, timestamp, subject_name):
         return None
 
 # ================================================================
-# Interfaccia Utente Streamlit
+# Interfaccia Utente Streamlit (Invariata, tranne footer)
 # ================================================================
 
 st.set_page_config(page_title="EvilProf 😈", layout="wide", initial_sidebar_state="expanded")
@@ -237,7 +227,6 @@ generate_button = st.sidebar.button("🚀 Genera Verifiche PDF", type="primary")
 st.sidebar.markdown("---")
 st.sidebar.subheader("Codice Sorgente")
 try:
-    # Determina il nome del file corrente per il download
     script_name = os.path.basename(__file__) if '__file__' in locals() else "evilprof_app.py"
     script_path = os.path.abspath(__file__)
     with open(script_path, 'r', encoding='utf-8') as f:
@@ -245,7 +234,7 @@ try:
     st.sidebar.download_button(
         label="📥 Scarica Codice App (.py)",
         data=source_code,
-        file_name=script_name, # Usa il nome del file corrente
+        file_name=script_name,
         mime="text/x-python"
     )
 except Exception as e:
@@ -274,7 +263,6 @@ if generate_button:
                 total_open = len(open_questions)
                 error_found = False
 
-                # Controlli di fattibilità (separati su più righe)
                 if total_mc == 0 and num_mc_q > 0:
                     st.error(f"ERRORE: {num_mc_q} MC richieste, 0 trovate.")
                     error_found = True
@@ -319,7 +307,6 @@ if generate_button:
                             selected_open_indices = set()
                             current_test_data_unshuffled = []
 
-                            # Selezione MC
                             if num_mc_q > 0:
                                 if ensure_different and i > 1:
                                     avail_mc_set = (all_mc_indices_set - prev_mc_indices) | prev_prev_mc_indices
@@ -337,7 +324,6 @@ if generate_button:
                                 for idx in selected_mc_indices:
                                     current_test_data_unshuffled.append(mc_by_index[idx])
 
-                            # Selezione Aperte
                             if num_open_q > 0:
                                 if ensure_different and i > 1:
                                     avail_open_set = (all_open_indices_set - prev_open_indices) | prev_prev_open_indices
@@ -356,7 +342,7 @@ if generate_button:
                                     current_test_data_unshuffled.append(open_by_index[idx])
 
                             if generation_logic_error:
-                                break # Esce dal loop principale
+                                break
 
                             random.shuffle(current_test_data_unshuffled)
                             all_tests_question_data.append(current_test_data_unshuffled)
@@ -364,7 +350,6 @@ if generate_button:
                         if not generation_logic_error:
                             st.info(f"Dati per {len(all_tests_question_data)} verifiche preparati.")
 
-                    # Generazione PDF
                     if not generation_logic_error:
                          with st.spinner("⏳ Conversione in PDF..."):
                              timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -386,6 +371,6 @@ if generate_button:
             else:
                 st.error("❌ Impossibile procedere: errore caricamento/validazione domande.")
 
-# --- Footer con Link GitHub ---
+# --- Footer ---
 st.markdown("---")
 st.markdown("EvilProf v1.0 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit")
