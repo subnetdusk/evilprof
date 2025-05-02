@@ -107,18 +107,43 @@ def load_questions_from_excel(uploaded_file, status_placeholder=None):
 # ================================================================
 # Funzione Generazione PDF (Invariata da v1.1)
 # ================================================================
+# ================================================================
+# Funzione Generazione PDF (MODIFICATA - No spazio per aperte)
+# ================================================================
 def generate_pdf_data(tests_data_lists, timestamp, subject_name, status_placeholder=None):
-    """Genera i dati binari del PDF, senza footer. Usa status_placeholder."""
-    if not WEASYPRINT_AVAILABLE: st.error("ERRORE: Libreria WeasyPrint non trovata/funzionante."); return None
+    """Genera i dati binari del PDF, senza spazio extra per domande aperte."""
+    if not WEASYPRINT_AVAILABLE: st.error("ERROR: WeasyPrint library not found/functional."); return None
     def update_status(message):
         if status_placeholder: status_placeholder.info(message)
         else: st.info(message)
-    update_status("⚙️ Avvio generazione PDF...")
-    css_style = """@page { size: A4; margin: 2cm; } body { font-family: Verdana, sans-serif; font-size: 11pt; line-height: 1.4; } .test-container { } .page-break { page-break-before: always; } h2 { margin-bottom: 0.8em; font-size: 1.6em; color: #000; font-weight: bold; } .pdf-header-info { margin-bottom: 2.5em; font-size: 1em; font-weight: normal; line-height: 1.6; } .header-line { display: flex; align-items: baseline; width: 100%; margin-bottom: 0.6em; } .header-label { white-space: nowrap; margin-right: 0.5em; flex-shrink: 0; } .header-underline { flex-grow: 1; border-bottom: 1px solid black; position: relative; top: -2px; min-width: 40px; } .class-label { margin-left: 2.5em; } .question { margin-top: 1.8em; margin-bottom: 0.8em; font-weight: bold; } .answer { display: flex; align-items: baseline; margin-left: 2.5em; margin-top: 0.1em; margin-bottom: 0.3em; padding-left: 0; text-indent: 0; } .checkbox { flex-shrink: 0; margin-right: 0.6em; } .answer-text { } .open-answer-space { min-height: 3em; margin-left: 1em; margin-top: 0.5em; margin-bottom: 1.5em; }"""
-    update_status("⚙️ Costruzione documento HTML...")
+    update_status("⚙️ Starting PDF generation...")
+    # CSS Aggiornato: Rimossa la regola .open-answer-space
+    css_style = """
+         @page {
+             size: A4;
+             margin: 2cm;
+         }
+         body { font-family: Verdana, sans-serif; font-size: 11pt; line-height: 1.4; }
+         .test-container { }
+         .page-break { page-break-before: always; }
+         h2 { margin-bottom: 0.8em; font-size: 1.6em; color: #000; font-weight: bold; }
+         .pdf-header-info { margin-bottom: 2.5em; font-size: 1em; font-weight: normal; line-height: 1.6; }
+         .header-line { display: flex; align-items: baseline; width: 100%; margin-bottom: 0.6em; }
+         .header-label { white-space: nowrap; margin-right: 0.5em; flex-shrink: 0; }
+         .header-underline { flex-grow: 1; border-bottom: 1px solid black; position: relative; top: -2px; min-width: 40px; }
+         .class-label { margin-left: 2.5em; }
+         .question { margin-top: 1.8em; margin-bottom: 0.8em; font-weight: bold; }
+         .answer { display: flex; align-items: baseline; margin-left: 2.5em; margin-top: 0.1em; margin-bottom: 0.3em; padding-left: 0; text-indent: 0; }
+         .checkbox { flex-shrink: 0; margin-right: 0.6em; }
+         .answer-text { }
+         /* .open-answer-space { ... } Rimosso */
+    """
+
+    update_status("⚙️ Building HTML document...")
     html_parts = []; checkbox_char = "☐"; safe_subject_name = subject_name.replace('<', '&lt;').replace('>', '&gt;')
     for index, single_test_data in enumerate(tests_data_lists):
-        test_html = f"<h2>Verifica di {safe_subject_name}</h2>\n"; test_html += '<div class="pdf-header-info">\n <div class="header-line">\n <span class="header-label">Cognome e Nome:</span><span class="header-underline"></span>\n </div>\n <div class="header-line">\n <span class="header-label">Data:</span><span class="header-underline date-line"></span><span class="header-label class-label">Classe:</span><span class="header-underline class-line"></span>\n </div>\n</div>\n'
+        test_html = f"<h2>Test for {safe_subject_name}</h2>\n";
+        test_html += '<div class="pdf-header-info">\n <div class="header-line">\n <span class="header-label">Name:</span><span class="header-underline"></span>\n </div>\n <div class="header-line">\n <span class="header-label">Date:</span><span class="header-underline date-line"></span><span class="header-label class-label">Class:</span><span class="header-underline class-line"></span>\n </div>\n</div>\n'
         q_counter = 1
         for question_data in single_test_data:
             q_text = question_data['question'].strip().replace('\r', '').replace('<', '&lt;').replace('>', '&gt;'); q_type = question_data['type']; nbsp = "&nbsp;"
@@ -126,14 +151,16 @@ def generate_pdf_data(tests_data_lists, timestamp, subject_name, status_placehol
             if q_type == 'multiple_choice':
                 answers = question_data['answers'].copy(); random.shuffle(answers)
                 for answer in answers: ans_text = str(answer).strip().replace('\r', '').replace('<', '&lt;').replace('>', '&gt;'); test_html += f'<p class="answer"><span class="checkbox">{checkbox_char}</span><span class="answer-text">{ans_text}</span></p>\n'
-            elif q_type == 'open_ended': test_html += '<div class="open-answer-space"></div>\n'
+            elif q_type == 'open_ended':
+                # Non aggiunge più il div vuoto
+                pass # Non fa nulla, lascia solo la domanda
             q_counter += 1
         page_break_class = " page-break" if index > 0 else ""; html_parts.append(f'<div class="test-container{page_break_class}">\n{test_html}\n</div>')
-    final_html_content = f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Verifiche Generate</title><style>{css_style}</style></head><body>{''.join(html_parts)}</body></html>"""
-    update_status("⚙️ Conversione HTML in PDF con WeasyPrint (può richiedere tempo)...")
-    try: html_doc = HTML(string=final_html_content); pdf_bytes = html_doc.write_pdf(); update_status("⚙️ Conversione PDF completata."); return pdf_bytes
-    except FileNotFoundError as e: st.error(f"ERRORE WeasyPrint: Dipendenze mancanti (GTK+?) {e}"); return None
-    except Exception as e: st.error(f"ERRORE WeasyPrint: {e}"); return None
+    final_html_content = f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Generated Tests</title><style>{css_style}</style></head><body>{''.join(html_parts)}</body></html>"""
+    update_status("⚙️ Converting HTML to PDF with WeasyPrint (this may take time)...")
+    try: html_doc = HTML(string=final_html_content); pdf_bytes = html_doc.write_pdf(); update_status("⚙️ PDF conversion complete."); return pdf_bytes
+    except FileNotFoundError as e: st.error(f"ERROR WeasyPrint: Missing dependencies (GTK+?) {e}"); return None
+    except Exception as e: st.error(f"ERROR WeasyPrint: {e}"); return None
 
 # ================================================================
 # Interfaccia Utente Streamlit
