@@ -20,7 +20,7 @@ except ImportError:
     WEASYPRINT_AVAILABLE = False
 
 # ================================================================
-# Testo Introduttivo e Istruzioni (Invariato da v1.4)
+# Testo Introduttivo e Istruzioni (Invariato da v1.1)
 # ================================================================
 INTRO_TEXT = """
 EvilProf è un'applicazione web realizzata con Streamlit che permette di generare rapidamente file PDF contenenti verifiche personalizzate.
@@ -33,7 +33,7 @@ Le caratteristiche principali includono:
 - **Randomizzazione Avanzata:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
 - **Diversità Migliorata (con Fallback):** L'applicazione tenta di utilizzare una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)** basata sull'algoritmo A di Efraimidis e Spirakis (descritto in [questo paper](https://ethz.ch/content/dam/ethz/special-interest/baug/ivt/ivt-dam/vpl/reports/1101-1200/ab1141.pdf)) per selezionare le domande. Questo metodo:
     - Tenta di **garantire** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*. Ciò richiede che il numero totale di domande di un certo tipo (`n`) sia strettamente maggiore del numero di domande di quel tipo richieste per verifica (`k`), ovvero `n > k`.
-    - Tenta di **favorire statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k` (e se non ci sono errori più gravi).
+    - Tenta di **favorire statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k` (e se non ci sono errori più gravi o fallback attivi).
     - **Fallback:** Se non ci sono abbastanza domande uniche disponibili per garantire la diversità rispetto al test precedente (`n <= k`), l'applicazione **passerà a un campionamento casuale semplice** da *tutte* le domande disponibili per quel tipo, **perdendo la garanzia di diversità** tra test adiacenti. Verrà mostrato un avviso rosso prominente in tal caso.
 - **Output PDF:** Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
 
@@ -75,7 +75,7 @@ def weighted_random_sample_without_replacement(population, weights, k):
     return [filtered_population[i] for i in sampled_indices]
 
 # ================================================================
-# Funzione Caricamento Domande da Excel (Invariata da v1.5)
+# Funzione Caricamento Domande da Excel (Invariata da v1.1)
 # ================================================================
 def load_questions_from_excel(uploaded_file, status_placeholder=None):
     """Carica domande/risposte da file Excel (UploadedFile). Usa status_placeholder."""
@@ -105,7 +105,7 @@ def load_questions_from_excel(uploaded_file, status_placeholder=None):
     except Exception as e: st.error(f"Errore imprevisto lettura Excel: {e}"); return None
 
 # ================================================================
-# Funzione Generazione PDF (Invariata da v1.5)
+# Funzione Generazione PDF (Invariata da v1.1)
 # ================================================================
 def generate_pdf_data(tests_data_lists, timestamp, subject_name, status_placeholder=None):
     """Genera i dati binari del PDF, senza footer. Usa status_placeholder."""
@@ -183,24 +183,22 @@ validation_button = st.sidebar.button(
 st.sidebar.markdown("---")
 st.sidebar.subheader("Codice Sorgente")
 try:
-    # Determina il nome del file corrente in modo sicuro
     script_name = "evilprof_app.py" # Default
     if '__file__' in locals() and os.path.exists(__file__):
          script_name = os.path.basename(__file__)
          script_path = os.path.abspath(__file__)
          with open(script_path, 'r', encoding='utf-8') as f: source_code = f.read()
-    else: # Fallback se __file__ non è definito (es. in alcuni ambienti interattivi)
+    else:
          source_code = "# Impossibile leggere il codice sorgente automaticamente in questo ambiente."
          st.sidebar.warning("Download codice sorgente non disponibile in questo ambiente.")
-
-    if '__file__' in locals() and os.path.exists(__file__): # Mostra bottone solo se il codice è stato letto
+    if '__file__' in locals() and os.path.exists(__file__):
         st.sidebar.download_button(label="📥 Scarica Codice App (.py)", data=source_code, file_name=script_name, mime="text/x-python")
 except Exception as e: st.sidebar.warning(f"Impossibile leggere codice sorgente: {e}")
 # --- Fine Sidebar ---
 
 st.subheader("Output Generazione")
 
-# --- Logica Test di Validazione (Invariata da v1.2) ---
+# --- Logica Test di Validazione (Invariata da v1.1) ---
 if validation_button:
     st.markdown("---")
     st.subheader("Risultato Test di Validazione")
@@ -309,20 +307,17 @@ if generate_button:
                  if total_open == 0 and num_open_q > 0: st.error(f"ERRORE: {num_open_q} Aperte richieste, 0 trovate."); error_found_main = True
                  if total_mc < num_mc_q: st.error(f"ERRORE CRITICO: Non abbastanza domande a scelta multipla ({total_mc}) per {num_mc_q} richieste."); error_found_main = True
                  if total_open < num_open_q: st.error(f"ERRORE CRITICO: Non abbastanza Aperte ({total_open}) per {num_open_q} richieste."); error_found_main = True
-                 # Rimosso controllo n > k perché ora gestito dal fallback
 
                  # Warning per bassa diversità potenziale (n < 3k) - Mostrato solo se non ci sono errori critici
+                 # E verrà comunque nascosto se il fallback si attiva dopo
                  if not error_found_main:
                      show_mc_warning = num_mc_q > 0 and total_mc < 3 * num_mc_q
                      show_oe_warning = num_open_q > 0 and total_open < 3 * num_open_q
 
-                     # Mostra warning solo se non è già stato mostrato l'errore di fallback
-                     # (Questo controllo avviene DOPO il loop, ma lo mettiamo qui per riferimento logico)
-                     # if 'fallback_warning_shown' not in st.session_state: # Controllo effettivo dopo il loop
-                     if show_mc_warning:
-                         st.warning(f"⚠️ Attenzione: Il numero totale di domande a scelta multipla ({total_mc}) è inferiore al triplo ({3*num_mc_q}) delle richieste per test ({num_mc_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
-                     if show_oe_warning:
-                         st.warning(f"⚠️ Attenzione: Il numero totale di domande aperte ({total_open}) è inferiore al triplo ({3*num_open_q}) delle richieste per test ({num_open_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
+                     # Memorizza se mostrare i warning (verranno mostrati solo se il fallback non scatta)
+                     st.session_state['show_mc_low_diversity_warning'] = show_mc_warning
+                     st.session_state['show_oe_low_diversity_warning'] = show_oe_warning
+
                  # --- Fine Controlli ---
 
                  if not error_found_main:
@@ -344,7 +339,7 @@ if generate_button:
                                      fallback_active_mc = True
                                      if 'fallback_warning_shown' not in st.session_state:
                                          st.error(f"‼️ ATTENZIONE: Domande insufficienti per garantire test {i} diverso dal precedente per le domande a scelta multipla. Si procede con campionamento casuale semplice da TUTTE le domande disponibili. I test successivi potrebbero contenere ripetizioni.")
-                                         st.session_state.fallback_warning_shown = True
+                                         st.session_state.fallback_warning_shown = True # Imposta il flag
                                      try: sampled_mc_indices = random.sample(list(mc_by_index.keys()), num_mc_q)
                                      except ValueError: st.error(f"Errore Imprevisto: Impossibile campionare {num_mc_q} da {total_mc} domande totali."); break
                                  else:
@@ -375,6 +370,13 @@ if generate_button:
                              random.shuffle(current_test_data_unshuffled); all_tests_question_data.append(current_test_data_unshuffled)
                          # --- Fine Loop Generazione Test ---
 
+                         # --- Mostra Warning Giallo SOLO se il Fallback NON è scattato ---
+                         if 'fallback_warning_shown' not in st.session_state:
+                             if st.session_state.get('show_mc_low_diversity_warning', False):
+                                 st.warning(f"⚠️ Attenzione: Il numero totale di domande a scelta multipla ({total_mc}) è inferiore al triplo ({3*num_mc_q}) delle richieste per test ({num_mc_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
+                             if st.session_state.get('show_oe_low_diversity_warning', False):
+                                 st.warning(f"⚠️ Attenzione: Il numero totale di domande aperte ({total_open}) è inferiore al triplo ({3*num_open_q}) delle richieste per test ({num_open_q}). La diversità tra i test nel tempo potrebbe essere limitata.")
+
                          # Messaggio finale prima del PDF
                          if 'fallback_warning_shown' not in st.session_state:
                               status_placeholder.info(f"✅ Dati per {len(all_tests_question_data)} verifiche preparati (con diversità garantita). Avvio conversione PDF...")
@@ -398,5 +400,4 @@ if generate_button:
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("EvilProf v1.1 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") # Versione aggiornata
-# --- Fine Applicazione ---
+st.markdown("EvilProf v1.1 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit")
