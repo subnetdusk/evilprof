@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # ================================================================
-# EvilProf 😈 - Generatore Verifiche da Excel - v1.2
+# EvilProf 😈 - Generatore Verifiche da Excel - v1.0
 # ================================================================
-# Modifiche v1.2:
-# - Aggiunto riferimento a banner.svg sotto il titolo
-# - Versione incrementata
-# ================================================================
+
 
 import streamlit as st
 import pandas as pd
@@ -198,20 +195,6 @@ st.set_page_config(page_title="EvilProf 😈", layout="wide", initial_sidebar_st
 st.title("EvilProf 😈")
 st.subheader("Generatore di Verifiche Casuali da Excel a PDF")
 
-# --- AGGIUNTO BANNER SVG ---
-banner_path = "banner.svg" # Nome del file banner
-try:
-    st.image(banner_path, use_container_width=True)
-except FileNotFoundError:
-    # Non mostrare un errore se il banner non c'è, semplicemente non lo visualizza
-    # Potresti voler aggiungere un st.warning se è importante che ci sia
-    # st.warning(f"Nota: File banner '{banner_path}' non trovato.")
-    pass
-except Exception as e:
-    st.error(f"Errore caricamento banner '{banner_path}': {e}")
-# --- FINE BANNER ---
-
-
 if not WEASYPRINT_AVAILABLE:
     st.error("🚨 **Attenzione:** WeasyPrint non disponibile/funzionante. Generazione PDF bloccata.")
     st.stop()
@@ -384,4 +367,4 @@ if generate_button:
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("EvilProf v1.2 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") 
+st.markdown("EvilProf v1.0 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") 
