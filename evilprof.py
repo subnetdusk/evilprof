@@ -105,19 +105,16 @@ def load_questions_from_excel(uploaded_file, status_placeholder=None):
     except Exception as e: st.error(f"Errore imprevisto lettura Excel: {e}"); return None
 
 # ================================================================
-# Funzione Generazione PDF (Invariata da v1.1)
-# ================================================================
-# ================================================================
-# Funzione Generazione PDF (MODIFICATA - No spazio per aperte)
+# Funzione Generazione PDF (MODIFICATA - Margine inferiore ridotto per .question)
 # ================================================================
 def generate_pdf_data(tests_data_lists, timestamp, subject_name, status_placeholder=None):
-    """Genera i dati binari del PDF, senza spazio extra per domande aperte."""
+    """Genera i dati binari del PDF, senza spazio extra per domande aperte e con margine ridotto."""
     if not WEASYPRINT_AVAILABLE: st.error("ERROR: WeasyPrint library not found/functional."); return None
     def update_status(message):
         if status_placeholder: status_placeholder.info(message)
         else: st.info(message)
     update_status("⚙️ Starting PDF generation...")
-    # CSS Aggiornato: Rimossa la regola .open-answer-space
+    # CSS Aggiornato: Ridotto margin-bottom per .question
     css_style = """
          @page {
              size: A4;
@@ -132,7 +129,11 @@ def generate_pdf_data(tests_data_lists, timestamp, subject_name, status_placehol
          .header-label { white-space: nowrap; margin-right: 0.5em; flex-shrink: 0; }
          .header-underline { flex-grow: 1; border-bottom: 1px solid black; position: relative; top: -2px; min-width: 40px; }
          .class-label { margin-left: 2.5em; }
-         .question { margin-top: 1.8em; margin-bottom: 0.8em; font-weight: bold; }
+         .question {
+             margin-top: 1.8em;
+             margin-bottom: 0.4em; /* Ridotto da 0.8em */
+             font-weight: bold;
+         }
          .answer { display: flex; align-items: baseline; margin-left: 2.5em; margin-top: 0.1em; margin-bottom: 0.3em; padding-left: 0; text-indent: 0; }
          .checkbox { flex-shrink: 0; margin-right: 0.6em; }
          .answer-text { }
