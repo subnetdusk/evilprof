@@ -31,20 +31,6 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
 **Esempio Visivo:**
 
 ![Esempio struttura file Excel](excel_example.jpg)
-*(Assicurati che il file `excel_example.jpg` sia presente nel repository)*
-
-## Come Usare l'Applicazione (Interfaccia Web)
-
-1.  **Avvia l'App:** Esegui l'applicazione Streamlit (vedi sezione "Esecuzione Locale" o accedi all'URL se deployata).
-2.  **Carica File:** Usa il riquadro "1. File Excel (.xlsx, .xls)" nella sidebar per caricare il tuo file Excel preparato.
-3.  **Imposta Parametri:**
-    * Inserisci il nome della **Materia**.
-    * Definisci il **Numero di Verifiche** da generare.
-    * Specifica il numero di **Domande a Scelta Multipla** e **Domande Aperte** desiderate per *ogni* verifica.
-    * Seleziona/Deseleziona l'opzione "**Garantire test adiacenti diversi?**" (leggi le istruzioni nell'app per i requisiti sul numero di domande).
-4.  **Genera:** Clicca sul pulsante "🚀 Genera Verifiche PDF".
-5.  **Scarica:** Se la generazione va a buon fine (potrebbe richiedere qualche secondo), apparirà un pulsante "📥 Scarica PDF Generato" per scaricare il file PDF risultante.
-6.  **Codice Sorgente:** Puoi scaricare il codice Python di questa app usando il link nella sidebar.
 
 ## Esecuzione Locale
 
