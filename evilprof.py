@@ -23,9 +23,11 @@ except ImportError:
 # Testo Introduttivo e Istruzioni
 # ================================================================
 INTRO_TEXT = """
-Questo strumento legge un file Excel contenente domande (colonna A) e le relative risposte multiple (colonne B, C, D, ...) OPPURE domande aperte (senza risposte nelle colonne B, C, D...).
+Questa webapp legge un file Excel contenente domande (colonna A) e le relative risposte multiple (colonne B, C, D, ...) OPPURE domande aperte (senza risposte nelle colonne B, C, D...).
 
-Genera un singolo file PDF contenente il numero desiderato di verifiche. Ogni verifica contiene un numero specifico di domande a scelta multipla e aperte, mescolate casualmente. Le risposte (se presenti) sono in ordine casuale. Ogni verifica inizia su una nuova pagina.
+Genera un singolo file PDF contenente il numero desiderato di verifiche. Ogni verifica contiene un numero specifico di domande a scelta multipla e aperte, mescolate casualmente.
+Le risposte (se presenti) sono in ordine casuale. Ogni verifica inizia su una nuova pagina.
+E' possibile assicurarsi che i test adiacenti non abbiano nessuna domanda in comune scegliendo l'opzione "Garantire test adiacenti diversi?"
 
 **Preparazione File Excel:**
  - Una domanda per riga.
@@ -193,7 +195,7 @@ def generate_pdf_data(tests_data_lists, timestamp, subject_name):
 
 st.set_page_config(page_title="EvilProf 😈", layout="wide", initial_sidebar_state="expanded")
 st.title("EvilProf 😈")
-st.subheader("Generatore di Verifiche Casuali da Excel a PDF")
+st.subheader("Generatore di verifiche casuali e diverse, da Excel a PDF")
 
 if not WEASYPRINT_AVAILABLE:
     st.error("🚨 **Attenzione:** WeasyPrint non disponibile/funzionante. Generazione PDF bloccata.")
