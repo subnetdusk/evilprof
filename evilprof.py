@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ================================================================
-# EvilProf 😈 - Generatore Verifiche da Excel - v1.0
+# EvilProf 😈 - Generatore Verifiche da Excel - v1.0.1
 # ================================================================
 
 
@@ -363,4 +363,4 @@ if generate_button:
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("EvilProf v1.0 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") 
+st.markdown("EvilProf v1.0.1 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit") 
