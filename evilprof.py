@@ -240,7 +240,7 @@ try:
 except Exception as e:
     st.sidebar.warning(f"Impossibile leggere codice sorgente: {e}")
 
-st.header("Output Generazione")
+st.subheader("Output Generazione")
 if generate_button:
     if uploaded_file is None:
         st.warning("⚠️ Carica prima un file Excel.")
