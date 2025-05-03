@@ -1,4 +1,4 @@
-# test.py (Updated to check similarity up to the last generated test)
+# test.py (Updated to use Sørensen–Dice coefficient)
 import pandas as pd
 import random
 import os
@@ -6,11 +6,15 @@ import math
 from collections import defaultdict
 
 # Importa la funzione di generazione principale da core_logic
+# Import the main generation function from core_logic
 from core_logic import generate_all_tests_data
 
 # Costante per il nome del file di test e output
+# Constants for test file and output
 TEST_EXCEL_FILE = "test_questions.xlsx"
-OUTPUT_EXCEL_FILE = "similarity_analysis_results_mc.xlsx"
+# Aggiornato nome file output per riflettere l'uso di Dice
+# Updated output filename to reflect Dice usage
+OUTPUT_EXCEL_FILE = "similarity_analysis_dice_mc.xlsx"
 
 def _load_test_questions(status_callback):
     """
@@ -42,23 +46,45 @@ def _load_test_questions(status_callback):
         status_callback("error", "TEST_LOAD_ERROR", filename=TEST_EXCEL_FILE, error=str(e))
         return None, "TEST_LOAD_ERROR"
 
-def _calculate_jaccard(set1, set2):
-    """Calcola l'indice Jaccard tra due insiemi."""
-    intersection = len(set1.intersection(set2))
-    union = len(set1.union(set2))
-    return 1.0 if union == 0 else intersection / union
+# --- MODIFICA: Calcola Dice invece di Jaccard ---
+# --- CHANGE: Calculate Dice instead of Jaccard ---
+def _calculate_dice(set1, set2):
+    """
+    Calcola il coefficiente di Sørensen–Dice tra due insiemi.
+    Formula: 2 * |A ∩ B| / (|A| + |B|)
+
+    Calculates the Sørensen–Dice coefficient between two sets.
+    Formula: 2 * |A ∩ B| / (|A| + |B|)
+    """
+    intersection_cardinality = len(set1.intersection(set2))
+    set1_cardinality = len(set1)
+    set2_cardinality = len(set2)
+    denominator = set1_cardinality + set2_cardinality
+
+    # Se entrambi gli insiemi sono vuoti, il coefficiente è 1.
+    # Se il denominatore è 0 (improbabile qui), ritorna 1 se anche intersezione è 0, altrimenti 0.
+    # If both sets are empty, the coefficient is 1.
+    # If the denominator is 0 (unlikely here), return 1 if intersection is also 0, else 0.
+    if denominator == 0:
+        return 1.0 if intersection_cardinality == 0 else 0.0
+
+    return 2 * intersection_cardinality / denominator
+# --- FINE MODIFICA ---
 
 def _run_single_similarity_analysis_for_k(k_mc, k_oe, num_tests_to_generate, mc_questions, open_questions):
     """
-    Esegue UNA SINGOLA analisi di similarità per k_mc e k_oe.
-    Restituisce un dizionario {distance: avg_jaccard_index} e lista messaggi errore generazione.
+    Esegue UNA SINGOLA analisi di similarità per k_mc e k_oe usando Dice.
+    Restituisce un dizionario {distance: avg_dice_index} e lista messaggi errore generazione.
     NON chiama status_callback.
+
+    Performs A SINGLE similarity analysis for k_mc and k_oe using Dice.
+    Returns a dictionary {distance: avg_dice_index} and a list of generation error messages.
+    Does NOT call status_callback.
     """
-    jaccard_by_distance = {}
-    # --- CORREZIONE QUI: Rimuovi il limite di 15 ---
-    # --- CORRECTION HERE: Remove the limit of 15 ---
-    max_distance_to_check = num_tests_to_generate - 1 # Calcola fino all'ultimo test / Calculate up to the last test
-    # --- FINE CORREZIONE ---
+    # --- MODIFICA: Nome variabile / Variable name change ---
+    dice_by_distance = {}
+    # --- FINE MODIFICA ---
+    max_distance_to_check = num_tests_to_generate - 1
     generation_error_messages = []
     def nop_callback(*args, **kwargs): pass
 
@@ -74,33 +100,38 @@ def _run_single_similarity_analysis_for_k(k_mc, k_oe, num_tests_to_generate, mc_
 
     test_sets = [set(q['original_index'] for q in test) for test in generated_tests_data]
 
-    # Calcola Jaccard per tutte le distanze richieste / Calculate Jaccard for all required distances
     for d in range(1, max_distance_to_check + 1):
-        jaccard_indices_for_d = []
-        # Il numero di coppie diminuisce all'aumentare della distanza
-        # The number of pairs decreases as distance increases
+        # --- MODIFICA: Nome variabile / Variable name change ---
+        dice_indices_for_d = []
+        # --- FINE MODIFICA ---
         for i in range(num_tests_to_generate - d):
-            jaccard_index = _calculate_jaccard(test_sets[i], test_sets[i + d])
-            jaccard_indices_for_d.append(jaccard_index)
-        if jaccard_indices_for_d:
-            jaccard_by_distance[d] = jaccard_indices_for_d
+            # --- MODIFICA: Chiama _calculate_dice / Call _calculate_dice ---
+            dice_index = _calculate_dice(test_sets[i], test_sets[i + d])
+            dice_indices_for_d.append(dice_index)
+            # --- FINE MODIFICA ---
+        if dice_indices_for_d:
+            # --- MODIFICA: Nome variabile / Variable name change ---
+            dice_by_distance[d] = dice_indices_for_d
+            # --- FINE MODIFICA ---
 
-    avg_results_for_k = {}
-    for d, indices in jaccard_by_distance.items():
+    # --- MODIFICA: Nome variabile / Variable name change ---
+    avg_dice_results_for_k = {}
+    for d, indices in dice_by_distance.items():
          if indices:
              avg = sum(indices) / len(indices)
-             avg_results_for_k[d] = avg if not math.isnan(avg) else 0.0
+             avg_dice_results_for_k[d] = avg if not math.isnan(avg) else 0.0
          else:
-             avg_results_for_k[d] = None
+             avg_dice_results_for_k[d] = None
+    return avg_dice_results_for_k, generation_error_messages
+    # --- FINE MODIFICA ---
 
-    return avg_results_for_k, generation_error_messages
 
 # ================================================================
 # Funzione Orchestratore Test Monte Carlo (run_all_tests)
 # ================================================================
 def run_all_tests(status_callback, num_monte_carlo_runs=30):
     """
-    Orchestra l'analisi statistica di similarità con approccio Monte Carlo.
+    Orchestra l'analisi statistica di similarità (Dice) con approccio Monte Carlo.
     Salva i risultati medi finali in un file Excel.
     Restituisce lista di tuple (type, key, kwargs_dict) con messaggi sommari finali
     e include un messaggio di successo/fallimento per l'Excel.
@@ -126,7 +157,7 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     # 2. Definisci parametri
     num_tests_per_k_sequence = 30
     k_values_to_test = range(11, 0, -1)
-    max_distance_overall = 0 # Verrà aggiornato dinamicamente / Will be updated dynamically
+    max_distance_overall = 0
     progress_update_frequency = 5
 
     monte_carlo_summary.append(("info", "MC_TEST_STARTING", {"num_runs": num_monte_carlo_runs, "num_k": len(k_values_to_test), "num_tests": num_tests_per_k_sequence}))
@@ -139,18 +170,20 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
 
         # Ciclo sui valori di k interno
         for k in k_values_to_test:
-            avg_jaccard_by_distance, gen_errors = _run_single_similarity_analysis_for_k(
+            # --- MODIFICA: Nome variabile / Variable name change ---
+            avg_dice_by_distance, gen_errors = _run_single_similarity_analysis_for_k(
                 k, k, num_tests_per_k_sequence, mc_questions, open_questions
             )
+            # --- FINE MODIFICA ---
             monte_carlo_summary.extend(gen_errors)
-            if avg_jaccard_by_distance is not None:
-                for d, avg_j in avg_jaccard_by_distance.items():
-                    if avg_j is not None:
-                        results_accumulator[k][d]['sum'] += avg_j
+            # --- MODIFICA: Nome variabile / Variable name change ---
+            if avg_dice_by_distance is not None:
+                for d, avg_d in avg_dice_by_distance.items(): # Usa avg_d per chiarezza / Use avg_d for clarity
+                    if avg_d is not None:
+                        results_accumulator[k][d]['sum'] += avg_d
                         results_accumulator[k][d]['count'] += 1
-                        # Aggiorna la distanza massima globale vista finora
-                        # Update the maximum global distance seen so far
                         max_distance_overall = max(max_distance_overall, d)
+            # --- FINE MODIFICA ---
             else:
                 monte_carlo_summary.append(("warning", "MC_TEST_FAILED_FOR_K_IN_RUN", {"k": k, "run": run}))
                 run_successful = False
@@ -159,14 +192,10 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     final_avg_results = defaultdict(dict)
     detailed_results_for_excel = []
     sorted_k = sorted(results_accumulator.keys(), reverse=True)
-    # Assicurati che max_distance_overall sia almeno 1 se ci sono risultati
-    # Ensure max_distance_overall is at least 1 if there are results
-    if not max_distance_overall and any(results_accumulator.values()):
-         max_distance_overall = 1
+    if not max_distance_overall and any(results_accumulator.values()): max_distance_overall = 1
 
     for k in sorted_k:
-        # Itera fino alla distanza massima effettivamente calcolata
-        # Iterate up to the maximum distance actually calculated
+        result_str_parts = []
         for d in range(1, max_distance_overall + 1):
             data = results_accumulator[k].get(d)
             final_avg = None
@@ -175,8 +204,15 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
                 final_avg = data['sum'] / data['count']
                 num_samples = data['count']
             final_avg_results[k][d] = final_avg
-            detailed_results_for_excel.append({'k': k, 'distance': d, 'avg_jaccard': final_avg, 'num_samples': num_samples})
-        # Non mostrare più i risultati per k qui, verranno mostrati alla fine
+            # --- MODIFICA: Nome colonna per Excel / Column name change for Excel ---
+            detailed_results_for_excel.append({'k': k, 'distance': d, 'avg_dice': final_avg, 'num_samples': num_samples})
+            result_str_parts.append(f"d{d}={final_avg:.3f}({num_samples})" if final_avg is not None else f"d{d}=N/A")
+            # --- FINE MODIFICA ---
+        result_str = ", ".join(result_str_parts)
+        # --- MODIFICA: Chiave messaggio (opzionale ma consigliato) / Message key change (optional but recommended) ---
+        monte_carlo_summary.append(("info", "MC_TEST_FINAL_RESULTS_DICE_FOR_K", {"k": k, "results": result_str}))
+        # --- FINE MODIFICA ---
+
 
     # 5. Crea e salva il file Excel
     excel_created = False
@@ -184,14 +220,11 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     if detailed_results_for_excel:
         try:
             df_results = pd.DataFrame(detailed_results_for_excel)
-            # Usa pivot_table per creare la tabella k vs distanza
-            # Use pivot_table to create the k vs distance table
-            df_pivot = pd.pivot_table(df_results, values='avg_jaccard', index='k', columns='distance')
-            df_pivot = df_pivot.sort_index(ascending=False) # Ordina k decrescente
-            # Assicura che le colonne delle distanze siano ordinate
-            # Ensure distance columns are sorted
+            # --- MODIFICA: Nome valore nel pivot / Value name in pivot ---
+            df_pivot = pd.pivot_table(df_results, values='avg_dice', index='k', columns='distance')
+            # --- FINE MODIFICA ---
+            df_pivot = df_pivot.sort_index(ascending=False)
             df_pivot = df_pivot.reindex(sorted(df_pivot.columns), axis=1)
-
             df_pivot.to_excel(OUTPUT_EXCEL_FILE)
             monte_carlo_summary.append(("success", "STAT_TEST_EXCEL_CREATED", {"filename": OUTPUT_EXCEL_FILE}))
             excel_created = True
