@@ -160,7 +160,7 @@ if validation_button:
     # Esegue i test interni / Run internal tests
     with st.spinner(T("VALIDATION_LOGIC_SPINNER")):
         # Chiama la funzione da test.py / Call function from test.py
-        test_results = run_all_tests(status_callback)
+        test_results = run_statistical_similarity_test(status_callback)
 
     # Mostra risultati / Display results
     display_message("info", "VALIDATION_RESULTS_HEADER")
