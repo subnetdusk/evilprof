@@ -1,4 +1,4 @@
-# test.py (Quieter Monte Carlo simulation with progress update)
+# test.py (Updated to check similarity up to the last generated test)
 import pandas as pd
 import random
 import os
@@ -55,7 +55,10 @@ def _run_single_similarity_analysis_for_k(k_mc, k_oe, num_tests_to_generate, mc_
     NON chiama status_callback.
     """
     jaccard_by_distance = {}
-    max_distance_to_check = min(num_tests_to_generate - 1, 15)
+    # --- CORREZIONE QUI: Rimuovi il limite di 15 ---
+    # --- CORRECTION HERE: Remove the limit of 15 ---
+    max_distance_to_check = num_tests_to_generate - 1 # Calcola fino all'ultimo test / Calculate up to the last test
+    # --- FINE CORREZIONE ---
     generation_error_messages = []
     def nop_callback(*args, **kwargs): pass
 
@@ -71,8 +74,11 @@ def _run_single_similarity_analysis_for_k(k_mc, k_oe, num_tests_to_generate, mc_
 
     test_sets = [set(q['original_index'] for q in test) for test in generated_tests_data]
 
+    # Calcola Jaccard per tutte le distanze richieste / Calculate Jaccard for all required distances
     for d in range(1, max_distance_to_check + 1):
         jaccard_indices_for_d = []
+        # Il numero di coppie diminuisce all'aumentare della distanza
+        # The number of pairs decreases as distance increases
         for i in range(num_tests_to_generate - d):
             jaccard_index = _calculate_jaccard(test_sets[i], test_sets[i + d])
             jaccard_indices_for_d.append(jaccard_index)
@@ -120,17 +126,15 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     # 2. Definisci parametri
     num_tests_per_k_sequence = 30
     k_values_to_test = range(11, 0, -1)
-    max_distance_overall = 0
-    progress_update_frequency = 5 # Aggiorna ogni 5 run / Update every 5 runs
+    max_distance_overall = 0 # Verrà aggiornato dinamicamente / Will be updated dynamically
+    progress_update_frequency = 5
 
     monte_carlo_summary.append(("info", "MC_TEST_STARTING", {"num_runs": num_monte_carlo_runs, "num_k": len(k_values_to_test), "num_tests": num_tests_per_k_sequence}))
 
     # 3. Ciclo Monte Carlo Esterno
     for run in range(1, num_monte_carlo_runs + 1):
-        # --- AGGIUNTO MESSAGGIO DI PROGRESSO MENO FREQUENTE ---
         if run % progress_update_frequency == 0 or run == num_monte_carlo_runs:
              status_callback("info", "MC_TEST_RUN_PROGRESS", current_run=run, total_runs=num_monte_carlo_runs)
-        # --- FINE AGGIUNTA ---
         run_successful = True
 
         # Ciclo sui valori di k interno
@@ -144,6 +148,8 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
                     if avg_j is not None:
                         results_accumulator[k][d]['sum'] += avg_j
                         results_accumulator[k][d]['count'] += 1
+                        # Aggiorna la distanza massima globale vista finora
+                        # Update the maximum global distance seen so far
                         max_distance_overall = max(max_distance_overall, d)
             else:
                 monte_carlo_summary.append(("warning", "MC_TEST_FAILED_FOR_K_IN_RUN", {"k": k, "run": run}))
@@ -153,7 +159,14 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     final_avg_results = defaultdict(dict)
     detailed_results_for_excel = []
     sorted_k = sorted(results_accumulator.keys(), reverse=True)
+    # Assicurati che max_distance_overall sia almeno 1 se ci sono risultati
+    # Ensure max_distance_overall is at least 1 if there are results
+    if not max_distance_overall and any(results_accumulator.values()):
+         max_distance_overall = 1
+
     for k in sorted_k:
+        # Itera fino alla distanza massima effettivamente calcolata
+        # Iterate up to the maximum distance actually calculated
         for d in range(1, max_distance_overall + 1):
             data = results_accumulator[k].get(d)
             final_avg = None
@@ -164,7 +177,6 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
             final_avg_results[k][d] = final_avg
             detailed_results_for_excel.append({'k': k, 'distance': d, 'avg_jaccard': final_avg, 'num_samples': num_samples})
         # Non mostrare più i risultati per k qui, verranno mostrati alla fine
-        # Do not show results per k here anymore, they will be shown at the end
 
     # 5. Crea e salva il file Excel
     excel_created = False
@@ -172,9 +184,14 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     if detailed_results_for_excel:
         try:
             df_results = pd.DataFrame(detailed_results_for_excel)
+            # Usa pivot_table per creare la tabella k vs distanza
+            # Use pivot_table to create the k vs distance table
             df_pivot = pd.pivot_table(df_results, values='avg_jaccard', index='k', columns='distance')
-            df_pivot = df_pivot.sort_index(ascending=False)
-            df_pivot = df_pivot.sort_index(axis=1, ascending=True)
+            df_pivot = df_pivot.sort_index(ascending=False) # Ordina k decrescente
+            # Assicura che le colonne delle distanze siano ordinate
+            # Ensure distance columns are sorted
+            df_pivot = df_pivot.reindex(sorted(df_pivot.columns), axis=1)
+
             df_pivot.to_excel(OUTPUT_EXCEL_FILE)
             monte_carlo_summary.append(("success", "STAT_TEST_EXCEL_CREATED", {"filename": OUTPUT_EXCEL_FILE}))
             excel_created = True
