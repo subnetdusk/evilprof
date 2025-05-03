@@ -1,4 +1,4 @@
-# config.py (aggiornato)
+# config.py (Cleaned Indentation)
 
 DEFAULT_NUM_TESTS = 30
 DEFAULT_NUM_MC = 8
