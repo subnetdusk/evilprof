@@ -1,4 +1,4 @@
-# test.py (Quieter Monte Carlo simulation)
+# test.py (Quieter Monte Carlo simulation with progress update)
 import pandas as pd
 import random
 import os
@@ -37,8 +37,6 @@ def _load_test_questions(status_callback):
         if not questions_data:
              status_callback("error", "TEST_NO_QUESTIONS_FOUND", filename=TEST_EXCEL_FILE)
              return None, "TEST_NO_QUESTIONS_FOUND"
-        # Non chiamare callback per successo caricamento / Do not call callback on load success
-        # status_callback("info", "TEST_LOAD_SUCCESS", count=len(questions_data), mc=mc_count, oe=oe_count)
         return questions_data, None
     except Exception as e:
         status_callback("error", "TEST_LOAD_ERROR", filename=TEST_EXCEL_FILE, error=str(e))
@@ -100,7 +98,7 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     Salva i risultati medi finali in un file Excel.
     Restituisce lista di tuple (type, key, kwargs_dict) con messaggi sommari finali
     e include un messaggio di successo/fallimento per l'Excel.
-    Chiama status_callback solo per messaggi essenziali (inizio, errori critici, fine, excel).
+    Chiama status_callback per messaggi essenziali e aggiornamenti progresso meno frequenti.
     """
     monte_carlo_summary = []
     results_accumulator = defaultdict(lambda: defaultdict(lambda: {'sum': 0.0, 'count': 0}))
@@ -123,15 +121,16 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     num_tests_per_k_sequence = 30
     k_values_to_test = range(11, 0, -1)
     max_distance_overall = 0
+    progress_update_frequency = 5 # Aggiorna ogni 5 run / Update every 5 runs
 
-    # Messaggio iniziale (UNO SOLO) / Single initial message
     monte_carlo_summary.append(("info", "MC_TEST_STARTING", {"num_runs": num_monte_carlo_runs, "num_k": len(k_values_to_test), "num_tests": num_tests_per_k_sequence}))
 
     # 3. Ciclo Monte Carlo Esterno
     for run in range(1, num_monte_carlo_runs + 1):
-        # --- RIMOSSO MESSAGGIO DI PROGRESSO RUN ---
-        # status_callback("info", "MC_TEST_RUN_PROGRESS", current_run=run, total_runs=num_monte_carlo_runs)
-        # --- FINE RIMOZIONE ---
+        # --- AGGIUNTO MESSAGGIO DI PROGRESSO MENO FREQUENTE ---
+        if run % progress_update_frequency == 0 or run == num_monte_carlo_runs:
+             status_callback("info", "MC_TEST_RUN_PROGRESS", current_run=run, total_runs=num_monte_carlo_runs)
+        # --- FINE AGGIUNTA ---
         run_successful = True
 
         # Ciclo sui valori di k interno
@@ -139,7 +138,6 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
             avg_jaccard_by_distance, gen_errors = _run_single_similarity_analysis_for_k(
                 k, k, num_tests_per_k_sequence, mc_questions, open_questions
             )
-            # Accumula solo errori critici dalla generazione / Accumulate only critical errors
             monte_carlo_summary.extend(gen_errors)
             if avg_jaccard_by_distance is not None:
                 for d, avg_j in avg_jaccard_by_distance.items():
@@ -148,19 +146,14 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
                         results_accumulator[k][d]['count'] += 1
                         max_distance_overall = max(max_distance_overall, d)
             else:
-                # Segnala fallimento per k in run (questo potrebbe essere utile mantenerlo)
                 monte_carlo_summary.append(("warning", "MC_TEST_FAILED_FOR_K_IN_RUN", {"k": k, "run": run}))
                 run_successful = False
 
     # 4. Calcola Medie Finali e Prepara Output
     final_avg_results = defaultdict(dict)
     detailed_results_for_excel = []
-    # --- RIMOSSO MESSAGGIO CALCOLO MEDIE ---
-    # status_callback("info", "MC_TEST_CALCULATING_FINAL_AVERAGES")
-    # --- FINE RIMOZIONE ---
     sorted_k = sorted(results_accumulator.keys(), reverse=True)
     for k in sorted_k:
-        result_str_parts = []
         for d in range(1, max_distance_overall + 1):
             data = results_accumulator[k].get(d)
             final_avg = None
@@ -170,12 +163,8 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
                 num_samples = data['count']
             final_avg_results[k][d] = final_avg
             detailed_results_for_excel.append({'k': k, 'distance': d, 'avg_jaccard': final_avg, 'num_samples': num_samples})
-            # Non costruire stringa per messaggio intermedio / Do not build string for intermediate message
-            # result_str_parts.append(f"d{d}={final_avg:.3f}({num_samples})" if final_avg is not None else f"d{d}=N/A")
-        # result_str = ", ".join(result_str_parts)
-        # --- RIMOSSO MESSAGGIO RISULTATI PER K ---
-        # monte_carlo_summary.append(("info", "MC_TEST_FINAL_RESULTS_FOR_K", {"k": k, "results": result_str}))
-        # --- FINE RIMOZIONE ---
+        # Non mostrare più i risultati per k qui, verranno mostrati alla fine
+        # Do not show results per k here anymore, they will be shown at the end
 
     # 5. Crea e salva il file Excel
     excel_created = False
@@ -187,17 +176,15 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
             df_pivot = df_pivot.sort_index(ascending=False)
             df_pivot = df_pivot.sort_index(axis=1, ascending=True)
             df_pivot.to_excel(OUTPUT_EXCEL_FILE)
-            # Messaggio creazione Excel (IMPORTANTE) / Excel creation message (IMPORTANT)
             monte_carlo_summary.append(("success", "STAT_TEST_EXCEL_CREATED", {"filename": OUTPUT_EXCEL_FILE}))
             excel_created = True
             excel_filename = OUTPUT_EXCEL_FILE
         except Exception as e:
-            # Messaggio errore creazione Excel (IMPORTANTE) / Excel creation error message (IMPORTANT)
             monte_carlo_summary.append(("error", "STAT_TEST_EXCEL_SAVE_ERROR", {"filename": OUTPUT_EXCEL_FILE, "error": str(e)}))
     elif any(results_accumulator.values()):
          monte_carlo_summary.append(("warning", "STAT_TEST_NO_DATA_FOR_EXCEL", {}))
 
-    # 6. Messaggio finale completamento (IMPORTANTE) / Final completion message (IMPORTANT)
+    # 6. Messaggio finale completamento
     monte_carlo_summary.append(("info", "MC_TEST_ALL_COMPLETE", {}))
 
     return monte_carlo_summary, excel_filename
