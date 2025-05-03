@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-# app.py (Tentativo di avvicinare i bottoni lingua)
+# app.py 
 
 import streamlit as st
 from datetime import datetime
 import os
-
-# ... [altri import come prima] ...
 from localization import TEXTS, get_text, format_text
 from config import (
     DEFAULT_NUM_TESTS, DEFAULT_NUM_MC, DEFAULT_NUM_OPEN, EXAMPLE_IMAGE_PATH
@@ -59,14 +57,12 @@ with col_lang_en:
 st.title(T("MAIN_TITLE"))
 st.subheader(T("SUBHEADER"))
 
-# ... [Il resto del codice di app.py rimane invariato] ...
-
 if not WEASYPRINT_AVAILABLE:
     st.error(T("WEASYPRINT_ERROR"))
     st.stop()
 
 # ================================================================
-# Istruzioni (Espandibili)
+# Istruzioni 
 # ================================================================
 with st.expander(T("INSTRUCTIONS_HEADER"), expanded=False):
     st.markdown(T("INTRO_TEXT"), unsafe_allow_html=True)
