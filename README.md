@@ -10,6 +10,8 @@ Generatore di verifiche casuali e diverse da Excel a PDF (Streamlit App)
 
 EvilProf è un'applicazione web realizzata con Streamlit che permette di generare rapidamente file PDF contenenti verifiche personalizzate.
 
+Questa app è [hostata su Streamlit](https://evilprof.streamlit.app/)
+
 Le caratteristiche principali includono:
 
 -   **Input da Excel:** Carica facilmente le tue domande da un file `.xlsx` o `.xls`.
@@ -39,6 +41,8 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
 ## 🇬🇧 English Version <a name="english-version"></a>
 
 EvilProf is a web application built with Streamlit that allows you to quickly generate PDF files containing custom tests.
+
+This app is [hosted here in Streamlit](https://evilprof.streamlit.app/)
 
 Main features include:
 
