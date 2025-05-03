@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# app.py (Corretto SetPageConfig Error + Toggle Button + i18n backend)
+# app.py (Corretto AttributeError, Two-Button Toggle + i18n backend)
 
 import streamlit as st
 from datetime import datetime
@@ -23,16 +23,13 @@ from pdf_generator import generate_pdf_data, WEASYPRINT_AVAILABLE
 if 'lang' not in st.session_state:
     st.session_state.lang = 'it' # Default a Italiano
 
-# Funzione per cambiare lingua, usata dall'on_click del bottone
-def toggle_language():
-    st.session_state.lang = 'en' if st.session_state.lang == 'it' else 'it'
-    # Forza un rerun immediato per vedere il cambio di lingua
-    st.experimental_rerun()
-
 # Helper locali per testo (definiti prima, usati dopo set_page_config)
 def T(key):
+    """Ottiene testo tradotto per la lingua corrente."""
     return get_text(st.session_state.lang, key)
+
 def F(key, **kwargs):
+    """Ottiene testo tradotto e lo formatta."""
     kwargs = kwargs or {}
     return format_text(st.session_state.lang, key, **kwargs)
 
@@ -40,29 +37,37 @@ def F(key, **kwargs):
 # Setup Pagina (DEVE ESSERE IL PRIMO COMANDO STREAMLIT)
 # ================================================================
 st.set_page_config(
-    page_title=T("PAGE_TITLE"),  # Ora T() è definito e può essere usato
+    page_title=T("PAGE_TITLE"),
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ================================================================
-# Toggle Button Lingua (ORA DOPO set_page_config)
+# Toggle Button Lingua (Two-Button Style, DOPO set_page_config)
 # ================================================================
-_, col_btn = st.columns([0.85, 0.15]) # Ajusta ratio se necessario
-with col_btn:
-    if st.session_state.lang == 'it':
-        button_label = "🇬🇧 English"; button_key = "lang_toggle_to_en"
-    else:
-        button_label = "🇮🇹 Italiano"; button_key = "lang_toggle_to_it"
-    st.button(
-        label=button_label, key=button_key, on_click=toggle_language,
-        help="Switch Language / Cambia Lingua"
-    )
+# Crea colonne per allineare i bottoni a destra
+_, col_lang_it, col_lang_en = st.columns([0.8, 0.1, 0.1]) # Colonne strette per i bottoni
+
+with col_lang_it:
+    # Bottone Italiano: Primario se IT è attivo, altrimenti secondario
+    button_it_type = "primary" if st.session_state.lang == 'it' else "secondary"
+    if st.button("🇮🇹", key="lang_it_btn", type=button_it_type, help="Passa a Italiano / Switch to Italian"):
+        if st.session_state.lang != 'it':
+            st.session_state.lang = 'it'
+            st.rerun() # Usa st.rerun() per aggiornare l'interfaccia
+
+with col_lang_en:
+     # Bottone Inglese: Primario se EN è attivo, altrimenti secondario
+    button_en_type = "primary" if st.session_state.lang == 'en' else "secondary"
+    if st.button("🇬🇧", key="lang_en_btn", type=button_en_type, help="Passa a Inglese / Switch to English"):
+        if st.session_state.lang != 'en':
+            st.session_state.lang = 'en'
+            st.rerun() # Usa st.rerun() per aggiornare l'interfaccia
 # --- Fine Toggle Button ---
 
 
 # ================================================================
-# Titolo e Contenuto Principale (ORA DOPO set_page_config)
+# Titolo e Contenuto Principale
 # ================================================================
 st.title(T("MAIN_TITLE"))
 st.subheader(T("SUBHEADER"))
@@ -116,7 +121,7 @@ except Exception as e:
 st.subheader(T("OUTPUT_AREA_HEADER"))
 output_placeholder = st.container()
 
-# Funzione display_message (invariata)
+# Funzione display_message (invariata dalla versione precedente)
 def display_message(message_type, key_or_raw_text, **kwargs):
     kwargs = kwargs or {}
     formatted_text = F(key_or_raw_text, **kwargs)
@@ -189,68 +194,3 @@ if generate_button:
 
     if total_mc == 0 and num_mc_q > 0: display_message("error", "MC_ZERO_ERROR", num_mc_q=num_mc_q); error_found_main = True
     if total_open == 0 and num_open_q > 0: display_message("error", "OPEN_ZERO_ERROR", num_open_q=num_open_q); error_found_main = True
-    if total_mc < num_mc_q: display_message("error", "MC_INSUFFICIENT_ERROR", total_mc=total_mc, num_mc_q=num_mc_q); error_found_main = True
-    if total_open < num_open_q: display_message("error", "OPEN_INSUFFICIENT_ERROR", total_open=total_open, num_open_q=num_open_q); error_found_main = True
-
-    if error_found_main:
-        display_message("error", "CORRECT_ERRORS_ERROR"); st.stop()
-
-    display_message("info", "PARAMS_OK_INFO", num_tests=num_tests, subject_name=subject_name, num_mc_q=num_mc_q, num_open_q=num_open_q, num_q_per_test=num_q_per_test)
-
-    with st.spinner(F("GENERATING_DATA_SPINNER", num_tests=num_tests)):
-        all_tests_data, generation_messages = generate_all_tests_data(
-            mc_questions, open_questions, num_tests, num_mc_q, num_open_q, status_callback
-        )
-
-    if generation_messages:
-         display_message("info", "GENERATION_MESSAGES_HEADER")
-         for msg_type, msg_key, msg_kwargs in generation_messages:
-             display_message(msg_type, msg_key, **msg_kwargs)
-
-    if all_tests_data is None:
-        if not any(m[0]=='error' for m in generation_messages):
-            display_message("error", "GENERATION_FAILED_ERROR")
-        st.stop()
-
-    pdf_strings = {
-        "title_format": T("PDF_TEST_TITLE"), "name_label": T("PDF_NAME_LABEL"),
-        "date_label": T("PDF_DATE_LABEL"), "class_label": T("PDF_CLASS_LABEL"),
-        "missing_question": T("PDF_MISSING_QUESTION"), "no_options": T("PDF_NO_OPTIONS")
-    }
-
-    display_message("info", "DATA_READY_PDF_INFO", num_tests=len(all_tests_data))
-    with st.spinner(T("PDF_CREATION_SPINNER")):
-         pdf_data = generate_pdf_data(all_tests_data, subject_name, status_callback, pdf_strings)
-
-    if pdf_data:
-        display_message("success", "PDF_SUCCESS")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        safe_filename_subject = "".join(c if c.isalnum() else "_" for c in subject_name)
-        pdf_filename = f"Tests_{safe_filename_subject}_{num_tests}x{num_q_per_test}q_{timestamp}.pdf"
-        st.download_button(
-            label=T("PDF_DOWNLOAD_BUTTON_LABEL"), data=pdf_data, file_name=pdf_filename, mime="application/pdf",
-            help=F("PDF_DOWNLOAD_BUTTON_HELP", pdf_filename=pdf_filename),
-            use_container_width=True, type="primary"
-        )
-    else:
-        if not any(m[0]=='error' for m in generation_messages):
-             display_message("error", "PDF_GENERATION_ERROR")
-
-# ================================================================
-# Messaggio Iniziale
-# ================================================================
-if 'action_performed' not in st.session_state:
-     st.session_state.action_performed = False
-if validation_button:
-     st.session_state.action_performed = True
-if generate_button:
-     st.session_state.action_performed = True
-
-if not st.session_state.action_performed:
-    output_placeholder.info(T("INITIAL_INFO"))
-
-# ================================================================
-# Footer
-# ================================================================
-st.markdown("---")
-st.markdown(T("FOOTER_TEXT"))
