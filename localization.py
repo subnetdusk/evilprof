@@ -1,4 +1,4 @@
-# localization.py (Versione COMPLETA con tutte le chiavi)
+# localization.py
 
 TEXTS = {
     "it": {
@@ -143,7 +143,7 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERRORE WeasyPrint: Dipendenze mancanti (GTK+/Pango/Cairo?). Dettagli: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERRORE durante la generazione PDF con WeasyPrint: {error}",
 
-        # Nuove chiavi per test.py (Test Statistici)
+        # Chiavi per test.py (Test Statistici e Monte Carlo)
         "TEST_FILE_NOT_FOUND": "ERRORE: File di test '{filename}' non trovato. Esegui prima lo script 'generate_test_excel.py'.",
         "TEST_LOADING_DATA": "Caricamento dati dal file di test '{filename}'...",
         "TEST_NO_QUESTIONS_FOUND": "ERRORE: Nessuna domanda valida trovata nel file di test '{filename}'.",
@@ -151,22 +151,21 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
         "TEST_LOAD_ERROR": "ERRORE imprevisto durante il caricamento del file di test '{filename}': {error}",
         "TEST_ABORTED_LOAD_FAILED": "❌ Test annullato: impossibile caricare i dati di test.",
         "TEST_WRONG_QUESTION_COUNT": "ERRORE Dati Test: Trovate {mc} MC e {oe} OE domande, attese {expected} per tipo.",
-        "TEST_RUNNING_SCENARIO": "--- Esecuzione Scenario Test {scenario} (MC={mc}, OE={oe}, N={n_sim}) ---",
-        "TEST_SCENARIO_PASSED": "✅ Scenario Test {scenario}: PASSATO (Nessuna ripetizione consecutiva trovata).",
-        "TEST_SCENARIO_ASSERT_FAILED": "❌ Scenario Test {scenario}: FALLITO Assertion ({failures}/{total} test consecutivi identici trovati).",
-        "TEST_SCENARIO_GENERATION_FAILED": "❌ Scenario Test {scenario}: FALLITA la generazione dei dati necessari.",
-        "TEST_SCENARIO_ASSERT_FAILED_EXPECTED": "⚠️ Scenario Test {scenario}: FALLITO Assertion ({failures}/{total} test consecutivi identici trovati - ATTESO a causa del fallback).",
-        "TEST_SCENARIO_3_PASSED_WITH_FALLBACK": "ℹ️ Scenario Test 3: PASSATO nonostante il fallback fosse attivo (ripetizioni non trovate).",
-        "TEST_ALL_SCENARIOS_COMPLETE": "--- Tutti gli scenari di test completati. Controllare i risultati sopra. ---",
-        "STAT_TEST_GENERATING_SEQUENCE": "⚙️ Generazione sequenza test per k={k_mc}/{k_oe} (N={num_tests})...",
-        "STAT_TEST_GENERATION_FAILED": "❌ Fallita generazione sequenza test per k={k_mc}/{k_oe}.",
-        "STAT_TEST_CALCULATING_SIMILARITY": "⚙️ Calcolo similarità per k={k_mc}/{k_oe} (max dist={max_dist})...",
-        "STAT_TEST_ANALYSIS_COMPLETE": "✅ Analisi similarità completata per k={k_mc}/{k_oe}.",
-        "STAT_TEST_STARTING": "Avvio analisi statistica similarità per {num_k} valori di k (N={num_tests} test per k)...",
-        "STAT_TEST_RUNNING_FOR_K": "--- Analisi per k = {k} ---",
-        "STAT_TEST_RESULTS_FOR_K": "Risultati Medie Jaccard per k={k}: {results}",
-        "STAT_TEST_FAILED_FOR_K": "❌ Analisi fallita per k = {k}.",
-        "STAT_TEST_ALL_COMPLETE": "--- Analisi statistica di similarità completata. ---",
+        "STAT_TEST_GENERATING_SEQUENCE": "⚙️ Generazione sequenza test per k={k_mc}/{k_oe} (N={num_tests})...", # Usato internamente, silenziato
+        "STAT_TEST_GENERATION_FAILED": "❌ Fallita generazione sequenza test per k={k_mc}/{k_oe}.", # Errore critico
+        "STAT_TEST_CALCULATING_SIMILARITY": "⚙️ Calcolo similarità per k={k_mc}/{k_oe} (max dist={max_dist})...", # Usato internamente, silenziato
+        "STAT_TEST_ANALYSIS_COMPLETE": "✅ Analisi similarità completata per k={k_mc}/{k_oe}.", # Usato internamente, silenziato
+        "STAT_TEST_STARTING": "Avvio analisi statistica similarità per {num_k} valori di k (N={num_tests} test per k)...", # Vecchio test
+        "STAT_TEST_RUNNING_FOR_K": "--- Analisi per k = {k} ---", # Vecchio test
+        "STAT_TEST_RESULTS_FOR_K": "Risultati Medie Jaccard per k={k}: {results}", # Vecchio test
+        "STAT_TEST_FAILED_FOR_K": "❌ Analisi fallita per k = {k}.", # Vecchio test
+        "STAT_TEST_ALL_COMPLETE": "--- Analisi statistica di similarità completata. ---", # Vecchio test
+        "MC_TEST_STARTING": "Avvio simulazione Monte Carlo ({num_runs} run, {num_k} valori di k, {num_tests} test/k)...",
+        "MC_TEST_RUN_PROGRESS": "Progresso Monte Carlo: Run {current_run}/{total_runs}...",
+        "MC_TEST_FAILED_FOR_K_IN_RUN": "⚠️ Fallita analisi per k={k} nella run {run}.",
+        "MC_TEST_CALCULATING_FINAL_AVERAGES": "⚙️ Calcolo medie finali Monte Carlo...", # Usato internamente, silenziato
+        "MC_TEST_FINAL_RESULTS_FOR_K": "Risultati Finali Medie Jaccard per k={k}: {results}", # Usato internamente, silenziato
+        "MC_TEST_ALL_COMPLETE": "--- Simulazione Monte Carlo completata. ---",
         "STAT_TEST_EXCEL_CREATED": "✅ File Excel con risultati statistici '{filename}' creato.",
         "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Errore durante il salvataggio del file Excel '{filename}': {error}",
         "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ Nessun dato dettagliato raccolto per creare il file Excel.",
@@ -315,7 +314,7 @@ For the application to work correctly, the Excel file must adhere to the followi
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERROR WeasyPrint: Missing dependencies (GTK+/Pango/Cairo?). Details: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERROR during PDF generation with WeasyPrint: {error}",
 
-        # New keys for test.py (Statistical Tests)
+        # Keys for test.py (Statistical Tests and Monte Carlo)
         "TEST_FILE_NOT_FOUND": "ERROR: Test file '{filename}' not found. Please run the 'generate_test_excel.py' script first.",
         "TEST_LOADING_DATA": "Loading data from test file '{filename}'...",
         "TEST_NO_QUESTIONS_FOUND": "ERROR: No valid questions found in test file '{filename}'.",
@@ -323,22 +322,21 @@ For the application to work correctly, the Excel file must adhere to the followi
         "TEST_LOAD_ERROR": "Unexpected ERROR while loading test file '{filename}': {error}",
         "TEST_ABORTED_LOAD_FAILED": "❌ Test aborted: failed to load test data.",
         "TEST_WRONG_QUESTION_COUNT": "ERROR Test Data: Found {mc} MC and {oe} OE questions, expected {expected} of each.",
-        "TEST_RUNNING_SCENARIO": "--- Running Test Scenario {scenario} (MC={mc}, OE={oe}, N={n_sim}) ---",
-        "TEST_SCENARIO_PASSED": "✅ Test Scenario {scenario}: PASSED (No consecutive repetitions found).",
-        "TEST_SCENARIO_ASSERT_FAILED": "❌ Test Scenario {scenario}: Assertion FAILED ({failures}/{total} identical consecutive tests found).",
-        "TEST_SCENARIO_GENERATION_FAILED": "❌ Test Scenario {scenario}: Failed to generate necessary data.",
-        "TEST_SCENARIO_ASSERT_FAILED_EXPECTED": "⚠️ Test Scenario {scenario}: Assertion FAILED ({failures}/{total} identical consecutive tests found - EXPECTED due to fallback).",
-        "TEST_SCENARIO_3_PASSED_WITH_FALLBACK": "ℹ️ Test Scenario 3: PASSED although fallback was active (no repetitions found).",
-        "TEST_ALL_SCENARIOS_COMPLETE": "--- All test scenarios completed. Check results above. ---",
-        "STAT_TEST_GENERATING_SEQUENCE": "⚙️ Generating test sequence for k={k_mc}/{k_oe} (N={num_tests})...",
-        "STAT_TEST_GENERATION_FAILED": "❌ Failed test sequence generation for k={k_mc}/{k_oe}.",
-        "STAT_TEST_CALCULATING_SIMILARITY": "⚙️ Calculating similarity for k={k_mc}/{k_oe} (max dist={max_dist})...",
-        "STAT_TEST_ANALYSIS_COMPLETE": "✅ Similarity analysis completed for k={k_mc}/{k_oe}.",
-        "STAT_TEST_STARTING": "Starting statistical similarity analysis for {num_k} k-values (N={num_tests} tests per k)...",
-        "STAT_TEST_RUNNING_FOR_K": "--- Analysis for k = {k} ---",
-        "STAT_TEST_RESULTS_FOR_K": "Average Jaccard Results for k={k}: {results}",
-        "STAT_TEST_FAILED_FOR_K": "❌ Analysis failed for k = {k}.",
-        "STAT_TEST_ALL_COMPLETE": "--- Statistical similarity analysis completed. ---",
+        "STAT_TEST_GENERATING_SEQUENCE": "⚙️ Generating test sequence for k={k_mc}/{k_oe} (N={num_tests})...", # Internal, silenced
+        "STAT_TEST_GENERATION_FAILED": "❌ Failed test sequence generation for k={k_mc}/{k_oe}.", # Critical error
+        "STAT_TEST_CALCULATING_SIMILARITY": "⚙️ Calculating similarity for k={k_mc}/{k_oe} (max dist={max_dist})...", # Internal, silenced
+        "STAT_TEST_ANALYSIS_COMPLETE": "✅ Similarity analysis completed for k={k_mc}/{k_oe}.", # Internal, silenced
+        "STAT_TEST_STARTING": "Starting statistical similarity analysis for {num_k} k-values (N={num_tests} tests per k)...", # Old test
+        "STAT_TEST_RUNNING_FOR_K": "--- Analysis for k = {k} ---", # Old test
+        "STAT_TEST_RESULTS_FOR_K": "Average Jaccard Results for k={k}: {results}", # Old test
+        "STAT_TEST_FAILED_FOR_K": "❌ Analysis failed for k = {k}.", # Old test
+        "STAT_TEST_ALL_COMPLETE": "--- Statistical similarity analysis completed. ---", # Old test
+        "MC_TEST_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k-values, {num_tests} tests/k)...",
+        "MC_TEST_RUN_PROGRESS": "Monte Carlo Progress: Run {current_run}/{total_runs}...",
+        "MC_TEST_FAILED_FOR_K_IN_RUN": "⚠️ Analysis failed for k={k} in run {run}.",
+        "MC_TEST_CALCULATING_FINAL_AVERAGES": "⚙️ Calculating final Monte Carlo averages...", # Internal, silenced
+        "MC_TEST_FINAL_RESULTS_FOR_K": "Final Average Jaccard Results for k={k}: {results}", # Internal, silenced
+        "MC_TEST_ALL_COMPLETE": "--- Monte Carlo simulation completed. ---",
         "STAT_TEST_EXCEL_CREATED": "✅ Excel file with statistical results '{filename}' created.",
         "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Error saving Excel file '{filename}': {error}",
         "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ No detailed data collected to create the Excel file.",
@@ -360,3 +358,4 @@ def format_text(lang_code, key, **kwargs):
      try: return raw_text.format(**kwargs)
      except KeyError as e: print(f"WARN: Missing placeholder key {e} in text key '{key}' for lang '{lang_code}' when formatting with {kwargs}"); return raw_text
      except Exception as e: print(f"WARN: Generic formatting error for text key '{key}' with args {kwargs} for lang '{lang_code}': {e}"); return raw_text
+
