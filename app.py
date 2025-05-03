@@ -18,7 +18,7 @@ from file_handler import load_questions_from_excel
 from core_logic import generate_all_tests_data
 # Importa la NUOVA funzione di test statistico dal file test.py
 # Import the NEW statistical test function from test.py
-from test import run_statistical_similarity_test # <<< MODIFICATO QUI / CHANGED HERE
+from test import run_all_tests 
 # Assicurati che pdf_generator esporti WEASYPRINT_AVAILABLE
 # Ensure pdf_generator exports WEASYPRINT_AVAILABLE
 from pdf_generator import generate_pdf_data, WEASYPRINT_AVAILABLE
