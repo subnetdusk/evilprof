@@ -70,5 +70,3 @@ For the application to work correctly, the Excel file must adhere to the followi
 
 ---
 
-*(README generato basandosi sulla versione refactored con i18n)*
-
