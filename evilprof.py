@@ -20,7 +20,7 @@ except ImportError:
     WEASYPRINT_AVAILABLE = False
 
 # ================================================================
-# Testo Introduttivo e Istruzioni (Invariato da v1.1)
+# Testo Introduttivo e Istruzioni
 # ================================================================
 INTRO_TEXT = """
 EvilProf è un'applicazione web realizzata con Streamlit che permette di generare rapidamente file PDF contenenti verifiche personalizzate.
@@ -31,10 +31,10 @@ Le caratteristiche principali includono:
 - **Tipi di Domande:** Supporta sia domande a scelta multipla (con risposte casualizzate) sia domande a risposta aperta.
 - **Personalizzazione:** Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
 - **Randomizzazione Avanzata:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
-- **Diversità Migliorata (con Fallback):** L'applicazione tenta di utilizzare una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)** basata sull'algoritmo A di Efraimidis e Spirakis (descritto in [questo paper](https://ethz.ch/content/dam/ethz/special-interest/baug/ivt/ivt-dam/vpl/reports/1101-1200/ab1141.pdf)) per selezionare le domande. Questo metodo:
-    - Tenta di **garantire** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*. Ciò richiede che il numero totale di domande di un certo tipo (`n`) sia strettamente maggiore del numero di domande di quel tipo richieste per verifica (`k`), ovvero `n > k`.
-    - Tenta di **favorire statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k` (e se non ci sono errori più gravi o fallback attivi).
-    - **Fallback:** Se non ci sono abbastanza domande uniche disponibili per garantire la diversità rispetto al test precedente (`n <= k`), l'applicazione **passerà a un campionamento casuale semplice** da *tutte* le domande disponibili per quel tipo, **perdendo la garanzia di diversità** tra test adiacenti. Verrà mostrato un avviso rosso prominente in tal caso.
+- **Diversità Migliorata (con Fallback):** L'applicazione tenta di utilizzare una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)**  per selezionare le domande. Questo metodo:
+    - Tenta di **garantire** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*. Ciò richiede che il numero totale di domande di un certo tipo (`n`) sia strettamente maggiore del doppio del numero di domande di quel tipo richieste per verifica (`k`), ovvero `n >= 2k`. 
+    - Tenta di **favorire statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k`.
+    - **Fallback:** Se non ci sono abbastanza domande uniche disponibili per garantire la diversità rispetto al test precedente (`n <= 2k`), l'applicazione **passerà a un campionamento casuale semplice** da *tutte* le domande disponibili per quel tipo, **perdendo la garanzia di diversità** tra test adiacenti. Verrà mostrato un avviso rosso prominente in tal caso.
 - **Output PDF:** Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
 
 **Struttura del File Excel**
@@ -50,10 +50,29 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
 """
 
 # ================================================================
-# Funzione Helper WRSwOR (Invariata)
+# Funzione Helper WRSwOR
 # ================================================================
 def weighted_random_sample_without_replacement(population, weights, k):
-    """Seleziona k elementi unici da population senza reinserimento, rispettando i pesi."""
+    """
+        Seleziona k elementi unici da una popolazione data, senza reinserimento,
+        utilizzando un campionamento ponderato. La probabilità di selezione di ciascun
+        elemento è influenzata dal peso corrispondente. Implementa l'algoritmo
+        basato su chiavi esponenziali (variante di Efraimidis & Spirakis) per efficienza.
+    
+        Args:
+            population: Lista o set di elementi da cui campionare.
+            weights: Lista di pesi numerici corrispondenti agli elementi in population.
+                     Pesi maggiori aumentano la probabilità di selezione.
+            k: Numero di elementi unici da selezionare.
+    
+        Returns:
+            Lista di k elementi campionati dalla popolazione.
+    
+        Raises:
+            ValueError: Se k è maggiore della dimensione della popolazione, se le lunghezze
+                        di population e weights non coincidono, o se non ci sono elementi
+                        con peso positivo sufficienti per campionare k elementi.
+    """
     if k > len(population): raise ValueError(f"k ({k}) > len(population) ({len(population)})")
     if len(population) != len(weights): raise ValueError("len(population) != len(weights)")
     if k == 0: return []
@@ -75,7 +94,7 @@ def weighted_random_sample_without_replacement(population, weights, k):
     return [filtered_population[i] for i in sampled_indices]
 
 # ================================================================
-# Funzione Caricamento Domande da Excel (Invariata da v1.1)
+# Funzione Caricamento Domande da Excel 
 # ================================================================
 def load_questions_from_excel(uploaded_file, status_placeholder=None):
     """Carica domande/risposte da file Excel (UploadedFile). Usa status_placeholder."""
@@ -105,16 +124,17 @@ def load_questions_from_excel(uploaded_file, status_placeholder=None):
     except Exception as e: st.error(f"Errore imprevisto lettura Excel: {e}"); return None
 
 # ================================================================
-# Funzione Generazione PDF (MODIFICATA - Margine inferiore ridotto per .question)
+# Funzione Generazione PDF 
 # ================================================================
 def generate_pdf_data(tests_data_lists, timestamp, subject_name, status_placeholder=None):
-    """Genera i dati binari del PDF, senza spazio extra per domande aperte e con margine ridotto."""
+    """Genera i dati binari del PDF."""
     if not WEASYPRINT_AVAILABLE: st.error("ERROR: WeasyPrint library not found/functional."); return None
     def update_status(message):
         if status_placeholder: status_placeholder.info(message)
         else: st.info(message)
     update_status("⚙️ Starting PDF generation...")
-    # CSS Aggiornato: Ridotto margin-bottom per .question
+    
+    # CSS 
     css_style = """
          @page {
              size: A4;
@@ -171,15 +191,6 @@ st.set_page_config(page_title="EvilProf 😈", layout="wide", initial_sidebar_st
 st.title("EvilProf 😈")
 st.subheader("Generatore di verifiche casuali e diverse, da Excel a PDF")
 
-# --- Banner SVG ---
-banner_path = "banner.svg"
-try:
-    with open(banner_path, "r", encoding="utf-8") as f: svg_content = f.read()
-    st.markdown(svg_content, unsafe_allow_html=True)
-except FileNotFoundError: pass
-except Exception as e: st.error(f"Errore caricamento banner '{banner_path}': {e}")
-# --- Fine Banner ---
-
 if not WEASYPRINT_AVAILABLE:
     st.error("🚨 **Attenzione:** WeasyPrint non disponibile/funzionante. Generazione PDF bloccata.")
     st.stop()
@@ -226,7 +237,7 @@ except Exception as e: st.sidebar.warning(f"Impossibile leggere codice sorgente:
 
 st.subheader("Output Generazione")
 
-# --- Logica Test di Validazione (Invariata da v1.1) ---
+# --- Logica Test di Validazione ---
 if validation_button:
     st.markdown("---")
     st.subheader("Risultato Test di Validazione")
@@ -299,7 +310,7 @@ if validation_button:
     #st.markdown("---")
 
 # ================================================================
-# Logica Principale di Generazione (PDF Effettivo - MODIFICATA)
+# Logica Principale di Generazione 
 # ================================================================
 if generate_button:
     status_placeholder = st.empty()
@@ -428,4 +439,4 @@ if generate_button:
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("EvilProf v1.1 - [GitHub](https://github.com/subnetdusk/evilprof) - Streamlit")
+st.markdown("EvilProf v1.1 - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit")
