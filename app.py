@@ -7,6 +7,7 @@ import os
 import pandas as pd
 
 # Importa funzioni e costanti dai moduli separati
+# Import functions and constants from separate modules
 from localization import TEXTS, get_text, format_text
 from config import (
     DEFAULT_NUM_TESTS, DEFAULT_NUM_MC, DEFAULT_NUM_OPEN, EXAMPLE_IMAGE_PATH
