@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# app.py (Corretto SetPageConfig Error + Toggle Button + i18n backend)
 
 import streamlit as st
 from datetime import datetime
@@ -15,7 +16,7 @@ from core_logic import generate_all_tests_data, run_validation_test
 from pdf_generator import generate_pdf_data, WEASYPRINT_AVAILABLE
 
 # ================================================================
-# Stato Sessione e Selezione Lingua con Toggle Button
+# Stato Sessione e Logica Lingua (PRIMA di st.set_page_config)
 # ================================================================
 
 # Default lingua se non presente in sessione
@@ -28,7 +29,25 @@ def toggle_language():
     # Forza un rerun immediato per vedere il cambio di lingua
     st.experimental_rerun()
 
-# --- Toggle Button in alto a destra ---
+# Helper locali per testo (definiti prima, usati dopo set_page_config)
+def T(key):
+    return get_text(st.session_state.lang, key)
+def F(key, **kwargs):
+    kwargs = kwargs or {}
+    return format_text(st.session_state.lang, key, **kwargs)
+
+# ================================================================
+# Setup Pagina (DEVE ESSERE IL PRIMO COMANDO STREAMLIT)
+# ================================================================
+st.set_page_config(
+    page_title=T("PAGE_TITLE"),  # Ora T() è definito e può essere usato
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# ================================================================
+# Toggle Button Lingua (ORA DOPO set_page_config)
+# ================================================================
 _, col_btn = st.columns([0.85, 0.15]) # Ajusta ratio se necessario
 with col_btn:
     if st.session_state.lang == 'it':
@@ -41,18 +60,10 @@ with col_btn:
     )
 # --- Fine Toggle Button ---
 
-# Helper locali per testo
-def T(key):
-    return get_text(st.session_state.lang, key)
-def F(key, **kwargs):
-    # Aggiunto fallback nel caso kwargs sia None
-    kwargs = kwargs or {}
-    return format_text(st.session_state.lang, key, **kwargs)
 
 # ================================================================
-# Setup Pagina e Titolo
+# Titolo e Contenuto Principale (ORA DOPO set_page_config)
 # ================================================================
-st.set_page_config(page_title=T("PAGE_TITLE"), layout="wide", initial_sidebar_state="expanded")
 st.title(T("MAIN_TITLE"))
 st.subheader(T("SUBHEADER"))
 
@@ -105,7 +116,7 @@ except Exception as e:
 st.subheader(T("OUTPUT_AREA_HEADER"))
 output_placeholder = st.container()
 
-# Funzione display_message (leggermente migliorata)
+# Funzione display_message (invariata)
 def display_message(message_type, key_or_raw_text, **kwargs):
     kwargs = kwargs or {}
     formatted_text = F(key_or_raw_text, **kwargs)
@@ -116,14 +127,13 @@ def display_message(message_type, key_or_raw_text, **kwargs):
                  print(f"WARN: Could not format raw text '{key_or_raw_text}' with args {kwargs}")
                  formatted_text = key_or_raw_text
         else: formatted_text = key_or_raw_text
-
     if message_type == "info": output_placeholder.info(formatted_text)
     elif message_type == "warning": output_placeholder.warning(formatted_text)
     elif message_type == "error": output_placeholder.error(formatted_text)
     elif message_type == "success": output_placeholder.success(formatted_text)
     else: output_placeholder.write(f"[{message_type.upper()}] {formatted_text}")
 
-# --- Callback per funzioni backend ---
+# Callback per funzioni backend (invariato)
 def status_callback(msg_type, msg_key, **kwargs):
      display_message(msg_type, msg_key, **kwargs)
 
@@ -151,7 +161,6 @@ if validation_button:
              else:
                  for msg_type, msg_key, msg_kwargs in validation_results:
                      display_message(msg_type, msg_key, **msg_kwargs)
-            # Rimosso st.markdown("---") da DENTRO l'if validation_button
 
 # ================================================================
 # Logica Principale per Generazione PDF
@@ -197,7 +206,6 @@ if generate_button:
          display_message("info", "GENERATION_MESSAGES_HEADER")
          for msg_type, msg_key, msg_kwargs in generation_messages:
              display_message(msg_type, msg_key, **msg_kwargs)
-         # Rimosso st.markdown("---") da DENTRO l'if generate_button
 
     if all_tests_data is None:
         if not any(m[0]=='error' for m in generation_messages):
@@ -231,9 +239,6 @@ if generate_button:
 # ================================================================
 # Messaggio Iniziale
 # ================================================================
-# Mostra questo solo se nessun bottone è stato premuto (stato iniziale)
-# Verifica lo stato dei bottoni tramite il loro valore di ritorno (False se non premuti)
-# O meglio ancora, usa una variabile di stato per tracciare se un'azione è stata eseguita
 if 'action_performed' not in st.session_state:
      st.session_state.action_performed = False
 if validation_button:
@@ -245,7 +250,7 @@ if not st.session_state.action_performed:
     output_placeholder.info(T("INITIAL_INFO"))
 
 # ================================================================
-# Footer (CORRETTO: Indentazione a livello 0)
+# Footer
 # ================================================================
-st.markdown("---") # <<< Riga 185 (circa) ORA CORRETTA (indentazione 0)
-st.markdown(T("FOOTER_TEXT")) # <<< ANCHE QUESTA CORRETTA (indentazione 0)
+st.markdown("---")
+st.markdown(T("FOOTER_TEXT"))
