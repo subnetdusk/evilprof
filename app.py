@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# app.py 
+# app.py (Importa run_all_tests da test.py)
 
 import streamlit as st
 from datetime import datetime
@@ -17,7 +17,7 @@ from file_handler import load_questions_from_excel
 from core_logic import generate_all_tests_data
 # Importa la NUOVA funzione di test dal file test.py
 # Import the NEW test function from test.py
-from test import run_all_tests # <<< MODIFICATO QUI / CHANGED HERE
+from test import run_all_tests # <<< Importa da test.py / Imports from test.py
 # Assicurati che pdf_generator esporti WEASYPRINT_AVAILABLE
 # Ensure pdf_generator exports WEASYPRINT_AVAILABLE
 from pdf_generator import generate_pdf_data, WEASYPRINT_AVAILABLE
@@ -259,11 +259,13 @@ if generate_button:
         if not any(m[0]=='error' for m in generation_messages):
              display_message("error", "PDF_GENERATION_ERROR")
 
+
 # ================================================================
 # Messaggio Iniziale / Initial Message
 # ================================================================
 # Traccia azione per nascondere messaggio / Track action to hide message
 if 'action_performed' not in st.session_state: st.session_state.action_performed = False
+# Imposta a True quando i bottoni principali vengono premuti / Set to True when main buttons are pressed
 if validation_button: st.session_state.action_performed = True
 if generate_button: st.session_state.action_performed = True
 # Mostra solo se nessuna azione / Show only if no action
