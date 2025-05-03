@@ -134,7 +134,7 @@ if validation_button:
     with st.spinner(T("VALIDATION_LOGIC_SPINNER")):
         # Chiama la funzione da test.py, che ora ritorna (risultati, nome_file_excel_o_None)
         # Call function from test.py, which now returns (results, excel_filename_or_None)
-        test_results, excel_file_created = run_statistical_similarity_test(status_callback)
+        test_results, excel_file_created = run_all_tests(status_callback)
 
     # Mostra i risultati sommari / Display summary results
     display_message("info", "VALIDATION_RESULTS_HEADER")
