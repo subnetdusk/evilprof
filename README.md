@@ -4,7 +4,7 @@
 
 Generatore di Verifiche Casuali da Excel a PDF - Versione Streamlit
 
-Questa versione è hostata su [evilprof.streamlit.app](https://evilprof.streamlit.app/)
+Questa app è hostata su [evilprof.streamlit.app](https://evilprof.streamlit.app/)
 
 ## Descrizione
 
@@ -66,7 +66,7 @@ Per eseguire EvilProf sul tuo computer:
 
 <a name="english-version"></a>
 ## English Version
-This English Version is hosted at [evilprof-english.streamlit.app](https://evilprof-english.streamlit.app/)
+This app is hosted at [evilprof.streamlit.app](https://evilprof.streamlit.app/)
 
 ### Description
 
