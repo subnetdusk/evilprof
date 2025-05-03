@@ -1,4 +1,5 @@
-# localization.py 
+# localization.py (Include chiavi per test.py e nuovo help)
+
 TEXTS = {
     "it": {
         # Titoli e Intestazioni
@@ -28,7 +29,7 @@ TEXTS = {
         "NUM_OPEN_HELP": "Quante domande a risposta aperta includere in ogni verifica.",
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
         "VALIDATE_BUTTON_LABEL": "🧪 Esegui Test Funzionale", # Modificato nome
-        "VALIDATE_BUTTON_HELP_NEW": "Esegue 3 scenari di test interni usando 'test_questions.xlsx' per verificare la logica di diversità.", # Nuovo help
+        "VALIDATE_BUTTON_HELP_NEW": "Esegue scenari di test interni usando 'test_questions.xlsx' per verificare la logica di diversità e similarità.", # Nuovo help aggiornato
         "DOWNLOAD_SOURCE_BUTTON_LABEL": "📥 Scarica Codice App (app.py)",
         "DOWNLOAD_SOURCE_CAPTION": "Scarica gli altri file (.py) separatamente.",
         "SOURCE_UNAVAILABLE_WARNING": "Download codice sorgente non disponibile: {error}",
@@ -121,17 +122,18 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
         "CL_FINAL_LOW_DIVERSITY_MC": "⚠️ Diversità Limitata (MC): Il totale domande ({total_mc}) è meno del triplo ({three_k}) delle richieste ({k}). Consigliato aumentare il pool di domande MC.",
         "CL_FINAL_LOW_DIVERSITY_OE": "⚠️ Diversità Limitata (Aperte): Il totale domande ({total_open}) è meno del triplo ({three_k}) delle richieste ({k}). Consigliato aumentare il pool di domande Aperte.",
         "CL_FINAL_OK_DIVERSITY": "✅ Dati per {num_tests} verifiche preparati (con diversità garantita).",
-        "CL_VALIDATION_TEST_FAILED_GENERATION": "❌ Validazione Fallita: Errore durante la generazione dei dati di test.", # Usato da test.py
-        "CL_VALIDATION_TEST_WRONG_Q_COUNT": "❌ Validazione Fallita: Test {test_num} ha {actual_count} domande invece di {expected_count}.", # Usato da test.py
-        "CL_VALIDATION_TESTS_NO_INTERSECTION": "✅ Validazione Passata: Test 1 e Test 2 non hanno domande in comune.", # Usato da test.py
-        "CL_VALIDATION_TESTS_INTERSECTION_WARNING": "⚠️ Validazione: Test 1 e Test 2 hanno domande in comune (indici: {intersection}). Atteso se il fallback è stato attivato durante il test.", # Usato da test.py
-        "CL_VALIDATION_TESTS_WRONG_COUNT": "❌ Validazione Fallita: Numero di test generati ({actual_count}) non corretto ({expected_count}).", # Usato da test.py
-        "CL_VALIDATION_COMPLETE_SUCCESS": "🎉 Test funzionale completato con successo (o con warning attesi).", # Usato da test.py
-        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Errore imprevisto durante l'esecuzione del test funzionale: {error}", # Usato da test.py
-        "CL_VALIDATION_INSUFFICIENT_MC_ERROR": "Test Fallito: Non abbastanza MC ({total}) per test ({k}).", # Usato da test.py
-        "CL_VALIDATION_INSUFFICIENT_OE_ERROR": "Test Fallito: Non abbastanza Aperte ({total}) per test ({k}).", # Usato da test.py
-        "CL_VALIDATION_INSUFFICIENT_MC_WARN": "Test Warning: Servono >{k} MC totali per testare efficacemente la non-ripetizione.", # Usato da test.py
-        "CL_VALIDATION_INSUFFICIENT_OE_WARN": "Test Warning: Servono >{k} Aperte totali per testare efficacemente la non-ripetizione.", # Usato da test.py
+        # Chiavi usate specificamente dal vecchio test.py (run_all_tests) - Potrebbero essere rimosse se non più usato
+        "CL_VALIDATION_TEST_FAILED_GENERATION": "❌ Validazione Fallita: Errore durante la generazione dei dati di test.",
+        "CL_VALIDATION_TEST_WRONG_Q_COUNT": "❌ Validazione Fallita: Test {test_num} ha {actual_count} domande invece di {expected_count}.",
+        "CL_VALIDATION_TESTS_NO_INTERSECTION": "✅ Validazione Passata: Test 1 e Test 2 non hanno domande in comune.",
+        "CL_VALIDATION_TESTS_INTERSECTION_WARNING": "⚠️ Validazione: Test 1 e Test 2 hanno domande in comune (indici: {intersection}). Atteso se il fallback è stato attivato durante il test.",
+        "CL_VALIDATION_TESTS_WRONG_COUNT": "❌ Validazione Fallita: Numero di test generati ({actual_count}) non corretto ({expected_count}).",
+        "CL_VALIDATION_COMPLETE_SUCCESS": "🎉 Test funzionale completato con successo (o con warning attesi).",
+        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Errore imprevisto durante l'esecuzione del test funzionale: {error}",
+        "CL_VALIDATION_INSUFFICIENT_MC_ERROR": "Test Fallito: Non abbastanza MC ({total}) per test ({k}).",
+        "CL_VALIDATION_INSUFFICIENT_OE_ERROR": "Test Fallito: Non abbastanza Aperte ({total}) per test ({k}).",
+        "CL_VALIDATION_INSUFFICIENT_MC_WARN": "Test Warning: Servono >{k} MC totali per testare efficacemente la non-ripetizione.",
+        "CL_VALIDATION_INSUFFICIENT_OE_WARN": "Test Warning: Servono >{k} Aperte totali per testare efficacemente la non-ripetizione.",
 
         # Messaggi specifici del pdf_generator
         "PG_PDF_GENERATION_START": "⚙️ Inizio generazione PDF...",
@@ -142,21 +144,31 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERRORE WeasyPrint: Dipendenze mancanti (GTK+/Pango/Cairo?). Dettagli: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERRORE durante la generazione PDF con WeasyPrint: {error}",
 
-        # Nuove chiavi per test.py
-        "TEST_FILE_NOT_FOUND": "ERRORE: File di test '{filename}' non trovato. Esegui prima lo script 'generate_test_excel.py'.", # Aggiornato messaggio
+        # Nuove chiavi per test.py (Test Statistici)
+        "TEST_FILE_NOT_FOUND": "ERRORE: File di test '{filename}' non trovato. Esegui prima lo script 'generate_test_excel.py'.",
         "TEST_LOADING_DATA": "Caricamento dati dal file di test '{filename}'...",
         "TEST_NO_QUESTIONS_FOUND": "ERRORE: Nessuna domanda valida trovata nel file di test '{filename}'.",
         "TEST_LOAD_SUCCESS": "Dati di test caricati: {count} domande ({mc} MC, {oe} OE).",
         "TEST_LOAD_ERROR": "ERRORE imprevisto durante il caricamento del file di test '{filename}': {error}",
         "TEST_ABORTED_LOAD_FAILED": "❌ Test annullato: impossibile caricare i dati di test.",
         "TEST_WRONG_QUESTION_COUNT": "ERRORE Dati Test: Trovate {mc} MC e {oe} OE domande, attese {expected} per tipo.",
-        "TEST_RUNNING_SCENARIO": "--- Esecuzione Scenario Test {scenario} (MC={mc}, OE={oe}, N={n_sim}) ---",
-        "TEST_SCENARIO_PASSED": "✅ Scenario Test {scenario}: PASSATO (Nessuna ripetizione consecutiva trovata).",
-        "TEST_SCENARIO_ASSERT_FAILED": "❌ Scenario Test {scenario}: FALLITO Assertion ({failures}/{total} test consecutivi identici trovati).",
-        "TEST_SCENARIO_GENERATION_FAILED": "❌ Scenario Test {scenario}: FALLITA la generazione dei dati necessari.",
-        "TEST_SCENARIO_ASSERT_FAILED_EXPECTED": "⚠️ Scenario Test {scenario}: FALLITO Assertion ({failures}/{total} test consecutivi identici trovati - ATTESO a causa del fallback).",
-        "TEST_SCENARIO_3_PASSED_WITH_FALLBACK": "ℹ️ Scenario Test 3: PASSATO nonostante il fallback fosse attivo (ripetizioni non trovate).",
-        "TEST_ALL_SCENARIOS_COMPLETE": "--- Tutti gli scenari di test completati. Controllare i risultati sopra. ---",
+        "TEST_RUNNING_SCENARIO": "--- Esecuzione Scenario Test {scenario} (MC={mc}, OE={oe}, N={n_sim}) ---", # Usato dal vecchio test
+        "TEST_SCENARIO_PASSED": "✅ Scenario Test {scenario}: PASSATO (Nessuna ripetizione consecutiva trovata).", # Usato dal vecchio test
+        "TEST_SCENARIO_ASSERT_FAILED": "❌ Scenario Test {scenario}: FALLITO Assertion ({failures}/{total} test consecutivi identici trovati).", # Usato dal vecchio test
+        "TEST_SCENARIO_GENERATION_FAILED": "❌ Scenario Test {scenario}: FALLITA la generazione dei dati necessari.", # Usato dal vecchio test
+        "TEST_SCENARIO_ASSERT_FAILED_EXPECTED": "⚠️ Scenario Test {scenario}: FALLITO Assertion ({failures}/{total} test consecutivi identici trovati - ATTESO a causa del fallback).", # Usato dal vecchio test
+        "TEST_SCENARIO_3_PASSED_WITH_FALLBACK": "ℹ️ Scenario Test 3: PASSATO nonostante il fallback fosse attivo (ripetizioni non trovate).", # Usato dal vecchio test
+        "TEST_ALL_SCENARIOS_COMPLETE": "--- Tutti gli scenari di test completati. Controllare i risultati sopra. ---", # Usato dal vecchio test
+        "STAT_TEST_GENERATING_SEQUENCE": "⚙️ Generazione sequenza test per k={k_mc}/{k_oe} (N={num_tests})...",
+        "STAT_TEST_GENERATION_FAILED": "❌ Fallita generazione sequenza test per k={k_mc}/{k_oe}.",
+        "STAT_TEST_CALCULATING_SIMILARITY": "⚙️ Calcolo similarità per k={k_mc}/{k_oe} (max dist={max_dist})...",
+        "STAT_TEST_ANALYSIS_COMPLETE": "✅ Analisi similarità completata per k={k_mc}/{k_oe}.",
+        "STAT_TEST_STARTING": "Avvio analisi statistica similarità per {num_k} valori di k (N={num_tests} test per k)...",
+        "STAT_TEST_RUNNING_FOR_K": "--- Analisi per k = {k} ---",
+        "STAT_TEST_RESULTS_FOR_K": "Risultati Medie Jaccard per k={k}: {results}",
+        "STAT_TEST_FAILED_FOR_K": "❌ Analisi fallita per k = {k}.",
+        "STAT_TEST_ALL_COMPLETE": "--- Analisi statistica di similarità completata. ---",
+
     },
     "en": {
         # Titles & Headers
@@ -186,7 +198,7 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
         "NUM_OPEN_HELP": "How many open-ended questions to include in each test.",
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
         "VALIDATE_BUTTON_LABEL": "🧪 Run Functional Test", # Changed name
-        "VALIDATE_BUTTON_HELP_NEW": "Runs 3 internal test scenarios using 'test_questions.xlsx' to verify diversity logic.", # New help
+        "VALIDATE_BUTTON_HELP_NEW": "Runs internal test scenarios using 'test_questions.xlsx' to verify diversity and similarity logic.", # New updated help
         "DOWNLOAD_SOURCE_BUTTON_LABEL": "📥 Download App Code (app.py)",
         "DOWNLOAD_SOURCE_CAPTION": "Download other (.py) files separately.",
         "SOURCE_UNAVAILABLE_WARNING": "Source code download unavailable: {error}",
@@ -199,13 +211,10 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
         "VALIDATION_START": "Starting Functional Test...", # Changed
         "GENERATION_START": "Starting Test Generation...",
         "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel file first.",
-        # "VALIDATION_UPLOAD_FIRST": "⚠️ Upload an Excel file to run the test.", # No longer needed
         "LOADING_DATA_SPINNER": "⏳ Loading and validating questions...",
         "LOADING_DATA_VALIDATION_SPINNER": "⏳ Loading data for test...", # Changed
         "LOAD_ERROR": "Error loading data: {error_msg}",
-        # "LOAD_ERROR_VALIDATION": "Error loading data for test: {error_msg}", # Replaced
         "NO_VALID_QUESTIONS_ERROR": "No valid questions found in the file. Cannot proceed.",
-        # "NO_VALID_QUESTIONS_VALIDATION": "No valid questions found for the test.", # Replaced
         "TOTAL_QUESTIONS_ZERO_ERROR": "ERROR: The total number of questions per test (Multiple Choice + Open) must be greater than zero.",
         "PARAMS_OK_INFO": "Parameters OK. Generating {num_tests} tests for '{subject_name}' with {num_mc_q} MC + {num_open_q} Open = {num_q_per_test} Questions/Test.",
         "MC_ZERO_ERROR": "ERROR: Requested {num_mc_q} multiple-choice questions, but 0 found in the file.",
@@ -282,17 +291,18 @@ For the application to work correctly, the Excel file must adhere to the followi
         "CL_FINAL_LOW_DIVERSITY_MC": "⚠️ Limited Diversity (MC): Total questions ({total_mc}) is less than triple ({three_k}) the requested per test ({k}). Consider increasing the MC question pool.",
         "CL_FINAL_LOW_DIVERSITY_OE": "⚠️ Limited Diversity (Open): Total questions ({total_open}) is less than triple ({three_k}) the requested per test ({k}). Consider increasing the Open question pool.",
         "CL_FINAL_OK_DIVERSITY": "✅ Data for {num_tests} tests prepared (with diversity guaranteed).",
-        "CL_VALIDATION_TEST_FAILED_GENERATION": "❌ Validation Failed: Error during test data generation.", # Used by test.py
-        "CL_VALIDATION_TEST_WRONG_Q_COUNT": "❌ Validation Failed: Test {test_num} has {actual_count} questions instead of {expected_count}.", # Used by test.py
-        "CL_VALIDATION_TESTS_NO_INTERSECTION": "✅ Validation Passed: Test 1 and Test 2 have no questions in common.", # Used by test.py
-        "CL_VALIDATION_TESTS_INTERSECTION_WARNING": "⚠️ Validation: Test 1 and Test 2 have questions in common (indices: {intersection}). Expected if fallback was active during the test.", # Used by test.py
-        "CL_VALIDATION_TESTS_WRONG_COUNT": "❌ Validation Failed: Incorrect number of tests generated ({actual_count} vs {expected_count}).", # Used by test.py
-        "CL_VALIDATION_COMPLETE_SUCCESS": "🎉 Functional test completed successfully (or with expected warnings).", # Used by test.py
-        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during functional test execution: {error}", # Used by test.py
-        "CL_VALIDATION_INSUFFICIENT_MC_ERROR": "Test Failed: Not enough MC ({total}) for test ({k}).", # Used by test.py
-        "CL_VALIDATION_INSUFFICIENT_OE_ERROR": "Test Failed: Not enough Open ({total}) for test ({k}).", # Used by test.py
-        "CL_VALIDATION_INSUFFICIENT_MC_WARN": "Test Warning: Need >{k} total MC questions to effectively test non-repetition.", # Used by test.py
-        "CL_VALIDATION_INSUFFICIENT_OE_WARN": "Test Warning: Need >{k} total Open questions to effectively test non-repetition.", # Used by test.py
+        # Keys used specifically by the old test.py (run_all_tests) - Could be removed if no longer used
+        "CL_VALIDATION_TEST_FAILED_GENERATION": "❌ Validation Failed: Error during test data generation.",
+        "CL_VALIDATION_TEST_WRONG_Q_COUNT": "❌ Validation Failed: Test {test_num} has {actual_count} questions instead of {expected_count}.",
+        "CL_VALIDATION_TESTS_NO_INTERSECTION": "✅ Validation Passed: Test 1 and Test 2 have no questions in common.",
+        "CL_VALIDATION_TESTS_INTERSECTION_WARNING": "⚠️ Validation: Test 1 and Test 2 have questions in common (indices: {intersection}). Expected if fallback was active during the test.",
+        "CL_VALIDATION_TESTS_WRONG_COUNT": "❌ Validation Failed: Incorrect number of tests generated ({actual_count}) vs {expected_count}).",
+        "CL_VALIDATION_COMPLETE_SUCCESS": "🎉 Functional test completed successfully (or with expected warnings).",
+        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during functional test execution: {error}",
+        "CL_VALIDATION_INSUFFICIENT_MC_ERROR": "Test Failed: Not enough MC ({total}) for test ({k}).",
+        "CL_VALIDATION_INSUFFICIENT_OE_ERROR": "Test Failed: Not enough Open ({total}) for test ({k}).",
+        "CL_VALIDATION_INSUFFICIENT_MC_WARN": "Test Warning: Need >{k} total MC questions to effectively test non-repetition.",
+        "CL_VALIDATION_INSUFFICIENT_OE_WARN": "Test Warning: Need >{k} total Open questions to effectively test non-repetition.",
 
         # pdf_generator messages
         "PG_PDF_GENERATION_START": "⚙️ Starting PDF generation...",
@@ -303,7 +313,7 @@ For the application to work correctly, the Excel file must adhere to the followi
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERROR WeasyPrint: Missing dependencies (GTK+/Pango/Cairo?). Details: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERROR during PDF generation with WeasyPrint: {error}",
 
-        # New keys for test.py
+        # New keys for test.py (Statistical Tests)
         "TEST_FILE_NOT_FOUND": "ERROR: Test file '{filename}' not found. Please run the 'generate_test_excel.py' script first.", # Updated message
         "TEST_LOADING_DATA": "Loading data from test file '{filename}'...",
         "TEST_NO_QUESTIONS_FOUND": "ERROR: No valid questions found in test file '{filename}'.",
@@ -311,13 +321,22 @@ For the application to work correctly, the Excel file must adhere to the followi
         "TEST_LOAD_ERROR": "Unexpected ERROR while loading test file '{filename}': {error}",
         "TEST_ABORTED_LOAD_FAILED": "❌ Test aborted: failed to load test data.",
         "TEST_WRONG_QUESTION_COUNT": "ERROR Test Data: Found {mc} MC and {oe} OE questions, expected {expected} of each.",
-        "TEST_RUNNING_SCENARIO": "--- Running Test Scenario {scenario} (MC={mc}, OE={oe}, N={n_sim}) ---",
-        "TEST_SCENARIO_PASSED": "✅ Test Scenario {scenario}: PASSED (No consecutive repetitions found).",
-        "TEST_SCENARIO_ASSERT_FAILED": "❌ Test Scenario {scenario}: Assertion FAILED ({failures}/{total} identical consecutive tests found).",
-        "TEST_SCENARIO_GENERATION_FAILED": "❌ Test Scenario {scenario}: Failed to generate necessary data.",
-        "TEST_SCENARIO_ASSERT_FAILED_EXPECTED": "⚠️ Test Scenario {scenario}: Assertion FAILED ({failures}/{total} identical consecutive tests found - EXPECTED due to fallback).",
-        "TEST_SCENARIO_3_PASSED_WITH_FALLBACK": "ℹ️ Test Scenario 3: PASSED although fallback was active (no repetitions found).",
-        "TEST_ALL_SCENARIOS_COMPLETE": "--- All test scenarios completed. Check results above. ---",
+        "TEST_RUNNING_SCENARIO": "--- Running Test Scenario {scenario} (MC={mc}, OE={oe}, N={n_sim}) ---", # Used by old test
+        "TEST_SCENARIO_PASSED": "✅ Test Scenario {scenario}: PASSED (No consecutive repetitions found).", # Used by old test
+        "TEST_SCENARIO_ASSERT_FAILED": "❌ Test Scenario {scenario}: Assertion FAILED ({failures}/{total} identical consecutive tests found).", # Used by old test
+        "TEST_SCENARIO_GENERATION_FAILED": "❌ Test Scenario {scenario}: Failed to generate necessary data.", # Used by old test
+        "TEST_SCENARIO_ASSERT_FAILED_EXPECTED": "⚠️ Test Scenario {scenario}: Assertion FAILED ({failures}/{total} identical consecutive tests found - EXPECTED due to fallback).", # Used by old test
+        "TEST_SCENARIO_3_PASSED_WITH_FALLBACK": "ℹ️ Test Scenario 3: PASSED although fallback was active (no repetitions found).", # Used by old test
+        "TEST_ALL_SCENARIOS_COMPLETE": "--- All test scenarios completed. Check results above. ---", # Used by old test
+        "STAT_TEST_GENERATING_SEQUENCE": "⚙️ Generating test sequence for k={k_mc}/{k_oe} (N={num_tests})...",
+        "STAT_TEST_GENERATION_FAILED": "❌ Failed test sequence generation for k={k_mc}/{k_oe}.",
+        "STAT_TEST_CALCULATING_SIMILARITY": "⚙️ Calculating similarity for k={k_mc}/{k_oe} (max dist={max_dist})...",
+        "STAT_TEST_ANALYSIS_COMPLETE": "✅ Similarity analysis completed for k={k_mc}/{k_oe}.",
+        "STAT_TEST_STARTING": "Starting statistical similarity analysis for {num_k} k-values (N={num_tests} tests per k)...",
+        "STAT_TEST_RUNNING_FOR_K": "--- Analysis for k = {k} ---",
+        "STAT_TEST_RESULTS_FOR_K": "Average Jaccard Results for k={k}: {results}",
+        "STAT_TEST_FAILED_FOR_K": "❌ Analysis failed for k = {k}.",
+        "STAT_TEST_ALL_COMPLETE": "--- Statistical similarity analysis completed. ---",
     }
 }
 
@@ -334,4 +353,3 @@ def format_text(lang_code, key, **kwargs):
      try: return raw_text.format(**kwargs)
      except KeyError as e: print(f"WARN: Missing placeholder key {e} in text key '{key}' for lang '{lang_code}' when formatting with {kwargs}"); return raw_text
      except Exception as e: print(f"WARN: Generic formatting error for text key '{key}' with args {kwargs} for lang '{lang_code}': {e}"); return raw_text
-
