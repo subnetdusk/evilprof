@@ -1,26 +1,19 @@
 # -*- coding: utf-8 -*-
-# app.py 
+# app.py (Cleaned Indentation)
 
 import streamlit as st
 from datetime import datetime
 import os
-import pandas as pd # Import pandas per leggere l'Excel per il download / Import pandas to read Excel for download
+import pandas as pd
 
 # Importa funzioni e costanti dai moduli separati
-# Import functions and constants from separate modules
 from localization import TEXTS, get_text, format_text
 from config import (
     DEFAULT_NUM_TESTS, DEFAULT_NUM_MC, DEFAULT_NUM_OPEN, EXAMPLE_IMAGE_PATH
 )
 from file_handler import load_questions_from_excel
-# Importa la funzione di generazione principale da core_logic
-# Import the main generation function from core_logic
 from core_logic import generate_all_tests_data
-# Importa la NUOVA funzione di test statistico dal file test.py
-# Import the NEW statistical test function from test.py
-from test import run_all_tests 
-# Assicurati che pdf_generator esporti WEASYPRINT_AVAILABLE
-# Ensure pdf_generator exports WEASYPRINT_AVAILABLE
+from test import run_all_tests
 from pdf_generator import generate_pdf_data, WEASYPRINT_AVAILABLE
 
 # ================================================================
@@ -77,8 +70,6 @@ generate_button = st.sidebar.button(T("GENERATE_BUTTON_LABEL"), type="primary", 
 
 st.sidebar.markdown("---")
 st.sidebar.subheader(T("VALIDATION_TEST_HEADER"))
-# Bottone test funzionale (chiama run_statistical_similarity_test)
-# Functional test button (calls run_statistical_similarity_test)
 validation_button = st.sidebar.button(
     T("VALIDATE_BUTTON_LABEL"),
     help=T("VALIDATE_BUTTON_HELP_NEW"),
@@ -102,118 +93,128 @@ except Exception as e: st.sidebar.warning(F("SOURCE_UNAVAILABLE_WARNING", error=
 # ================================================================
 st.subheader(T("OUTPUT_AREA_HEADER"))
 output_placeholder = st.container()
+transient_status_placeholder = st.empty()
 
-def display_message(message_type, key_or_raw_text, **kwargs):
-    # ... (funzione display_message invariata) ...
+def display_critical_message(message_type, key_or_raw_text, **kwargs):
+    """Mostra solo warning/error nel transient_status_placeholder."""
+    if message_type not in ["warning", "error"]: return
     kwargs = kwargs or {}
     formatted_text = F(key_or_raw_text, **kwargs)
     if formatted_text == key_or_raw_text or formatted_text.startswith("MISSING_TEXT["):
         if kwargs:
             try: formatted_text = key_or_raw_text.format(**kwargs)
-            except (KeyError, IndexError, ValueError, TypeError):
-                 print(f"WARN: Could not format raw text '{key_or_raw_text}' with args {kwargs}")
-                 formatted_text = key_or_raw_text
+            except (KeyError, IndexError, ValueError, TypeError): formatted_text = key_or_raw_text
         else: formatted_text = key_or_raw_text
-    if message_type == "info": output_placeholder.info(formatted_text)
-    elif message_type == "warning": output_placeholder.warning(formatted_text)
-    elif message_type == "error": output_placeholder.error(formatted_text)
-    elif message_type == "success": output_placeholder.success(formatted_text)
-    else: output_placeholder.write(f"[{message_type.upper()}] {formatted_text}")
+    if message_type == "warning": transient_status_placeholder.warning(formatted_text)
+    elif message_type == "error": transient_status_placeholder.error(formatted_text)
 
 def status_callback(msg_type, msg_key, **kwargs):
-     display_message(msg_type, msg_key, **kwargs)
+     display_critical_message(msg_type, msg_key, **kwargs)
 
 # ================================================================
 # Logica per il Test Funzionale / Logic for Functional Test
 # ================================================================
 if validation_button:
     output_placeholder.empty()
-    display_message("info", "VALIDATION_START")
-
-    excel_file_created = None # Variabile per memorizzare il nome del file Excel / Variable to store Excel filename
+    transient_status_placeholder.empty()
+    excel_file_created = None
+    test_results = []
     with st.spinner(T("VALIDATION_LOGIC_SPINNER")):
-        # Chiama la funzione da test.py, che ora ritorna (risultati, nome_file_excel_o_None)
-        # Call function from test.py, which now returns (results, excel_filename_or_None)
-        test_results, excel_file_created = run_all_tests(status_callback)
-
-    # Mostra i risultati sommari / Display summary results
-    display_message("info", "VALIDATION_RESULTS_HEADER")
-    if not test_results:
-        display_message("warning", "VALIDATION_NO_MESSAGES")
-    else:
-        for msg_type, msg_key, msg_kwargs in test_results:
-            display_message(msg_type, msg_key, **msg_kwargs)
-
-    # Aggiungi bottone download se l'Excel è stato creato / Add download button if Excel was created
-    if excel_file_created and os.path.exists(excel_file_created):
         try:
-            with open(excel_file_created, "rb") as fp:
-                excel_bytes = fp.read()
-            output_placeholder.download_button(
-                label=T("DOWNLOAD_STATS_EXCEL_LABEL"), # <-- Nuova chiave / New key
-                data=excel_bytes,
-                file_name=excel_file_created,
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                help=T("DOWNLOAD_STATS_EXCEL_HELP") # <-- Nuova chiave / New key
-            )
+            test_results, excel_file_created = run_all_tests(status_callback)
         except Exception as e:
-            output_placeholder.error(f"Errore lettura file Excel per download: {e}")
+             with output_placeholder:
+                 st.error(F("CL_VALIDATION_UNEXPECTED_ERROR", error=str(e)))
+    with output_placeholder:
+        st.markdown(f"**{T('VALIDATION_RESULTS_HEADER')}**")
+        if not test_results and not excel_file_created:
+             st.warning(T("VALIDATION_NO_MESSAGES"))
+        elif test_results:
+            for msg_type, msg_key, msg_kwargs in test_results:
+                final_formatted_text = F(msg_key, **msg_kwargs)
+                if msg_type == "info": st.info(final_formatted_text)
+                elif msg_type == "warning": st.warning(final_formatted_text)
+                elif msg_type == "error": st.error(final_formatted_text)
+                elif msg_type == "success": st.success(final_formatted_text)
+                else: st.write(f"[{msg_type.upper()}] {final_formatted_text}")
+        if excel_file_created and os.path.exists(excel_file_created):
+            try:
+                with open(excel_file_created, "rb") as fp: excel_bytes = fp.read()
+                st.download_button(
+                    label=T("DOWNLOAD_STATS_EXCEL_LABEL"), data=excel_bytes,
+                    file_name=excel_file_created,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    help=T("DOWNLOAD_STATS_EXCEL_HELP")
+                )
+            except Exception as e: st.error(f"Errore lettura file Excel per download: {e}")
 
 # ================================================================
 # Logica Principale per Generazione PDF / Main Logic for PDF Generation
 # ================================================================
 if generate_button:
-    # ... (questa sezione rimane uguale) ...
     output_placeholder.empty()
-    display_message("info", "GENERATION_START")
-    if uploaded_file is None: display_message("warning", "UPLOAD_FIRST_WARNING"); st.stop()
-    with st.spinner(T("LOADING_DATA_SPINNER")):
-         all_questions, error_key_load = load_questions_from_excel(uploaded_file, status_callback)
-    if error_key_load: display_message("error", error_key_load); st.stop()
-    if not all_questions: display_message("error", "NO_VALID_QUESTIONS_ERROR"); st.stop()
-    num_q_per_test = num_mc_q + num_open_q
-    if num_q_per_test <= 0: display_message("error", "TOTAL_QUESTIONS_ZERO_ERROR"); st.stop()
-    mc_questions = [q for q in all_questions if q['type'] == 'multiple_choice']
-    open_questions = [q for q in all_questions if q['type'] == 'open_ended']
-    total_mc = len(mc_questions); total_open = len(open_questions)
-    error_found_main = False
-    if total_mc == 0 and num_mc_q > 0: display_message("error", "MC_ZERO_ERROR", num_mc_q=num_mc_q); error_found_main = True
-    if total_open == 0 and num_open_q > 0: display_message("error", "OPEN_ZERO_ERROR", num_open_q=num_open_q); error_found_main = True
-    if total_mc < num_mc_q: display_message("error", "MC_INSUFFICIENT_ERROR", total_mc=total_mc, num_mc_q=num_mc_q); error_found_main = True
-    if total_open < num_open_q: display_message("error", "OPEN_INSUFFICIENT_ERROR", total_open=total_open, num_open_q=num_open_q); error_found_main = True
-    if error_found_main: display_message("error", "CORRECT_ERRORS_ERROR"); st.stop()
-    display_message("info", "PARAMS_OK_INFO", num_tests=num_tests, subject_name=subject_name, num_mc_q=num_mc_q, num_open_q=num_open_q, num_q_per_test=num_q_per_test)
-    with st.spinner(F("GENERATING_DATA_SPINNER", num_tests=num_tests)):
-        all_tests_data, generation_messages = generate_all_tests_data(
-            mc_questions, open_questions, num_tests, num_mc_q, num_open_q, status_callback
-        )
-    if generation_messages:
-         display_message("info", "GENERATION_MESSAGES_HEADER")
-         for msg_type, msg_key, msg_kwargs in generation_messages:
-             display_message(msg_type, msg_key, **msg_kwargs)
-    if all_tests_data is None:
-        if not any(m[0]=='error' for m in generation_messages): display_message("error", "GENERATION_FAILED_ERROR")
-        st.stop()
-    pdf_strings = {
-        "title_format": T("PDF_TEST_TITLE"), "name_label": T("PDF_NAME_LABEL"),
-        "date_label": T("PDF_DATE_LABEL"), "class_label": T("PDF_CLASS_LABEL"),
-        "missing_question": T("PDF_MISSING_QUESTION"), "no_options": T("PDF_NO_OPTIONS")
-    }
-    display_message("info", "DATA_READY_PDF_INFO", num_tests=len(all_tests_data))
-    with st.spinner(T("PDF_CREATION_SPINNER")):
-         pdf_data = generate_pdf_data(all_tests_data, subject_name, status_callback, pdf_strings)
-    if pdf_data:
-        display_message("success", "PDF_SUCCESS")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        safe_filename_subject = "".join(c if c.isalnum() else "_" for c in subject_name)
-        pdf_filename = f"Tests_{safe_filename_subject}_{num_tests}x{num_q_per_test}q_{timestamp}.pdf"
-        st.download_button(
-            label=T("PDF_DOWNLOAD_BUTTON_LABEL"), data=pdf_data, file_name=pdf_filename, mime="application/pdf",
-            help=F("PDF_DOWNLOAD_BUTTON_HELP", pdf_filename=pdf_filename),
-            use_container_width=True, type="primary"
-        )
-    else:
-        if not any(m[0]=='error' for m in generation_messages): display_message("error", "PDF_GENERATION_ERROR")
+    transient_status_placeholder.empty()
+    if uploaded_file is None:
+        output_placeholder.warning(T("UPLOAD_FIRST_WARNING")); st.stop()
+    pdf_generated = False
+    pdf_data = None
+    final_generation_messages = []
+    with st.spinner(T("GENERATING_DATA_SPINNER")):
+        try:
+            all_questions, error_key_load = load_questions_from_excel(uploaded_file, status_callback)
+            if error_key_load: raise ValueError(error_key_load)
+            if not all_questions: raise ValueError("NO_VALID_QUESTIONS_ERROR")
+            num_q_per_test = num_mc_q + num_open_q
+            if num_q_per_test <= 0: raise ValueError("TOTAL_QUESTIONS_ZERO_ERROR")
+            mc_questions = [q for q in all_questions if q['type'] == 'multiple_choice']
+            open_questions = [q for q in all_questions if q['type'] == 'open_ended']
+            total_mc = len(mc_questions); total_open = len(open_questions)
+            error_found_main = False
+            if total_mc == 0 and num_mc_q > 0: final_generation_messages.append(("error", "MC_ZERO_ERROR", {"num_mc_q": num_mc_q})); error_found_main = True
+            if total_open == 0 and num_open_q > 0: final_generation_messages.append(("error", "OPEN_ZERO_ERROR", {"num_open_q": num_open_q})); error_found_main = True
+            if total_mc < num_mc_q: final_generation_messages.append(("error", "MC_INSUFFICIENT_ERROR", {"total_mc": total_mc, "num_mc_q": num_mc_q})); error_found_main = True
+            if total_open < num_open_q: final_generation_messages.append(("error", "OPEN_INSUFFICIENT_ERROR", {"total_open": total_open, "num_open_q": num_open_q})); error_found_main = True
+            if error_found_main: raise ValueError("Input parameter errors found.")
+            all_tests_data, generation_messages = generate_all_tests_data(
+                mc_questions, open_questions, num_tests, num_mc_q, num_open_q, status_callback
+            )
+            final_generation_messages.extend(generation_messages)
+            if all_tests_data is None: raise ValueError("Test data generation failed.")
+            pdf_strings = {
+                "title_format": T("PDF_TEST_TITLE"), "name_label": T("PDF_NAME_LABEL"),
+                "date_label": T("PDF_DATE_LABEL"), "class_label": T("PDF_CLASS_LABEL"),
+                "missing_question": T("PDF_MISSING_QUESTION"), "no_options": T("PDF_NO_OPTIONS")
+            }
+            pdf_data = generate_pdf_data(all_tests_data, subject_name, status_callback, pdf_strings)
+            if pdf_data is None: raise ValueError("PDF generation failed.")
+            pdf_generated = True
+        except ValueError as ve:
+            msg_key = str(ve)
+            if msg_key in TEXTS['it'] or msg_key in TEXTS['en']:
+                 if not any(m[1] == msg_key for m in final_generation_messages): final_generation_messages.append(("error", msg_key, {}))
+            else:
+                 if not any(m[1] == "GENERATION_FAILED_ERROR" for m in final_generation_messages): final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": msg_key}))
+        except Exception as e:
+             if not any(m[1] == "GENERATION_FAILED_ERROR" for m in final_generation_messages): final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": str(e)}))
+    with output_placeholder:
+        if final_generation_messages:
+             st.markdown(f"**{T('GENERATION_MESSAGES_HEADER')}**")
+             for msg_type, msg_key, msg_kwargs in final_generation_messages:
+                 final_formatted_text = F(msg_key, **msg_kwargs)
+                 if msg_type == "warning": st.warning(final_formatted_text)
+                 elif msg_type == "error": st.error(final_formatted_text)
+        if pdf_generated and pdf_data:
+            st.success(T("PDF_SUCCESS"))
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            safe_filename_subject = "".join(c if c.isalnum() else "_" for c in subject_name)
+            pdf_filename = f"Tests_{safe_filename_subject}_{num_tests}x{num_q_per_test}q_{timestamp}.pdf"
+            st.download_button(
+                label=T("PDF_DOWNLOAD_BUTTON_LABEL"), data=pdf_data, file_name=pdf_filename, mime="application/pdf",
+                help=F("PDF_DOWNLOAD_BUTTON_HELP", pdf_filename=pdf_filename),
+                use_container_width=True, type="primary"
+            )
+        elif not final_generation_messages:
+             st.error(T("PDF_GENERATION_ERROR"))
 
 # ================================================================
 # Messaggio Iniziale / Initial Message
@@ -221,7 +222,8 @@ if generate_button:
 if 'action_performed' not in st.session_state: st.session_state.action_performed = False
 if validation_button: st.session_state.action_performed = True
 if generate_button: st.session_state.action_performed = True
-if not st.session_state.action_performed: output_placeholder.info(T("INITIAL_INFO"))
+if not st.session_state.action_performed:
+    output_placeholder.info(T("INITIAL_INFO"))
 
 # ================================================================
 # Footer
