@@ -17,7 +17,7 @@ Le caratteristiche principali includono:
 -   **Input da Excel:** Carica facilmente le tue domande da un file `.xlsx` o `.xls`.
 -   **Tipi di Domande:** Supporta sia domande a scelta multipla (con risposte casualizzate) sia domande a risposta aperta.
 -   **Personalizzazione:** Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
--   **Randomizzazione Avanzata:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
+-   **Randomizzazione:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
 -   **Diversità Migliorata (con Fallback):** L'applicazione tenta di utilizzare una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)** per selezionare le domande. Questo metodo:
     -   Tenta di **garantire** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*. Ciò richiede che il numero totale di domande di un certo tipo (`n`) sia strettamente maggiore del doppio del numero di domande di quel tipo richieste per verifica (`k`), ovvero `n >= 2k`.
     -   Tenta di **favorire statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k`.
@@ -42,17 +42,17 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
 
 EvilProf is a web application built with Streamlit that allows you to quickly generate PDF files containing custom tests.
 
-This app is [hosted here in Streamlit](https://evilprof.streamlit.app/)
+This app is [hosted here in streamlit.app](https://evilprof.streamlit.app/)
 
 Main features include:
 
 -   **Input from Excel:** Easily load your questions from an `.xlsx` or `.xls` file.
 -   **Question Types:** Supports both multiple-choice questions (with randomized answers) and open-ended questions.
 -   **Customization:** Choose the number of tests to generate, the number of questions per type (multiple/open) for each test, and the subject name.
--   **Advanced Randomization:** Questions in each test are randomly selected from the pool available in the Excel file. The order of multiple-choice answers is randomized.
+-   **Randomization:** Questions in each test are randomly selected from the pool available in the Excel file. The order of multiple-choice answers is randomized.
 -   **Improved Diversity (with Fallback):** The application attempts to use a **Weighted Random Sampling without Replacement (WRSwOR)** technique to select questions. This method:
-    -   Attempts to **ensure** that questions used in one test are not repeated in the *immediately following* test. This requires the total number of questions of a certain type (`n`) to be strictly greater than twice the number of questions of that type required per test (`k`), i.e., `n >= 2k`.
-    -   Attempts to **statistically favor** the selection of questions that haven't been used for the longest time. For good long-term rotation and diversity, it is **strongly recommended** to have a total number of questions at least **three times greater** (`n >= 3k`) than those required per single test. The app will show a warning if `n < 3k`.
+    -   **Ensures** that questions used in one test are not repeated in the *immediately following* test. This requires the total number of questions of a certain type (`n`) to be strictly greater than twice the number of questions of that type required per test (`k`), i.e., `n >= 2k`.
+    -   **Statistically favors** the selection of questions that haven't been used for the longest time. For good long-term rotation and diversity, it is **strongly recommended** to have a total number of questions at least **three times greater** (`n >= 3k`) than those required per single test. The app will show a warning if `n < 3k`.
     -   **Fallback:** If there are not enough unique questions available to ensure diversity compared to the previous test (`n <= 2k`), the application **will switch to simple random sampling** from *all* available questions of that type, **losing the guarantee of diversity** between adjacent tests. A prominent red warning will be displayed in this case.
 -   **PDF Output:** Generates a single PDF file ready for printing, with each test starting on a new page and a header for name, date, and class.
 
