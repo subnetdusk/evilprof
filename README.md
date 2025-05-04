@@ -1,4 +1,4 @@
-# EvilProf 😈 - Versione 1.1
+# EvilProf 😈 - Versione a Blocchi
 
 Generatore di verifiche PDF selezionando un numero esatto di domande per blocco da Excel/CSV (Streamlit App)
 
@@ -21,7 +21,6 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
     * Se invece **`n <= 2k`** (cioè se chiedi la metà o più delle domande disponibili nel blocco), l'applicazione userà un **Campionamento Casuale Semplice** per selezionare le `k` domande da quel blocco, perdendo la garanzia di diversità tra test consecutivi per quel blocco.
     * Il fallback a campionamento casuale semplice può attivarsi anche per WRSwOR se le richieste (`k`) sono alte rispetto ai candidati *nuovi* disponibili in quel momento.
 * **Output PDF:** Genera un singolo file PDF con le verifiche composte secondo le tue selezioni.
-* **Test Funzionale:** Include un test statistico (Monte Carlo) che analizza la similarità (tramite coefficiente di Dice) tra verifiche generate consecutivamente al variare del numero di domande richieste per blocco (`k`), usando un file di test dedicato (`test_set_4_by_12_questions.xlsx`). I risultati vengono salvati in un file Excel.
 
 **Preparazione File Excel/CSV:**
 
@@ -33,11 +32,31 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
 4.  Ripeti i passaggi 2 e 3 per tutti i blocchi desiderati.
 5.  **Non inserire nomi di argomento o intestazioni di colonna.**
 
-*Vedi immagini di esempio qui sotto (assicurati che i file `.jpg` siano nella root del repository):*
+*Vedi immagine di esempio qui sotto:*
 
 ![Esempio Struttura Excel](excel_example.jpg)
 
 ---
+
+### Analisi Statistica (Test Funzionale)
+
+L'applicazione include un test funzionale accessibile dalla sidebar. Questo test:
+
+1.  Utilizza un file predefinito (`test_set_4_by_12_questions.xlsx`) contenente 4 blocchi di 12 domande ciascuno (2 blocchi MC, 2 blocchi OE).
+2.  Esegue una simulazione Monte Carlo (30 ripetizioni) per diversi scenari di selezione.
+3.  Per ogni scenario, varia il numero di domande richieste per blocco (`k`) da 1 a 11.
+4.  Genera sequenze di 15 test consecutivi per ogni `k` e ogni run Monte Carlo, applicando la logica di campionamento appropriata (WRSwOR se `12 > 2k`, Simple Random se `12 <= 2k`).
+5.  Calcola la similarità media tra test consecutivi a diverse "distanze" (da 1 a 14 test di distanza) usando il **coefficiente di Sørensen-Dice**. Un valore di 0 indica nessuna domanda in comune, 1 indica test identici.
+6.  Salva i risultati medi finali (per ogni `k` e distanza) in un file Excel (`similarity_analysis_unified_dice_mc_15t.xlsx`), che può essere scaricato dall'interfaccia.
+
+**Interpretazione dei Risultati:**
+
+* **Distanza 1:** L'indice di Dice dovrebbe essere molto vicino a 0 per `k` da 1 a 5 (dove si usa WRSwOR e `n > 2k`), indicando alta diversità tra test immediatamente consecutivi. Per `k` da 6 a 11 (dove si usa Simple Random), ci si aspetta un Dice > 0 già a distanza 1.
+* **Distanze Maggiori (d > 1):** L'effetto "memoria" di WRSwOR si attenua rapidamente. La similarità media tende a convergere verso il valore atteso per un campionamento casuale semplice (che dipende da `k`). Ad esempio, per `k=6` (12 domande totali su 48), la similarità converge a circa 0.25.
+* **Soglia `k=6` (n=2k):** Questo test permette di osservare il comportamento al limite e oltre la soglia dove il campionamento passa da WRSwOR a Simple Random.
+* **Consiglio Pratico:** Per massimizzare la diversità tra test consecutivi usando WRSwOR, è consigliabile scegliere un numero di domande per blocco (`k`) significativamente inferiore alla metà delle domande disponibili (`n/2`), idealmente `k <= n/3` (es. `k=4` per un blocco da 12).
+
+*Vedi immagine di esempio dell'analisi qui sotto:*
 
 ![Esempio Analisi Similarità](analisi.jpg)
 
@@ -45,9 +64,9 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
 
 ## 🇬🇧 English Version <a name="english-version"></a>
 
-EvilProf generates PDF tests by selecting an exact number of questions from blocks defined in your Excel or CSV file.
+EvilProf (Block Version) generates PDF tests by selecting an exact number of questions from blocks defined in your Excel or CSV file.
 
-**Features as of 1.1:**
+**Features:**
 
 * **Input from Excel/CSV:** Load an `.xlsx`, `.xls`, or `.csv` file.
 * **Block Structure:** Organize questions into blocks separated by **a completely empty row**.
@@ -58,7 +77,6 @@ EvilProf generates PDF tests by selecting an exact number of questions from bloc
     * If **`n <= 2k`** (i.e., if you request half or more of the available questions in the block), the application will use **Simple Random Sampling** to select the `k` questions from that block, losing the diversity guarantee between consecutive tests for that block.
     * Fallback to simple random sampling may also occur for WRSwOR if requests (`k`) are high relative to the *new* available candidates at that moment.
 * **PDF Output:** Generates a single PDF file with the tests composed according to your selections.
-* **Functional Test:** Includes a statistical test (Monte Carlo) that analyzes the similarity (using Dice coefficient) between consecutively generated tests as the number of requested questions per block (`k`) varies, using a dedicated test file (`test_set_4_by_12_questions.xlsx`). Results are saved to an Excel file.
 
 **Excel/CSV File Preparation:**
 
@@ -70,15 +88,34 @@ EvilProf generates PDF tests by selecting an exact number of questions from bloc
 4.  Repeat steps 2 and 3 for all desired blocks.
 5.  **Do not include topic names or column headers.**
 
-*See example images below (ensure the `.jpg` files are in the repository root):*
+*See example image below:*
 
 ![Excel Structure Example](excel_example.jpg)
 
 ---
 
+### Statistical Analysis (Functional Test)
+
+The application includes a functional test accessible from the sidebar. This test:
+
+1.  Uses a predefined file (`test_set_4_by_12_questions.xlsx`) containing 4 blocks of 12 questions each (2 MC blocks, 2 OE blocks).
+2.  Runs a Monte Carlo simulation (30 repetitions) for different selection scenarios.
+3.  For each scenario, it varies the number of questions requested per block (`k`) from 1 to 11.
+4.  Generates sequences of 15 consecutive tests for each `k` and each Monte Carlo run, applying the appropriate sampling logic (WRSwOR if `12 > 2k`, Simple Random if `12 <= 2k`).
+5.  Calculates the average similarity between consecutive tests at different "distances" (from 1 to 14 tests apart) using the **Sørensen-Dice coefficient**. A value of 0 indicates no common questions, 1 indicates identical tests.
+6.  Saves the final average results (for each `k` and distance) to an Excel file (`similarity_analysis_unified_dice_mc_15t.xlsx`), which can be downloaded from the interface.
+
+**Interpreting the Results:**
+
+* **Distance 1:** The Dice index should be very close to 0 for `k` from 1 to 5 (where WRSwOR is used and `n > 2k`), indicating high diversity between immediately consecutive tests. For `k` from 6 to 11 (where Simple Random is used), Dice > 0 is expected even at distance 1.
+* **Greater Distances (d > 1):** The "memory" effect of WRSwOR quickly fades. The average similarity tends to converge towards the value expected for simple random sampling (which depends on `k`). For example, for `k=6` (12 total questions out of 48), the similarity converges to about 0.25.
+* **Threshold `k=6` (n=2k):** This test allows observing the behavior at and beyond the threshold where sampling switches from WRSwOR to Simple Random.
+* **Practical Advice:** To maximize diversity between consecutive tests using WRSwOR, it's advisable to choose a number of questions per block (`k`) significantly less than half the available questions (`n/2`), ideally `k <= n/3` (e.g., `k=4` for a block of 12).
+
+*See example image of the analysis below:*
+
 ![Similarity Analysis Example](analisi.jpg)
 
 ---
 
-*(README updated for the block-based version with unified sampling logic and i18n)*
-
+*(README updated for the block-based version with unified sampling logic, i18n, and statistical test description)*
