@@ -1,364 +1,300 @@
-# localization.py
+# -*- coding: utf-8 -*-
+# app.py (Gestisce input dinamici per blocco)
 
-TEXTS = {
-    "it": {
-        # Titoli e Intestazioni
-        "PAGE_TITLE": "EvilProf 😈",
-        "MAIN_TITLE": "EvilProf 😈",
-        "SUBHEADER": "Generatore di verifiche casuali e diverse, da Excel a PDF",
-        "INSTRUCTIONS_HEADER": "ℹ️ Istruzioni e Preparazione File Excel",
-        "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
-        "VALIDATION_TEST_HEADER": "Test Funzionale",
-        "SOURCE_CODE_HEADER": "Codice Sorgente",
-        "OUTPUT_AREA_HEADER": "Output e Messaggi",
-        "VALIDATION_RESULTS_HEADER": "--- Risultato Test Funzionale ---",
-        "GENERATION_MESSAGES_HEADER": "--- Messaggi dalla Generazione dei Dati ---",
-        "FOOTER_TEXT": "EvilProf v1.1 (Refactored) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
+import streamlit as st
+from datetime import datetime
+import os
+import pandas as pd
 
-        # Widget Sidebar
-        "UPLOAD_LABEL": "1. Carica File Excel (.xlsx, .xls)",
-        "UPLOAD_HELP": "Trascina o seleziona il file Excel con le domande.",
-        "SUBJECT_LABEL": "2. Nome della Materia",
-        "SUBJECT_HELP": "Apparirà nel titolo di ogni verifica.",
-        "SUBJECT_DEFAULT": "Informatica",
-        "NUM_TESTS_LABEL": "3. Numero di Verifiche da Generare",
-        "NUM_TESTS_HELP": "Quante versioni diverse della verifica creare?",
-        "NUM_MC_LABEL": "4. N. Domande Scelta Multipla / Verifica",
-        "NUM_MC_HELP": "Quante domande a scelta multipla includere in ogni verifica.",
-        "NUM_OPEN_LABEL": "5. N. Domande Aperte / Verifica",
-        "NUM_OPEN_HELP": "Quante domande a risposta aperta includere in ogni verifica.",
-        "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
-        "VALIDATE_BUTTON_LABEL": "🧪 Esegui Test Funzionale",
-        "VALIDATE_BUTTON_HELP_NEW": "Esegue scenari di test interni usando 'test_questions.xlsx' per verificare la logica di diversità e similarità.",
-        "DOWNLOAD_SOURCE_BUTTON_LABEL": "📥 Scarica Codice App (app.py)",
-        "DOWNLOAD_SOURCE_CAPTION": "Scarica gli altri file (.py) separatamente.",
-        "SOURCE_UNAVAILABLE_WARNING": "Download codice sorgente non disponibile: {error}",
+# Importa funzioni e costanti dai moduli separati
+from localization import TEXTS, get_text, format_text
+from config import (
+    # DEFAULT_NUM_TESTS, DEFAULT_NUM_MC, DEFAULT_NUM_OPEN, # Non più usati globalmente
+    DEFAULT_NUM_TESTS, EXAMPLE_IMAGE_PATH # Mantiene questi
+)
+# Importa versioni aggiornate / Import updated versions
+from file_handler import load_questions_from_excel
+from core_logic import generate_all_tests_data
+from test import run_all_tests # Assumendo che test.py sia aggiornato o non usato qui
+from pdf_generator import generate_pdf_data, WEASYPRINT_AVAILABLE
 
-        # Messaggi di Stato / Errori / Warning (in app.py)
-        "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante. La generazione del PDF è bloccata. Assicurati di averla installata e che le sue dipendenze (GTK+, Pango, Cairo) siano presenti nel sistema.",
-        "IMAGE_CAPTION": "Esempio di struttura file Excel valida",
-        "IMAGE_NOT_FOUND_WARNING": "Nota: Immagine di esempio '{image_path}' non trovata.",
-        "IMAGE_LOAD_ERROR": "Errore caricamento immagine '{image_path}': {error}",
-        "VALIDATION_START": "Avvio Test Funzionale...",
-        "GENERATION_START": "Avvio Generazione Verifiche...",
-        "UPLOAD_FIRST_WARNING": "⚠️ Per favore, carica prima un file Excel.",
-        "LOADING_DATA_SPINNER": "⏳ Caricamento e validazione domande...",
-        "LOADING_DATA_VALIDATION_SPINNER": "⏳ Caricamento dati per test...",
-        "LOAD_ERROR": "Errore caricamento dati: {error_msg}",
-        "NO_VALID_QUESTIONS_ERROR": "Nessuna domanda valida trovata nel file. Impossibile procedere.",
-        "TOTAL_QUESTIONS_ZERO_ERROR": "ERRORE: Il numero totale di domande per verifica (Multiple + Aperte) deve essere maggiore di zero.",
-        "PARAMS_OK_INFO": "Parametri OK. Generazione di {num_tests} verifiche per '{subject_name}' con {num_mc_q} MC + {num_open_q} Aperte = {num_q_per_test} Domande/Test.",
-        "MC_ZERO_ERROR": "ERRORE: Richieste {num_mc_q} domande a scelta multipla, ma 0 trovate nel file.",
-        "OPEN_ZERO_ERROR": "ERRORE: Richieste {num_open_q} domande aperte, ma 0 trovate nel file.",
-        "MC_INSUFFICIENT_ERROR": "ERRORE CRITICO: Non ci sono abbastanza domande a scelta multipla ({total_mc}) per soddisfare le {num_mc_q} richieste per verifica.",
-        "OPEN_INSUFFICIENT_ERROR": "ERRORE CRITICO: Non ci sono abbastanza domande aperte ({total_open}) per soddisfare le {num_open_q} richieste per verifica.",
-        "CORRECT_ERRORS_ERROR": "Correggi gli errori sopra prima di generare.",
-        "GENERATING_DATA_SPINNER": "⏳ Generazione dati per {num_tests} verifiche...",
-        "VALIDATION_LOGIC_SPINNER": "⏳ Esecuzione test funzionale...",
-        "GENERATION_FAILED_ERROR": "❌ Generazione dati fallita a causa di errori critici. Controllare i messaggi sopra.",
-        "DATA_READY_PDF_INFO": "Dati per {num_tests} verifiche pronti. Avvio generazione PDF...",
-        "PDF_CREATION_SPINNER": "⏳ Creazione del file PDF in corso (può richiedere tempo)...",
-        "PDF_SUCCESS": "✅ Generazione PDF completata!",
-        "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Scarica PDF Generato",
-        "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'",
-        "PDF_GENERATION_ERROR": "❌ Errore durante la creazione del file PDF. Controllare i messaggi sopra, specialmente quelli relativi a WeasyPrint.",
-        "INITIAL_INFO": "Configura i parametri nella sidebar e premi 'Genera Verifiche PDF' o 'Esegui Test Funzionale'.",
-        "VALIDATION_NO_MESSAGES": "Il test funzionale non ha prodotto messaggi specifici.",
+# ================================================================
+# Stato Sessione e Logica Lingua / Session State and Language Logic
+# ================================================================
+if 'lang' not in st.session_state: st.session_state.lang = 'it'
+# Inizializza stato per dati caricati e richieste utente
+# Initialize state for loaded data and user requests
+if 'blocks_summary' not in st.session_state: st.session_state.blocks_summary = None
+if 'all_questions' not in st.session_state: st.session_state.all_questions = None
+if 'block_requests' not in st.session_state: st.session_state.block_requests = {}
 
-        # Testo Intro (COMPLETO ITALIANO)
-        "INTRO_TEXT": """
-EvilProf è un generatore di verifiche casuali e diverse in PDF da un insieme di domande prelevate da un file Excel.
+def T(key): return get_text(st.session_state.lang, key)
+def F(key, **kwargs): kwargs = kwargs or {}; return format_text(st.session_state.lang, key, **kwargs)
 
-Con un numero sufficiente di domande, l'app **assicura l'eterogeneità tra test adiacenti e massimizza la diversità locale** tramite un campionamento ponderato delle domande (quelle estratte di recente hanno meno probabilità di essere selezionate).
+# ================================================================
+# Setup Pagina / Page Setup
+# ================================================================
+st.set_page_config(page_title=T("PAGE_TITLE"), layout="wide", initial_sidebar_state="expanded")
 
-Le caratteristiche principali includono:
+# ================================================================
+# Toggle Button Lingua / Language Toggle Button
+# ================================================================
+col_spacer, col_lang_it, col_lang_en = st.columns([0.85, 0.075, 0.075], gap="small")
+with col_lang_it:
+    button_it_type = "primary" if st.session_state.lang == 'it' else "secondary"
+    if st.button("🇮🇹", key="lang_it_btn", type=button_it_type, help="Passa a Italiano / Switch to Italian", use_container_width=True):
+        if st.session_state.lang != 'it': st.session_state.lang = 'it'; st.rerun()
+with col_lang_en:
+    button_en_type = "primary" if st.session_state.lang == 'en' else "secondary"
+    if st.button("🇬🇧", key="lang_en_btn", type=button_en_type, help="Passa a Inglese / Switch to English", use_container_width=True):
+        if st.session_state.lang != 'en': st.session_state.lang = 'en'; st.rerun()
 
-- **Input da Excel:** Carica facilmente le tue domande da un file `.xlsx` o `.xls`.
-- **Tipi di Domande:** Supporta sia domande a scelta multipla (con risposte casualizzate) sia domande a risposta aperta.
-- **Personalizzazione:** Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
-- **Randomizzazione Avanzata:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
-- **Diversità Migliorata (con Fallback):** L'applicazione tenta di utilizzare una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)** per selezionare le domande. Questo metodo:
-    - Tenta di **garantire** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*. Ciò richiede che il numero totale di domande di un certo tipo (`n`) sia strettamente maggiore del doppio del numero di domande di quel tipo richieste per verifica (`k`), ovvero `n >= 2k`.
-    - Tenta di **favorire statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k`.
-    - **Fallback:** Se non ci sono abbastanza domande uniche disponibili per garantire la diversità rispetto al test precedente (`n <= 2k`), l'applicazione **passerà a un campionamento casuale semplice** da *tutte* le domande disponibili per quel tipo, **perdendo la garanzia di diversità** tra test adiacenti. Verrà mostrato un avviso rosso prominente in tal caso.
-- **Output PDF:** Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
+# ================================================================
+# Titolo e Contenuto Principale / Title and Main Content
+# ================================================================
+st.title(T("MAIN_TITLE"))
+st.subheader(T("SUBHEADER_NEW")) # <-- Nuova chiave per sottotitolo / New key for subheader
+if not WEASYPRINT_AVAILABLE: st.error(T("WEASYPRINT_ERROR")); st.stop()
 
-**Struttura del File Excel**
+# ================================================================
+# Istruzioni (Espandibili) / Instructions (Expandable)
+# ================================================================
+with st.expander(T("INSTRUCTIONS_HEADER"), expanded=False):
+    # Usa nuovo testo istruzioni / Use new instruction text
+    st.markdown(T("INTRO_TEXT_NEW"), unsafe_allow_html=True) # <-- Nuova chiave / New key
+    try: st.image(EXAMPLE_IMAGE_PATH, caption=T("IMAGE_CAPTION"), use_container_width=True)
+    except FileNotFoundError: st.warning(F("IMAGE_NOT_FOUND_WARNING", image_path=EXAMPLE_IMAGE_PATH))
+    except Exception as e: st.error(F("IMAGE_LOAD_ERROR", image_path=EXAMPLE_IMAGE_PATH, error=e))
 
-Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la seguente struttura **senza intestazioni di colonna**:
+# ================================================================
+# Sidebar per Input Utente / Sidebar for User Input
+# ================================================================
+st.sidebar.header(T("GENERATION_PARAMS_HEADER"))
 
-- **Colonna A:** Contiene il testo completo della domanda.
-- **Colonne B, C, D, ...:** Contengono le diverse opzioni di risposta *solo* per le domande a scelta multipla. Devono esserci almeno due opzioni di risposta perché la domanda sia considerata a scelta multipla.
-- **Domande Aperte:** Per una domanda aperta, lasciare semplicemente vuote le celle nelle colonne B, C, D, ...
-- *Vedi immagine di esempio qui sotto.*
+# --- 1. Caricamento File ---
+uploaded_file = st.sidebar.file_uploader(
+    T("UPLOAD_LABEL"),
+    type=['xlsx', 'xls'],
+    help=T("UPLOAD_HELP"),
+    key="file_uploader" # Aggiunta chiave per possibile reset
+)
 
----
-""",
-        # Testi usati nel PDF
-        "PDF_TEST_TITLE": "Verifica di {subject_name}",
-        "PDF_NAME_LABEL": "Nome e Cognome:",
-        "PDF_DATE_LABEL": "Data:",
-        "PDF_CLASS_LABEL": "Classe:",
-        "PDF_MISSING_QUESTION": "DOMANDA MANCANTE",
-        "PDF_NO_OPTIONS": "<em>(Nessuna opzione di risposta fornita)</em>",
+# --- Placeholder per messaggi critici durante caricamento/analisi ---
+sidebar_status_placeholder = st.sidebar.empty()
 
-        # Messaggi specifici del file_handler (usati anche da test.py)
-        "FH_READING_EXCEL": "⏳ Lettura file Excel: {file_name}...",
-        "FH_USING_CACHE": "ℹ️ Utilizzo dati già caricati per: {file_name}",
-        "FH_ROW_WARNING_ANSWERS_ONLY": "Attenzione: Riga Excel {row_num} ha risposte ma manca la domanda e sarà ignorata.",
-        "FH_ROW_WARNING_ONE_ANSWER": "Attenzione: Domanda '{q_text}' (riga Excel {row_num}) ha solo 1 risposta ed è stata trattata come Aperta.",
-        "FH_LOAD_COMPLETE": "✅ Dati caricati: {count} domande ({mc_count} a scelta multipla, {oe_count} aperte).",
-        "FH_NO_VALID_QUESTIONS": "Errore: Nessuna domanda valida trovata nel file '{file_name}'.",
-        "FH_UNEXPECTED_ERROR": "Errore imprevisto durante la lettura del file Excel '{file_name}': {error}",
+# --- Funzione Callback per Sidebar ---
+def sidebar_status_callback(msg_type, msg_key, **kwargs):
+     """Mostra solo warning/error nella sidebar."""
+     if msg_type not in ["warning", "error"]: return
+     formatted_text = F(msg_key, **kwargs)
+     if formatted_text.startswith("MISSING_TEXT["): formatted_text = f"{msg_key}: {kwargs}" # Fallback
+     if msg_type == "warning": sidebar_status_placeholder.warning(formatted_text)
+     elif msg_type == "error": sidebar_status_placeholder.error(formatted_text)
 
-        # Messaggi specifici del core_logic (usati anche da test.py)
-        "CL_GENERATING_TEST_DATA": "⚙️ Generazione dati test {current_test}/{total_tests}...",
-        "CL_VALIDATION_RUNNING": "Validazione {num_tests_generated} test generati...",
-        "CL_FALLBACK_MC_WARNING": "[Test {test_num}] Fallback attivo per Scelta Multipla: non abbastanza domande diverse ({candidates}) rispetto al test precedente. Campiono da tutte ({total}).",
-        "CL_FALLBACK_OE_WARNING": "[Test {test_num}] Fallback attivo per Aperte: non abbastanza domande diverse ({candidates}) rispetto al test precedente. Campiono da tutte ({total}).",
-        "CL_CRITICAL_SAMPLING_ERROR_MC": "Errore Critico Test {test_num}: Impossibile campionare {k} MC da {n} totali.",
-        "CL_CRITICAL_SAMPLING_ERROR_OE": "Errore Critico Test {test_num}: Impossibile campionare {k} Aperte da {n} totali.",
-        "CL_CRITICAL_WRSWOR_ERROR_MC": "Errore Critico Test {test_num} (WRSwOR MC): {error}",
-        "CL_CRITICAL_WRSWOR_ERROR_OE": "Errore Critico Test {test_num} (WRSwOR Aperte): {error}",
-        "CL_FINAL_FALLBACK_ACTIVE": "‼️ ATTENZIONE GENERALE: Il fallback è stato attivato per almeno un test. La diversità tra test *non* è garantita per tutti. Controllare i messaggi di warning specifici per i dettagli.",
-        "CL_FINAL_LOW_DIVERSITY_MC": "⚠️ Diversità Limitata (MC): Il totale domande ({total_mc}) è meno del triplo ({three_k}) delle richieste ({k}). Consigliato aumentare il pool di domande MC.",
-        "CL_FINAL_LOW_DIVERSITY_OE": "⚠️ Diversità Limitata (Aperte): Il totale domande ({total_open}) è meno del triplo ({three_k}) delle richieste ({k}). Consigliato aumentare il pool di domande Aperte.",
-        "CL_FINAL_OK_DIVERSITY": "✅ Dati per {num_tests} verifiche preparati (con diversità garantita).",
-        "CL_VALIDATION_TEST_FAILED_GENERATION": "❌ Validazione Fallita: Errore durante la generazione dei dati di test.",
-        "CL_VALIDATION_TEST_WRONG_Q_COUNT": "❌ Validazione Fallita: Test {test_num} ha {actual_count} domande invece di {expected_count}.",
-        "CL_VALIDATION_TESTS_NO_INTERSECTION": "✅ Validazione Passata: Test 1 e Test 2 non hanno domande in comune.",
-        "CL_VALIDATION_TESTS_INTERSECTION_WARNING": "⚠️ Validazione: Test 1 e Test 2 hanno domande in comune (indici: {intersection}). Atteso se il fallback è stato attivato durante il test.",
-        "CL_VALIDATION_TESTS_WRONG_COUNT": "❌ Validazione Fallita: Numero di test generati ({actual_count}) non corretto ({expected_count}).",
-        "CL_VALIDATION_COMPLETE_SUCCESS": "🎉 Test funzionale completato con successo (o con warning attesi).",
-        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Errore imprevisto durante l'esecuzione del test funzionale: {error}",
-        "CL_VALIDATION_INSUFFICIENT_MC_ERROR": "Test Fallito: Non abbastanza MC ({total}) per test ({k}).",
-        "CL_VALIDATION_INSUFFICIENT_OE_ERROR": "Test Fallito: Non abbastanza Aperte ({total}) per test ({k}).",
-        "CL_VALIDATION_INSUFFICIENT_MC_WARN": "Test Warning: Servono >{k} MC totali per testare efficacemente la non-ripetizione.",
-        "CL_VALIDATION_INSUFFICIENT_OE_WARN": "Test Warning: Servono >{k} Aperte totali per testare efficacemente la non-ripetizione.",
+# --- 2. Logica di Caricamento e Creazione Input Dinamici ---
+if uploaded_file is not None:
+    # Tenta di caricare/analizzare solo se il file è cambiato o non ancora processato
+    # Attempt to load/analyze only if file changed or not yet processed
+    if 'processed_filename' not in st.session_state or st.session_state.processed_filename != uploaded_file.name:
+        sidebar_status_placeholder.info(F("FH_READING_EXCEL", file_name=uploaded_file.name)) # Messaggio caricamento
+        all_q, blocks_sum, error_k = load_questions_from_excel(uploaded_file, sidebar_status_callback)
+        if error_k:
+            # Errore mostrato dal callback, resetta stato
+            st.session_state.all_questions = None
+            st.session_state.blocks_summary = None
+            st.session_state.block_requests = {}
+            st.session_state.processed_filename = None
+        else:
+            # Successo: salva dati in sessione e resetta richieste precedenti
+            st.session_state.all_questions = all_q
+            st.session_state.blocks_summary = blocks_sum
+            st.session_state.block_requests = {b['block_id']: 0 for b in blocks_sum} # Inizializza richieste a 0
+            st.session_state.processed_filename = uploaded_file.name
+            sidebar_status_placeholder.success(F("FH_LOAD_COMPLETE_BLOCKS", count=len(all_q), num_blocks=len(blocks_sum))) # Messaggio successo
 
-        # Messaggi specifici del pdf_generator
-        "PG_PDF_GENERATION_START": "⚙️ Inizio generazione PDF...",
-        "PG_WEASYPRINT_UNAVAILABLE": "Libreria WeasyPrint non trovata o non funzionante. Impossibile generare PDF.",
-        "PG_HTML_BUILDING": "⚙️ Costruzione documento HTML...",
-        "PG_PDF_CONVERTING": "⚙️ Conversione HTML in PDF con WeasyPrint (potrebbe richiedere tempo)...",
-        "PG_PDF_CONVERSION_COMPLETE": "⚙️ Conversione PDF completata.",
-        "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERRORE WeasyPrint: Dipendenze mancanti (GTK+/Pango/Cairo?). Dettagli: {error}",
-        "PG_WEASYPRINT_OTHER_ERROR": "ERRORE durante la generazione PDF con WeasyPrint: {error}",
+# --- 3. Mostra Input Dinamici se Blocchi sono stati Identificati ---
+if st.session_state.blocks_summary:
+    st.sidebar.markdown("---")
+    st.sidebar.subheader(T("BLOCK_REQUESTS_HEADER")) # <-- Nuova chiave / New key
+    total_questions_requested = 0
+    # Crea input per ogni blocco trovato / Create input for each found block
+    for block_info in st.session_state.blocks_summary:
+        block_id = block_info['block_id']
+        block_type_str = block_info['type'] # Es. "Scelta Multipla" / e.g., "Multiple Choice"
+        available_count = block_info['count']
+        label = F("BLOCK_REQUEST_LABEL", block_id=block_id, type=block_type_str, n=available_count) # <-- Nuova chiave / New key
 
-        # Chiavi per test.py (Test Statistici e Monte Carlo)
-        "TEST_FILE_NOT_FOUND": "ERRORE: File di test '{filename}' non trovato. Esegui prima lo script 'generate_test_excel.py'.",
-        "TEST_LOADING_DATA": "Caricamento dati dal file di test '{filename}'...",
-        "TEST_NO_QUESTIONS_FOUND": "ERRORE: Nessuna domanda valida trovata nel file di test '{filename}'.",
-        "TEST_LOAD_SUCCESS": "Dati di test caricati: {count} domande ({mc} MC, {oe} OE).",
-        "TEST_LOAD_ERROR": "ERRORE imprevisto durante il caricamento del file di test '{filename}': {error}",
-        "TEST_ABORTED_LOAD_FAILED": "❌ Test annullato: impossibile caricare i dati di test.",
-        "TEST_WRONG_QUESTION_COUNT": "ERRORE Dati Test: Trovate {mc} MC e {oe} OE domande, attese {expected} per tipo.",
-        "STAT_TEST_GENERATING_SEQUENCE": "⚙️ Generazione sequenza test per k={k_mc}/{k_oe} (N={num_tests})...", # Usato internamente, silenziato
-        "STAT_TEST_GENERATION_FAILED": "❌ Fallita generazione sequenza test per k={k_mc}/{k_oe}.", # Errore critico
-        "STAT_TEST_CALCULATING_SIMILARITY": "⚙️ Calcolo similarità per k={k_mc}/{k_oe} (max dist={max_dist})...", # Usato internamente, silenziato
-        "STAT_TEST_ANALYSIS_COMPLETE": "✅ Analisi similarità completata per k={k_mc}/{k_oe}.", # Usato internamente, silenziato
-        "STAT_TEST_STARTING": "Avvio analisi statistica similarità per {num_k} valori di k (N={num_tests} test per k)...", # Vecchio test
-        "STAT_TEST_RUNNING_FOR_K": "--- Analisi per k = {k} ---", # Vecchio test
-        "STAT_TEST_RESULTS_FOR_K": "Risultati Medie Jaccard per k={k}: {results}", # Vecchio test
-        "STAT_TEST_FAILED_FOR_K": "❌ Analisi fallita per k = {k}.", # Vecchio test
-        "STAT_TEST_ALL_COMPLETE": "--- Analisi statistica di similarità completata. ---", # Vecchio test
-        "MC_TEST_STARTING": "Avvio simulazione Monte Carlo ({num_runs} run, {num_k} valori di k, {num_tests} test/k)...",
-        "MC_TEST_RUN_PROGRESS": "Progresso Monte Carlo: Run {current_run}/{total_runs}...",
-        "MC_TEST_FAILED_FOR_K_IN_RUN": "⚠️ Fallita analisi per k={k} nella run {run}.",
-        "MC_TEST_CALCULATING_FINAL_AVERAGES": "⚙️ Calcolo medie finali Monte Carlo...", # Usato internamente, silenziato
-        "MC_TEST_FINAL_RESULTS_FOR_K": "Risultati Finali Medie Jaccard per k={k}: {results}", # Usato internamente, silenziato
-        "MC_TEST_ALL_COMPLETE": "--- Simulazione Monte Carlo completata. ---",
-        "STAT_TEST_EXCEL_CREATED": "✅ File Excel con risultati statistici '{filename}' creato.",
-        "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Errore durante il salvataggio del file Excel '{filename}': {error}",
-        "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ Nessun dato dettagliato raccolto per creare il file Excel.",
-        "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Scarica Risultati Statistici (.xlsx)",
-        "DOWNLOAD_STATS_EXCEL_HELP": "Scarica il file Excel con l'analisi di similarità Jaccard per distanza e k.",
-    },
-    "en": {
-        # Titles & Headers
-        "PAGE_TITLE": "EvilProf 😈",
-        "MAIN_TITLE": "EvilProf 😈",
-        "SUBHEADER": "Randomized and Diverse Test Generator, from Excel to PDF",
-        "INSTRUCTIONS_HEADER": "ℹ️ Instructions & Excel File Preparation",
-        "GENERATION_PARAMS_HEADER": "Generation Parameters",
-        "VALIDATION_TEST_HEADER": "Functional Test",
-        "SOURCE_CODE_HEADER": "Source Code",
-        "OUTPUT_AREA_HEADER": "Output & Messages",
-        "VALIDATION_RESULTS_HEADER": "--- Functional Test Results ---",
-        "GENERATION_MESSAGES_HEADER": "--- Messages from Data Generation ---",
-        "FOOTER_TEXT": "EvilProf v1.1 (Refactored) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
+        # Legge/Scrive valore da/in st.session_state.block_requests
+        # Read/Write value from/to st.session_state.block_requests
+        st.session_state.block_requests[block_id] = st.sidebar.number_input(
+            label=label,
+            min_value=0,
+            max_value=available_count,
+            value=st.session_state.block_requests.get(block_id, 0), # Mantieni valore precedente se esiste / Keep previous value if exists
+            step=1,
+            key=f"block_input_{block_id}" # Chiave univoca per widget / Unique key for widget
+        )
+        total_questions_requested += st.session_state.block_requests[block_id]
 
-        # Sidebar Widgets
-        "UPLOAD_LABEL": "1. Upload Excel File (.xlsx, .xls)",
-        "UPLOAD_HELP": "Drag and drop or select the Excel file with questions.",
-        "SUBJECT_LABEL": "2. Subject Name",
-        "SUBJECT_HELP": "Will appear in the title of each test.",
-        "SUBJECT_DEFAULT": "Computer Science",
-        "NUM_TESTS_LABEL": "3. Number of Tests to Generate",
-        "NUM_TESTS_HELP": "How many different versions of the test to create?",
-        "NUM_MC_LABEL": "4. Multiple Choice Questions / Test",
-        "NUM_MC_HELP": "How many multiple-choice questions to include in each test.",
-        "NUM_OPEN_LABEL": "5. Open-Ended Questions / Test",
-        "NUM_OPEN_HELP": "How many open-ended questions to include in each test.",
-        "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
-        "VALIDATE_BUTTON_LABEL": "🧪 Run Functional Test",
-        "VALIDATE_BUTTON_HELP_NEW": "Runs internal test scenarios using 'test_questions.xlsx' to verify diversity and similarity logic.",
-        "DOWNLOAD_SOURCE_BUTTON_LABEL": "📥 Download App Code (app.py)",
-        "DOWNLOAD_SOURCE_CAPTION": "Download other (.py) files separately.",
-        "SOURCE_UNAVAILABLE_WARNING": "Source code download unavailable: {error}",
+    # Mostra totale domande selezionate / Show total selected questions
+    st.sidebar.markdown(f"**{T('TOTAL_QUESTIONS_SELECTED')}: {total_questions_requested}**") # <-- Nuova chiave / New key
+else:
+    # Resetta se non ci sono blocchi (es. file rimosso)
+    st.session_state.block_requests = {}
 
-        # Status / Error / Warning Messages (in app.py)
-        "WEASYPRINT_ERROR": "🚨 **Warning:** The WeasyPrint library is not available or not functional. PDF generation is blocked. Ensure it is installed and its system dependencies (GTK+, Pango, Cairo) are present.",
-        "IMAGE_CAPTION": "Example of valid Excel file structure",
-        "IMAGE_NOT_FOUND_WARNING": "Note: Example image '{image_path}' not found.",
-        "IMAGE_LOAD_ERROR": "Error loading image '{image_path}': {error}",
-        "VALIDATION_START": "Starting Functional Test...",
-        "GENERATION_START": "Starting Test Generation...",
-        "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel file first.",
-        "LOADING_DATA_SPINNER": "⏳ Loading and validating questions...",
-        "LOADING_DATA_VALIDATION_SPINNER": "⏳ Loading data for test...",
-        "LOAD_ERROR": "Error loading data: {error_msg}",
-        "NO_VALID_QUESTIONS_ERROR": "No valid questions found in the file. Cannot proceed.",
-        "TOTAL_QUESTIONS_ZERO_ERROR": "ERROR: The total number of questions per test (Multiple Choice + Open) must be greater than zero.",
-        "PARAMS_OK_INFO": "Parameters OK. Generating {num_tests} tests for '{subject_name}' with {num_mc_q} MC + {num_open_q} Open = {num_q_per_test} Questions/Test.",
-        "MC_ZERO_ERROR": "ERROR: Requested {num_mc_q} multiple-choice questions, but 0 found in the file.",
-        "OPEN_ZERO_ERROR": "ERROR: Requested {num_open_q} open-ended questions, but 0 found in the file.",
-        "MC_INSUFFICIENT_ERROR": "CRITICAL ERROR: Not enough multiple-choice questions ({total_mc}) to meet the {num_mc_q} required per test.",
-        "OPEN_INSUFFICIENT_ERROR": "CRITICAL ERROR: Not enough open-ended questions ({total_open}) to meet the {num_open_q} required per test.",
-        "CORRECT_ERRORS_ERROR": "Please correct the errors above before generating.",
-        "GENERATING_DATA_SPINNER": "⏳ Generating data for {num_tests} tests...",
-        "VALIDATION_LOGIC_SPINNER": "⏳ Running functional test...",
-        "GENERATION_FAILED_ERROR": "❌ Data generation failed due to critical errors. Check messages above.",
-        "DATA_READY_PDF_INFO": "Data for {num_tests} tests ready. Starting PDF generation...",
-        "PDF_CREATION_SPINNER": "⏳ Creating PDF file (this may take time)...",
-        "PDF_SUCCESS": "✅ PDF Generation Complete!",
-        "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Download Generated PDF",
-        "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'",
-        "PDF_GENERATION_ERROR": "❌ Error during PDF creation. Check messages above, especially those related to WeasyPrint.",
-        "INITIAL_INFO": "Configure parameters in the sidebar and press 'Generate PDF Tests' or 'Run Functional Test'.",
-        "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
 
-        # Intro Text (English - complete)
-        "INTRO_TEXT": """
-EvilProf is a webapp that allows you to generate randomized tests in a PDF file retrieving questions from an Excel file.
+# --- 4. Input Generali Rimasti ---
+st.sidebar.markdown("---")
+subject_name = st.sidebar.text_input(T("SUBJECT_LABEL"), value=T("SUBJECT_DEFAULT"), help=T("SUBJECT_HELP"))
+num_tests_to_generate = st.sidebar.number_input(T("NUM_TESTS_LABEL"), min_value=1, value=DEFAULT_NUM_TESTS, step=1, help=T("NUM_TESTS_HELP"))
 
-If the number of questions is sufficient, **it ensures that two adjacent tests are entirely distinct and maximizes diversity among nearby tests**, following an exponential decay pattern—by employing a weighted question sampling technique (if a question has been recently chosen, it's less likely it would be picked for a while).
-Main features include:
+# --- 5. Bottone Generazione ---
+generate_button = st.sidebar.button(T("GENERATE_BUTTON_LABEL"), type="primary", use_container_width=True)
 
-- **Input from Excel:** Easily load your questions from an `.xlsx` or `.xls` file.
-- **Question Types:** Supports both multiple-choice questions (with randomized answers) and open-ended questions.
-- **Customization:** Choose the number of tests to generate, the number of questions per type (multiple/open) for each test, and the subject name.
-- **Advanced Randomization:** Questions in each test are randomly selected from the pool available in the Excel file. The order of multiple-choice answers is randomized.
-- **Improved Diversity (with Fallback):** The application attempts to use a **Weighted Random Sampling without Replacement (WRSwOR)** technique to select questions. This method:
-    - Attempts to **ensure** that questions used in one test are not repeated in the *immediately following* test. This requires the total number of questions of a certain type (`n`) to be strictly greater than twice the number of questions of that type required per test (`k`), i.e., `n >= 2k`.
-    - Attempts to **statistically favor** the selection of questions that haven't been used for the longest time. For good long-term rotation and diversity, it is **strongly recommended** to have a total number of questions at least **three times greater** (`n >= 3k`) than those required per single test. The app will show a warning if `n < 3k`.
-    - **Fallback:** If there are not enough unique questions available to ensure diversity compared to the previous test (`n <= 2k`), the application **will switch to simple random sampling** from *all* available questions of that type, **losing the guarantee of diversity** between adjacent tests. A prominent red warning will be displayed in this case.
-- **PDF Output:** Generates a single PDF file ready for printing, with each test starting on a new page and a header for name, date, and class.
+# --- 6. Test Funzionale (lasciato per ora, ma da aggiornare) ---
+st.sidebar.markdown("---")
+st.sidebar.subheader(T("VALIDATION_TEST_HEADER"))
+validation_button = st.sidebar.button(
+    T("VALIDATE_BUTTON_LABEL"),
+    help=T("VALIDATE_BUTTON_HELP_NEW"), # Questo help non è più accurato / This help text is no longer accurate
+    use_container_width=True,
+    disabled=True # Disabilitato finché non aggiorniamo test.py / Disabled until test.py is updated
+)
 
-**Excel File Structure**
 
-For the application to work correctly, the Excel file must adhere to the following structure **without column headers**:
+# ================================================================
+# Area Output Principale e Gestione Messaggi / Main Output Area and Message Handling
+# ================================================================
+st.subheader(T("OUTPUT_AREA_HEADER"))
+output_placeholder = st.container()
+transient_status_placeholder = st.empty()
 
-- **Column A:** Contains the full text of the question.
-- **Columns B, C, D, ...:** Contain the different answer options *only* for multiple-choice questions. There must be at least two answer options for the question to be considered multiple-choice.
-- **Open-Ended Questions:** For an open-ended question, simply leave the cells in columns B, C, D, ... empty.
-- *See example image below.*
+# Funzione per mostrare messaggi critici durante l'esecuzione
+def display_critical_message(message_type, key_or_raw_text, **kwargs):
+    """Mostra solo warning/error nel transient_status_placeholder."""
+    if message_type not in ["warning", "error"]: return
+    kwargs = kwargs or {}
+    formatted_text = F(key_or_raw_text, **kwargs)
+    if formatted_text == key_or_raw_text or formatted_text.startswith("MISSING_TEXT["):
+        if kwargs:
+            try: formatted_text = key_or_raw_text.format(**kwargs)
+            except (KeyError, IndexError, ValueError, TypeError): formatted_text = key_or_raw_text
+        else: formatted_text = key_or_raw_text
+    if message_type == "warning": transient_status_placeholder.warning(formatted_text)
+    elif message_type == "error": transient_status_placeholder.error(formatted_text)
 
----
-""",
-        # Texts used in PDF
-        "PDF_TEST_TITLE": "Test for {subject_name}",
-        "PDF_NAME_LABEL": "Name:",
-        "PDF_DATE_LABEL": "Date:",
-        "PDF_CLASS_LABEL": "Class:",
-        "PDF_MISSING_QUESTION": "MISSING QUESTION",
-        "PDF_NO_OPTIONS": "<em>(No answer options provided)</em>",
+# Callback passato alle funzioni backend
+def status_callback(msg_type, msg_key, **kwargs):
+     display_critical_message(msg_type, msg_key, **kwargs)
 
-        # file_handler messages (also used by test.py)
-        "FH_READING_EXCEL": "⏳ Reading Excel file: {file_name}...",
-        "FH_USING_CACHE": "ℹ️ Using already loaded data for: {file_name}",
-        "FH_ROW_WARNING_ANSWERS_ONLY": "Warning: Excel row {row_num} has answers but is missing the question and will be ignored.",
-        "FH_ROW_WARNING_ONE_ANSWER": "Warning: Question '{q_text}' (Excel row {row_num}) has only 1 answer and was treated as Open-Ended.",
-        "FH_LOAD_COMPLETE": "✅ Data loaded: {count} questions ({mc_count} multiple choice, {oe_count} open-ended).",
-        "FH_NO_VALID_QUESTIONS": "Error: No valid questions found in file '{file_name}'.",
-        "FH_UNEXPECTED_ERROR": "Unexpected error while reading Excel file '{file_name}': {error}",
+# ================================================================
+# Logica per il Test Funzionale (Disabilitata) / Logic for Functional Test (Disabled)
+# ================================================================
+if validation_button:
+    output_placeholder.info("Il test funzionale deve essere aggiornato per la nuova logica a blocchi.")
+    # ... (logica precedente commentata o rimossa) ...
 
-        # core_logic messages (also used by test.py)
-        "CL_GENERATING_TEST_DATA": "⚙️ Generating test data {current_test}/{total_tests}...",
-        "CL_VALIDATION_RUNNING": "Validating {num_tests_generated} generated tests...",
-        "CL_FALLBACK_MC_WARNING": "[Test {test_num}] Fallback active for Multiple Choice: not enough diverse questions ({candidates}) compared to the previous test. Sampling from all ({total}).",
-        "CL_FALLBACK_OE_WARNING": "[Test {test_num}] Fallback active for Open-Ended: not enough diverse questions ({candidates}) compared to the previous test. Sampling from all ({total}).",
-        "CL_CRITICAL_SAMPLING_ERROR_MC": "Critical Error Test {test_num}: Cannot sample {k} MC from {n} total.",
-        "CL_CRITICAL_SAMPLING_ERROR_OE": "Critical Error Test {test_num}: Cannot sample {k} Open from {n} total.",
-        "CL_CRITICAL_WRSWOR_ERROR_MC": "Critical Error Test {test_num} (WRSwOR MC): {error}",
-        "CL_CRITICAL_WRSWOR_ERROR_OE": "Critical Error Test {test_num} (WRSwOR Open): {error}",
-        "CL_FINAL_FALLBACK_ACTIVE": "‼️ GENERAL WARNING: Fallback was activated for at least one test. Diversity between tests is *not* guaranteed for all. Check specific warning messages for details.",
-        "CL_FINAL_LOW_DIVERSITY_MC": "⚠️ Limited Diversity (MC): Total questions ({total_mc}) is less than triple ({three_k}) the requested per test ({k}). Consider increasing the MC question pool.",
-        "CL_FINAL_LOW_DIVERSITY_OE": "⚠️ Limited Diversity (Open): Total questions ({total_open}) is less than triple ({three_k}) the requested per test ({k}). Consider increasing the Open question pool.",
-        "CL_FINAL_OK_DIVERSITY": "✅ Data for {num_tests} tests prepared (with diversity guaranteed).",
-        "CL_VALIDATION_TEST_FAILED_GENERATION": "❌ Validation Failed: Error during test data generation.",
-        "CL_VALIDATION_TEST_WRONG_Q_COUNT": "❌ Validation Failed: Test {test_num} has {actual_count} questions instead of {expected_count}.",
-        "CL_VALIDATION_TESTS_NO_INTERSECTION": "✅ Validation Passed: Test 1 and Test 2 have no questions in common.",
-        "CL_VALIDATION_TESTS_INTERSECTION_WARNING": "⚠️ Validation: Test 1 and Test 2 have questions in common (indices: {intersection}). Expected if fallback was active during the test.",
-        "CL_VALIDATION_TESTS_WRONG_COUNT": "❌ Validation Failed: Incorrect number of tests generated ({actual_count}) vs {expected_count}).",
-        "CL_VALIDATION_COMPLETE_SUCCESS": "🎉 Functional test completed successfully (or with expected warnings).",
-        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during functional test execution: {error}",
-        "CL_VALIDATION_INSUFFICIENT_MC_ERROR": "Test Failed: Not enough MC ({total}) for test ({k}).",
-        "CL_VALIDATION_INSUFFICIENT_OE_ERROR": "Test Failed: Not enough Open ({total}) for test ({k}).",
-        "CL_VALIDATION_INSUFFICIENT_MC_WARN": "Test Warning: Need >{k} total MC questions to effectively test non-repetition.",
-        "CL_VALIDATION_INSUFFICIENT_OE_WARN": "Test Warning: Need >{k} total Open questions to effectively test non-repetition.",
+# ================================================================
+# Logica Principale per Generazione PDF / Main Logic for PDF Generation
+# ================================================================
+if generate_button:
+    output_placeholder.empty()
+    transient_status_placeholder.empty()
 
-        # pdf_generator messages
-        "PG_PDF_GENERATION_START": "⚙️ Starting PDF generation...",
-        "PG_WEASYPRINT_UNAVAILABLE": "WeasyPrint library not found or not functional. Cannot generate PDF.",
-        "PG_HTML_BUILDING": "⚙️ Building HTML document...",
-        "PG_PDF_CONVERTING": "⚙️ Converting HTML to PDF with WeasyPrint (this may take time)...",
-        "PG_PDF_CONVERSION_COMPLETE": "⚙️ PDF conversion complete.",
-        "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERROR WeasyPrint: Missing dependencies (GTK+/Pango/Cairo?). Details: {error}",
-        "PG_WEASYPRINT_OTHER_ERROR": "ERROR during PDF generation with WeasyPrint: {error}",
+    # 1. Recupera richieste utente dai widget dinamici / Retrieve user requests from dynamic widgets
+    current_block_requests = st.session_state.get('block_requests', {})
+    # Filtra solo i blocchi con k > 0 / Filter only blocks with k > 0
+    active_block_requests = {bid: k for bid, k in current_block_requests.items() if k > 0}
+    total_requested = sum(active_block_requests.values())
 
-        # Keys for test.py (Statistical Tests and Monte Carlo)
-        "TEST_FILE_NOT_FOUND": "ERROR: Test file '{filename}' not found. Please run the 'generate_test_excel.py' script first.",
-        "TEST_LOADING_DATA": "Loading data from test file '{filename}'...",
-        "TEST_NO_QUESTIONS_FOUND": "ERROR: No valid questions found in test file '{filename}'.",
-        "TEST_LOAD_SUCCESS": "Test data loaded: {count} questions ({mc} MC, {oe} OE).",
-        "TEST_LOAD_ERROR": "Unexpected ERROR while loading test file '{filename}': {error}",
-        "TEST_ABORTED_LOAD_FAILED": "❌ Test aborted: failed to load test data.",
-        "TEST_WRONG_QUESTION_COUNT": "ERROR Test Data: Found {mc} MC and {oe} OE questions, expected {expected} of each.",
-        "STAT_TEST_GENERATING_SEQUENCE": "⚙️ Generating test sequence for k={k_mc}/{k_oe} (N={num_tests})...", # Internal, silenced
-        "STAT_TEST_GENERATION_FAILED": "❌ Failed test sequence generation for k={k_mc}/{k_oe}.", # Critical error
-        "STAT_TEST_CALCULATING_SIMILARITY": "⚙️ Calculating similarity for k={k_mc}/{k_oe} (max dist={max_dist})...", # Internal, silenced
-        "STAT_TEST_ANALYSIS_COMPLETE": "✅ Similarity analysis completed for k={k_mc}/{k_oe}.", # Internal, silenced
-        "STAT_TEST_STARTING": "Starting statistical similarity analysis for {num_k} k-values (N={num_tests} tests per k)...", # Old test
-        "STAT_TEST_RUNNING_FOR_K": "--- Analysis for k = {k} ---", # Old test
-        "STAT_TEST_RESULTS_FOR_K": "Average Jaccard Results for k={k}: {results}", # Old test
-        "STAT_TEST_FAILED_FOR_K": "❌ Analysis failed for k = {k}.", # Old test
-        "STAT_TEST_ALL_COMPLETE": "--- Statistical similarity analysis completed. ---", # Old test
-        "MC_TEST_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k-values, {num_tests} tests/k)...",
-        "MC_TEST_RUN_PROGRESS": "Monte Carlo Progress: Run {current_run}/{total_runs}...",
-        "MC_TEST_FAILED_FOR_K_IN_RUN": "⚠️ Analysis failed for k={k} in run {run}.",
-        "MC_TEST_CALCULATING_FINAL_AVERAGES": "⚙️ Calculating final Monte Carlo averages...", # Internal, silenced
-        "MC_TEST_FINAL_RESULTS_FOR_K": "Final Average Jaccard Results for k={k}: {results}", # Internal, silenced
-        "MC_TEST_ALL_COMPLETE": "--- Monte Carlo simulation completed. ---",
-        "STAT_TEST_EXCEL_CREATED": "✅ Excel file with statistical results '{filename}' created.",
-        "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Error saving Excel file '{filename}': {error}",
-        "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ No detailed data collected to create the Excel file.",
-        "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Download Statistical Results (.xlsx)",
-        "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Jaccard similarity analysis by distance and k.",
-    }
-}
+    # 2. Validazione Input / Input Validation
+    if uploaded_file is None:
+        output_placeholder.warning(T("UPLOAD_FIRST_WARNING"))
+        st.stop()
+    if not st.session_state.all_questions or not st.session_state.blocks_summary:
+         output_placeholder.error(T("LOAD_ERROR", error_msg="Dati blocchi non caricati correttamente.")) # Usa chiave generica
+         st.stop()
+    if total_requested <= 0:
+        output_placeholder.error(T("TOTAL_QUESTIONS_ZERO_ERROR_BLOCKS")) # <-- Nuova chiave / New key
+        st.stop()
 
-# Funzioni get_text e format_text (invariate)
-def get_text(lang_code, key):
-    """Recupera il testo per una data chiave nella lingua specificata."""
-    lang_dict = TEXTS.get(lang_code, TEXTS.get("en", {}))
-    return lang_dict.get(key, f"MISSING_TEXT[{key}]")
+    # 3. Esecuzione Generazione / Run Generation
+    pdf_generated = False
+    pdf_data = None
+    final_generation_messages = []
 
-def format_text(lang_code, key, **kwargs):
-     """Recupera testo e lo formatta con i parametri forniti."""
-     raw_text = get_text(lang_code, key)
-     if raw_text == f"MISSING_TEXT[{key}]": return raw_text
-     try: return raw_text.format(**kwargs)
-     except KeyError as e: print(f"WARN: Missing placeholder key {e} in text key '{key}' for lang '{lang_code}' when formatting with {kwargs}"); return raw_text
-     except Exception as e: print(f"WARN: Generic formatting error for text key '{key}' with args {kwargs} for lang '{lang_code}': {e}"); return raw_text
+    with st.spinner(T("GENERATING_DATA_SPINNER", num_tests=num_tests_to_generate)): # Usa nuova variabile nome
+        try:
+            # Chiama la NUOVA logica passando la lista completa delle domande,
+            # le richieste per blocco, e il numero di test
+            # Call the NEW logic passing the full question list,
+            # block requests, and number of tests
+            all_tests_data, generation_messages = generate_all_tests_data(
+                st.session_state.all_questions,
+                active_block_requests,
+                num_tests_to_generate, # Usa la variabile corretta
+                status_callback
+            )
+            final_generation_messages.extend(generation_messages)
+            if all_tests_data is None: raise ValueError("Test data generation failed.")
 
+            # Prepara stringhe PDF (invariato)
+            pdf_strings = {
+                "title_format": T("PDF_TEST_TITLE"), "name_label": T("PDF_NAME_LABEL"),
+                "date_label": T("PDF_DATE_LABEL"), "class_label": T("PDF_CLASS_LABEL"),
+                "missing_question": T("PDF_MISSING_QUESTION"), "no_options": T("PDF_NO_OPTIONS")
+            }
+
+            # Genera PDF (invariato, usa callback silenziato)
+            pdf_data = generate_pdf_data(all_tests_data, subject_name, status_callback, pdf_strings)
+            if pdf_data is None: raise ValueError("PDF generation failed.")
+
+            pdf_generated = True
+
+        except ValueError as ve:
+            msg_key = str(ve)
+            if msg_key in TEXTS['it'] or msg_key in TEXTS['en']:
+                 if not any(m[1] == msg_key for m in final_generation_messages): final_generation_messages.append(("error", msg_key, {}))
+            else:
+                 if not any(m[1] == "GENERATION_FAILED_ERROR" for m in final_generation_messages): final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": msg_key}))
+        except Exception as e:
+             if not any(m[1] == "GENERATION_FAILED_ERROR" for m in final_generation_messages): final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": str(e)}))
+
+    # 4. Mostra Risultati Finali / Display Final Results
+    with output_placeholder:
+        if final_generation_messages:
+             st.markdown(f"**{T('GENERATION_MESSAGES_HEADER')}**")
+             for msg_type, msg_key, msg_kwargs in final_generation_messages:
+                 final_formatted_text = F(msg_key, **msg_kwargs)
+                 if msg_type == "warning": st.warning(final_formatted_text)
+                 elif msg_type == "error": st.error(final_formatted_text)
+
+        if pdf_generated and pdf_data:
+            st.success(T("PDF_SUCCESS"))
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            safe_filename_subject = "".join(c if c.isalnum() else "_" for c in subject_name)
+            # Aggiorna nome file per riflettere totale domande variabile
+            # Update filename to reflect variable total questions
+            pdf_filename = f"Verifiche_{safe_filename_subject}_{num_tests_to_generate}tests_{timestamp}.pdf"
+            st.download_button(
+                label=T("PDF_DOWNLOAD_BUTTON_LABEL"), data=pdf_data, file_name=pdf_filename, mime="application/pdf",
+                help=F("PDF_DOWNLOAD_BUTTON_HELP", pdf_filename=pdf_filename),
+                use_container_width=True, type="primary"
+            )
+        elif not final_generation_messages:
+             st.error(T("PDF_GENERATION_ERROR"))
+
+# ================================================================
+# Messaggio Iniziale / Initial Message
+# ================================================================
+if 'action_performed' not in st.session_state: st.session_state.action_performed = False
+if validation_button: st.session_state.action_performed = True
+if generate_button: st.session_state.action_performed = True
+if not st.session_state.action_performed:
+    output_placeholder.info(T("INITIAL_INFO_NEW")) # <-- Nuova chiave / New key
+
+# ================================================================
+# Footer
+# ================================================================
+st.markdown("---")
+st.markdown(T("FOOTER_TEXT"))
