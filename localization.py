@@ -1,8 +1,8 @@
-# localization.py (Aggiunta descrizione test statistico CORRETTA nelle istruzioni)
+# localization.py (Corretta struttura testo INTRO_TEXT_NEW)
 
 TEXTS = {
     "it": {
-        # Titoli e Intestazioni
+        # ... [Titoli, Sidebar, Messaggi UI base come prima] ...
         "PAGE_TITLE": "EvilProf 😈 - Per Blocchi",
         "MAIN_TITLE": "EvilProf 😈 - Generatore per Blocchi",
         "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel/CSV.",
@@ -13,8 +13,6 @@ TEXTS = {
         "VALIDATION_RESULTS_HEADER": "--- Risultato Test Funzionale ---",
         "GENERATION_MESSAGES_HEADER": "--- Messaggi dalla Generazione ---",
         "FOOTER_TEXT": "EvilProf v1.1 (Blocchi) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
-
-        # Widget Sidebar
         "UPLOAD_LABEL": "1. Carica File Excel/CSV",
         "UPLOAD_HELP": "Trascina o seleziona il file (.xlsx, .xls, .csv) con le domande organizzate in blocchi separati da righe vuote.",
         "SUBJECT_LABEL": "2. Nome della Materia",
@@ -28,8 +26,6 @@ TEXTS = {
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
         "VALIDATE_BUTTON_LABEL": "🧪 Esegui Test Funzionale",
         "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.",
-
-        # Messaggi di Stato / Errori / Warning
         "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
         "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)",
         "ANALYSIS_IMAGE_CAPTION": "Esempio di analisi di similarità generata dal test funzionale",
@@ -56,7 +52,7 @@ TEXTS = {
         "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nella sidebar e premi 'Genera Verifiche PDF'.",
         "VALIDATION_NO_MESSAGES": "Il test funzionale non ha prodotto messaggi specifici.",
 
-        # Testo Intro (AGGIORNATO CON SEZIONE TEST STATISTICO CORRETTA)
+        # Testo Intro (STRUTTURA CORRETTA)
         "INTRO_TEXT_NEW": """
 EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto di domande da blocchi definiti nel tuo file Excel o CSV.
 
@@ -82,8 +78,6 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
 4.  Ripeti i passaggi 2 e 3 per tutti i blocchi desiderati.
 5.  **Non inserire nomi di argomento o intestazioni di colonna.**
 
-*Vedi immagini di esempio qui sotto.*
-
 ---
 
 ### Analisi Statistica (Accessibile tramite Bottone "Test Funzionale")
@@ -104,7 +98,7 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
 * **Soglia `k=6` (n=2k):** Questo test permette di osservare il comportamento al limite e oltre la soglia dove il campionamento passa da WRSwOR a Simple Random.
 * **Consiglio Pratico:** Per massimizzare la diversità tra test consecutivi usando WRSwOR, è consigliabile scegliere un numero di domande per blocco (`k`) tale che `n > 2k` (cioè `k < n/2`), idealmente `k <= n/3` per una rotazione ottimale (es. `k=4` per un blocco da 12).
 
-*Vedi immagine di esempio dell'analisi qui sotto.*
+*Vedi immagini di esempio qui sotto.*
 """,
         # Testi usati nel PDF
         "PDF_TEST_TITLE": "Verifica di {subject_name}",
@@ -248,8 +242,6 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
 4.  Repeat steps 2 and 3 for all desired blocks.
 5.  **Do not include topic names or column headers.**
 
-*See example images below.*
-
 ---
 
 ### Statistical Analysis (Accessible via "Functional Test" Button)
@@ -270,7 +262,7 @@ The application includes a functional test that performs an in-depth statistical
 * **Threshold `k=6` (n=2k):** This test allows observing the behavior at and beyond the threshold where sampling switches from WRSwOR to Simple Random.
 * **Practical Advice:** To maximize diversity between consecutive tests using WRSwOR, it's advisable to choose a number of questions per block (`k`) such that `n > 2k` (i.e., `k < n/2`), ideally `k <= n/3` for optimal rotation (e.g., `k=4` for a block of 12).
 
-*See example image of the analysis below.*
+*See example images below.*
 """,
         # Texts used in PDF
         "PDF_TEST_TITLE": "Test for {subject_name}",
