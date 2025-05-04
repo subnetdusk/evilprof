@@ -28,7 +28,7 @@ TEXTS = {
         "TOTAL_QUESTIONS_SELECTED": "Domande Totali Selezionate",
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
         "VALIDATE_BUTTON_LABEL": "🧪 Esegui Test Funzionale",
-        "VALIDATE_BUTTON_HELP_NEW": "[TEST DISABILITATO] Esegue test interni sulla logica.",
+        "VALIDATE_BUTTON_HELP_NEW": "Esegue una analisi statistica sulla similarità dei test.",
         # Download codice rimosso
 
         # Messaggi di Stato / Errori / Warning
@@ -173,7 +173,7 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "TOTAL_QUESTIONS_SELECTED": "Total Questions Selected",
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
         "VALIDATE_BUTTON_LABEL": "🧪 Run Functional Test",
-        "VALIDATE_BUTTON_HELP_NEW": "[TEST DISABLED] Runs internal test scenarios using 'test_questions.xlsx' to verify logic.",
+        "VALIDATE_BUTTON_HELP_NEW": "Runs a montecarlo simulation test to verify logic.",
         # Source code download removed
 
         # Status / Error / Warning Messages
