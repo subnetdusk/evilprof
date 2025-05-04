@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# app.py (Immagini centrate e con margine nell'expander)
+# app.py 
 
 import streamlit as st
 from datetime import datetime
@@ -58,6 +58,8 @@ if not WEASYPRINT_AVAILABLE: st.error(T("WEASYPRINT_ERROR")); st.stop()
 # Istruzioni (Espandibili) / Instructions (Expandable)
 # ================================================================
 with st.expander(T("INSTRUCTIONS_HEADER"), expanded=False):
+    # Mostra il testo delle istruzioni (che ora include la spiegazione del test)
+    # Show instruction text (which now includes the test explanation)
     st.markdown(T("INTRO_TEXT_NEW"), unsafe_allow_html=True)
 
     # --- SEZIONE IMMAGINI AGGIORNATA ---
@@ -101,6 +103,8 @@ def sidebar_status_callback(msg_type, msg_key, **kwargs):
      elif msg_type == "error": sidebar_status_placeholder.error(formatted_text)
 
 if uploaded_file is not None:
+    # Usa il nome del file caricato per controllare se è cambiato
+    # Use the name of the uploaded file to check if it changed
     if st.session_state.processed_filename != uploaded_file.name:
         # sidebar_status_placeholder.info(F("FH_READING_EXCEL", file_name=uploaded_file.name)) # Silenziato
         all_q, blocks_sum, error_k = load_questions_from_excel(uploaded_file, sidebar_status_callback)
