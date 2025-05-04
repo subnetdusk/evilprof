@@ -1,122 +1,132 @@
-# file_handler.py (Rilevamento blocchi e tipi)
-import pandas as pd
-import streamlit as st
+# core_logic.py 
+import random
+import math
+import heapq
 
-def load_questions_from_excel(uploaded_file, status_callback):
+# ================================================================
+# Funzione Helper WRSwOR (invariata)
+# ================================================================
+def weighted_random_sample_without_replacement(population, weights, k):
     """
-    Carica domande/risposte, rileva blocchi separati da righe vuote
-    e determina il tipo di ogni blocco (Scelta Multipla o Aperte).
-    Chiama status_callback solo per errori o warning significativi.
-    Restituisce:
-        - all_questions: Lista di tutti i dizionari domanda, ognuno con 'block_id' e 'type'.
-        - blocks_summary: Lista di dizionari che descrivono ogni blocco {'block_id', 'type', 'count'}.
-        - error_key: Chiave errore (str) o None se successo.
+    Seleziona k elementi unici da una popolazione data, senza reinserimento,
+    utilizzando un campionamento ponderato. (Implementazione A-ExpJ)
+    """
+    n = len(population)
+    if k < 0: raise ValueError("k non può essere negativo")
+    if k == 0: return []
+    if k > n: raise ValueError(f"k ({k}) > dimensione popolazione ({n})")
+    if n != len(weights): raise ValueError("Lunghezze popolazione e pesi non coincidono")
+    valid_indices = [i for i, w in enumerate(weights) if isinstance(w, (int, float)) and w > 0]
+    if k > len(valid_indices): raise ValueError(f"k ({k}) è maggiore del numero di elementi con peso positivo ({len(valid_indices)})")
+    population_valid = [population[i] for i in valid_indices]
+    weights_valid = [weights[i] for i in valid_indices]
+    min_heap = []
+    for i, item in enumerate(population_valid):
+        weight = weights_valid[i]; u = random.uniform(0, 1); epsilon = 1e-9
+        if u < epsilon: u = epsilon
+        try: key = u**(1.0 / (weight + epsilon))
+        except OverflowError: key = 0.0
+        if len(min_heap) < k: heapq.heappush(min_heap, (key, item))
+        elif key > min_heap[0][0]: heapq.heapreplace(min_heap, (key, item))
+    return [item for key, item in min_heap]
 
-    Loads questions/answers, detects blocks separated by empty rows,
-    and determines the type of each block (Multiple Choice or Open-Ended).
-    Calls status_callback only for significant errors or warnings.
+# ================================================================
+# Logica Generazione Test basata su Blocchi
+# ================================================================
+# --- ASSICURATI CHE QUESTA FUNZIONE SIA DEFINITA CORRETTAMENTE ---
+# --- MAKE SURE THIS FUNCTION IS DEFINED CORRECTLY ---
+def generate_all_tests_data(all_questions_list, block_requests, num_tests, status_callback):
+    """
+    Genera i dati per i test selezionando un numero esatto di domande da blocchi specifici.
+    Applica WRSwOR separatamente per ogni blocco.
+    Args:
+        all_questions_list: Lista completa di tutti i dizionari domanda (con 'block_id').
+        block_requests: Dizionario {block_id: k_requested} con le richieste utente.
+        num_tests: Numero di verifiche da generare.
+        status_callback: Funzione per segnalare warning/error critici.
     Returns:
-        - all_questions: List of all question dicts, each with 'block_id' and 'type'.
-        - blocks_summary: List of dicts describing each block {'block_id', 'type', 'count'}.
-        - error_key: Error key (str) or None on success.
+        (lista_dati_test, lista_messaggi_finali)
     """
-    if uploaded_file is None:
-        return None, None, "UPLOAD_FIRST_WARNING"
+    all_tests_question_data = []
+    final_messages = [] # Solo warning/error critici
+    fallback_activated_ever = False # Traccia se il fallback è mai stato attivato
 
-    file_name = uploaded_file.name
-    try:
-        # Usa cache sessione (logica invariata)
-        if 'loaded_file_name' not in st.session_state or st.session_state.loaded_file_name != file_name:
-            # status_callback("info", "FH_READING_EXCEL", file_name=file_name) # Silenziato
-            excel_df = pd.read_excel(uploaded_file, header=None)
-            st.session_state.excel_df = excel_df
-            st.session_state.loaded_file_name = file_name
-        else:
-            # status_callback("info", "FH_USING_CACHE", file_name=file_name) # Silenziato
-            excel_df = st.session_state.excel_df
+    # Raggruppa le domande per block_id per accesso efficiente
+    questions_by_block = {}
+    for q in all_questions_list:
+        block_id = q['block_id']
+        if block_id not in questions_by_block:
+            questions_by_block[block_id] = []
+        questions_by_block[block_id].append(q)
 
-        df = excel_df
-        all_questions = []
-        blocks_summary = []
-        current_block_id = 1
-        current_block_questions = []
-        current_block_type = None # Determinato dalla prima domanda del blocco
-        first_question_in_block = True
+    # Dizionario per mantenere lo stato WRSwOR per ogni blocco
+    wors_state_per_block = {}
+    for block_id, questions in questions_by_block.items():
+        wors_state_per_block[block_id] = {
+            'last_used_indices': set(),
+            'questions': questions,
+            'n_block': len(questions)
+        }
 
-        # Aggiunge una riga vuota virtuale alla fine per processare l'ultimo blocco
-        # Add a virtual empty row at the end to process the last block
-        df.loc[len(df)] = [None] * df.shape[1]
+    # Ciclo principale per generare ogni test
+    for i_test in range(1, num_tests + 1):
+        current_test_questions = []
+        fallback_active_this_test = False
 
-        for index, row in df.iterrows():
-            # Controlla se la riga è completamente vuota (o contiene solo NaN/None)
-            # Check if the row is completely empty (or only NaN/None)
-            is_empty_row = row.isnull().all() or all(s is None or str(s).strip() == "" for s in row)
+        # Itera sui blocchi richiesti dall'utente
+        for block_id, k_requested in block_requests.items():
+            if k_requested <= 0: continue
 
-            if is_empty_row:
-                # Riga vuota: finalizza il blocco precedente se conteneva domande
-                # Empty row: finalize the previous block if it contained questions
-                if current_block_questions:
-                    if current_block_type is None: # Se il blocco era vuoto o solo spazi
-                         current_block_type = 'Indeterminato' # O gestisci come errore
-                    blocks_summary.append({
-                        'block_id': current_block_id,
-                        'type': current_block_type,
-                        'count': len(current_block_questions)
-                    })
-                    # Aggiunge le domande del blocco completato alla lista totale
-                    # Add questions from the completed block to the total list
-                    all_questions.extend(current_block_questions)
+            block_state = wors_state_per_block.get(block_id)
+            if not block_state or not block_state['questions']:
+                final_messages.append(("error", "BLOCK_NOT_FOUND_OR_EMPTY", {"block_id": block_id}))
+                continue
 
-                # Prepara per il prossimo blocco / Prepare for the next block
-                current_block_id += 1
-                current_block_questions = []
-                current_block_type = None
-                first_question_in_block = True
+            block_questions = block_state['questions']
+            last_used_indices_block = block_state['last_used_indices']
+            n_block = block_state['n_block']
+            block_question_indices = [q['original_index'] for q in block_questions]
+
+            if k_requested > n_block:
+                 final_messages.append(("error", "BLOCK_REQUEST_EXCEEDS_AVAILABLE", {"block_id": block_id, "k": k_requested, "n": n_block}))
+                 continue
+
+            # Applica WRSwOR all'interno del blocco
+            candidate_indices = list(set(block_question_indices) - last_used_indices_block)
+            selected_indices_for_block = []
+
+            if len(candidate_indices) < k_requested:
+                fallback_active_this_test = True
+                fallback_activated_ever = True
+                status_callback("warning", "BLOCK_FALLBACK_WARNING",
+                                block_id=block_id, test_num=i_test,
+                                candidates=len(candidate_indices), k=k_requested)
+                candidate_indices = list(block_question_indices)
+                try:
+                    selected_indices_for_block = random.sample(candidate_indices, k_requested)
+                except ValueError:
+                    final_messages.append(("error", "BLOCK_CRITICAL_SAMPLING_ERROR", {"block_id": block_id, "k": k_requested, "n": len(candidate_indices)}))
+                    continue
             else:
-                # Riga non vuota: processa la domanda / Non-empty row: process the question
-                row_list = [str(item).strip() if pd.notna(item) else "" for item in row]
-                question_text = row_list[0]
-                answers = [ans for ans in row_list[1:] if ans]
+                weights = [1] * len(candidate_indices) # Pesi uguali per semplicità
+                try:
+                     selected_indices_for_block = weighted_random_sample_without_replacement(candidate_indices, weights, k_requested)
+                except ValueError as e:
+                     final_messages.append(("error", "BLOCK_WRSWOR_ERROR", {"block_id": block_id, "k": k_requested, "error": str(e)}))
+                     continue
 
-                if question_text: # Processa solo se c'è testo nella domanda / Process only if there's question text
-                    question_type = 'Scelta Multipla' if len(answers) >= 2 else 'Aperte'
+            questions_dict_in_block = {q['original_index']: q for q in block_questions}
+            for idx in selected_indices_for_block:
+                current_test_questions.append(questions_dict_in_block[idx])
 
-                    # Determina/verifica il tipo del blocco alla prima domanda valida
-                    # Determine/verify block type on the first valid question
-                    if first_question_in_block:
-                        current_block_type = question_type
-                        first_question_in_block = False
-                    elif question_type != current_block_type:
-                        # Errore/Warning: Tipi misti nello stesso blocco!
-                        # Error/Warning: Mixed types in the same block!
-                        status_callback("warning", "FH_BLOCK_MIXED_TYPES", block_id=current_block_id, expected=current_block_type, found=question_type, row_num=index + 1)
-                        # Decide se continuare ignorando la domanda o fermarsi
-                        # Decide whether to continue ignoring the question or stop
-                        continue # Ignora questa domanda / Ignore this question
+            block_state['last_used_indices'] = set(selected_indices_for_block)
 
-                    # Crea il dizionario domanda / Create question dictionary
-                    question_dict = {
-                        'question': question_text,
-                        'answers': answers if question_type == 'Scelta Multipla' else [],
-                        'original_index': index,
-                        'type': question_type, # Tipo della domanda specifica / Specific question type
-                        'block_id': current_block_id
-                    }
-                    current_block_questions.append(question_dict)
+        random.shuffle(current_test_questions)
+        all_tests_question_data.append(current_test_questions)
 
-        # Rimuove eventuali blocchi vuoti dalla summary / Remove potential empty blocks from summary
-        blocks_summary = [b for b in blocks_summary if b['count'] > 0]
+    # Aggiungi messaggio finale se fallback è avvenuto
+    if fallback_activated_ever and not any(m[1] == "CL_FINAL_FALLBACK_ACTIVE" for m in final_messages):
+         final_messages.append(("warning", "CL_FINAL_FALLBACK_ACTIVE", {})) # Segnalalo come warning
 
-        if not all_questions:
-            status_callback("error", "FH_NO_VALID_QUESTIONS", filename=file_name)
-            return None, None, "FH_NO_VALID_QUESTIONS"
-
-        # status_callback("info", "FH_LOAD_COMPLETE_BLOCKS", count=len(all_questions), num_blocks=len(blocks_summary)) # Silenziato
-        return all_questions, blocks_summary, None
-
-    except Exception as e:
-        status_callback("error", "FH_UNEXPECTED_ERROR", filename=file_name, error=str(e))
-        if 'loaded_file_name' in st.session_state: del st.session_state['loaded_file_name']
-        if 'excel_df' in st.session_state: del st.session_state['excel_df']
-        return None, None, "FH_UNEXPECTED_ERROR"
+    return all_tests_question_data, final_messages
 
