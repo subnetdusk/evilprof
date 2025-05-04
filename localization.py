@@ -1,12 +1,12 @@
-# localization.py (Cleaned Indentation & Updated Keys)
+# localization.py (Versione COMPLETA con logica campionamento aggiornata n > 2k)
 
 TEXTS = {
     "it": {
         # Titoli e Intestazioni
         "PAGE_TITLE": "EvilProf 😈 - Per Blocchi",
         "MAIN_TITLE": "EvilProf 😈 - Generatore per Blocchi",
-        "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel.",
-        "INSTRUCTIONS_HEADER": "ℹ️ Istruzioni e Preparazione File Excel (Logica a Blocchi)",
+        "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel/CSV.", # Aggiornato
+        "INSTRUCTIONS_HEADER": "ℹ️ Istruzioni e Preparazione File Excel/CSV (Logica a Blocchi)", # Aggiornato
         "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
         "VALIDATION_TEST_HEADER": "Test Funzionale",
         "OUTPUT_AREA_HEADER": "Output e Messaggi",
@@ -15,8 +15,8 @@ TEXTS = {
         "FOOTER_TEXT": "EvilProf v1.1 (Blocchi) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
         # Widget Sidebar
-        "UPLOAD_LABEL": "1. Carica File Excel/CSV",
-        "UPLOAD_HELP": "Trascina o seleziona il file (.xlsx, .xls, .csv) con le domande organizzate in blocchi separati da righe vuote.",
+        "UPLOAD_LABEL": "1. Carica File Excel/CSV", # Aggiornato
+        "UPLOAD_HELP": "Trascina o seleziona il file (.xlsx, .xls, .csv) con le domande organizzate in blocchi separati da righe vuote.", # Aggiornato
         "SUBJECT_LABEL": "2. Nome della Materia",
         "SUBJECT_HELP": "Apparirà nel titolo di ogni verifica.",
         "SUBJECT_DEFAULT": "Informatica",
@@ -27,16 +27,17 @@ TEXTS = {
         "TOTAL_QUESTIONS_SELECTED": "Domande Totali Selezionate",
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
         "VALIDATE_BUTTON_LABEL": "🧪 Esegui Test Funzionale",
-        "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.",
+        "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.", # Aggiornato
 
         # Messaggi di Stato / Errori / Warning
-        "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
+        "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante. La generazione del PDF è bloccata. Assicurati di averla installata e che le sue dipendenze (GTK+, Pango, Cairo) siano presenti nel sistema.",
         "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)",
+        "ANALYSIS_IMAGE_CAPTION": "Esempio di analisi di similarità generata dal test funzionale", # Aggiunto
         "IMAGE_NOT_FOUND_WARNING": "Nota: Immagine di esempio '{image_path}' non trovata.",
         "IMAGE_LOAD_ERROR": "Errore caricamento immagine '{image_path}': {error}",
         "VALIDATION_START": "Avvio Test Funzionale...",
         "GENERATION_START": "Avvio Generazione Verifiche...",
-        "UPLOAD_FIRST_WARNING": "⚠️ Per favore, carica prima un file Excel/CSV.",
+        "UPLOAD_FIRST_WARNING": "⚠️ Per favore, carica prima un file Excel/CSV.", # Aggiornato
         "LOADING_DATA_SPINNER": "⏳ Analisi file e identificazione blocchi...",
         "LOAD_ERROR": "Errore caricamento dati: {error_msg}",
         "NO_VALID_QUESTIONS_ERROR": "Nessuna domanda valida trovata nel file caricato.",
@@ -52,10 +53,10 @@ TEXTS = {
         "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Scarica PDF Generato",
         "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Errore durante la creazione del file PDF.",
-        "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nella sidebar e premi 'Genera Verifiche PDF'.",
+        "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nella sidebar e premi 'Genera Verifiche PDF'.", # Aggiornato
         "VALIDATION_NO_MESSAGES": "Il test funzionale non ha prodotto messaggi specifici.",
 
-        # Testo Intro (AGGIORNATO CON CONDIZIONE WRSwOR)
+        # Testo Intro (AGGIORNATO CON CONDIZIONE WRSwOR n > 2k)
         "INTRO_TEXT_NEW": """
 EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto di domande da blocchi definiti nel tuo file Excel o CSV.
 
@@ -81,7 +82,7 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
 4.  Ripeti i passaggi 2 e 3 per tutti i blocchi desiderati.
 5.  **Non inserire nomi di argomento o intestazioni di colonna.**
 
-*Vedi immagine di esempio qui sotto.*
+*Vedi immagini di esempio qui sotto.*
 """,
         # Testi usati nel PDF
         "PDF_TEST_TITLE": "Verifica di {subject_name}",
@@ -148,8 +149,8 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         # Titles & Headers
         "PAGE_TITLE": "EvilProf 😈 - By Blocks",
         "MAIN_TITLE": "EvilProf 😈 - Block-Based Generator",
-        "SUBHEADER_NEW": "Generate tests by selecting the exact number of questions per block from Excel.",
-        "INSTRUCTIONS_HEADER": "ℹ️ Instructions & Excel File Preparation (Block Logic)",
+        "SUBHEADER_NEW": "Generate tests by selecting the exact number of questions per block from Excel/CSV.", # Updated
+        "INSTRUCTIONS_HEADER": "ℹ️ Instructions & Excel/CSV File Preparation (Block Logic)", # Updated
         "GENERATION_PARAMS_HEADER": "Generation Parameters",
         "VALIDATION_TEST_HEADER": "Functional Test",
         # "SOURCE_CODE_HEADER": "Source Code", # Removed
@@ -159,8 +160,8 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "FOOTER_TEXT": "EvilProf v1.1 (Blocks) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
         # Widget Sidebar
-        "UPLOAD_LABEL": "1. Upload Excel/CSV File",
-        "UPLOAD_HELP": "Drag and drop or select the Excel/CSV file (.xlsx, .xls, .csv) with questions organized in blocks separated by empty rows.",
+        "UPLOAD_LABEL": "1. Upload Excel/CSV File", # Updated
+        "UPLOAD_HELP": "Drag and drop or select the Excel/CSV file (.xlsx, .xls, .csv) with questions organized in blocks separated by empty rows.", # Updated
         "SUBJECT_LABEL": "2. Subject Name",
         "SUBJECT_HELP": "Will appear in the title of each test.",
         "SUBJECT_DEFAULT": "Computer Science",
@@ -171,17 +172,17 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "TOTAL_QUESTIONS_SELECTED": "Total Questions Selected",
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
         "VALIDATE_BUTTON_LABEL": "🧪 Run Functional Test",
-        "VALIDATE_BUTTON_HELP_NEW": "Runs the Monte Carlo statistical analysis (using 'test_set_4_by_12_questions.xlsx') on test similarity.",
-        # Source code download removed
+        "VALIDATE_BUTTON_HELP_NEW": "Runs the Monte Carlo statistical analysis (using 'test_set_4_by_12_questions.xlsx') on test similarity.", # Updated
 
         # Status / Error / Warning Messages
         "WEASYPRINT_ERROR": "🚨 **Warning:** The WeasyPrint library is not available or not functional. PDF generation is blocked...",
         "IMAGE_CAPTION": "Example of valid Excel file structure (with separated blocks)",
+        "ANALYSIS_IMAGE_CAPTION": "Example of similarity analysis generated by the functional test", # Added
         "IMAGE_NOT_FOUND_WARNING": "Note: Example image '{image_path}' not found.",
         "IMAGE_LOAD_ERROR": "Error loading image '{image_path}': {error}",
         "VALIDATION_START": "Starting Functional Test...",
         "GENERATION_START": "Starting Test Generation...",
-        "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel/CSV file first.",
+        "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel/CSV file first.", # Updated
         "LOADING_DATA_SPINNER": "⏳ Analyzing file and identifying blocks...",
         "LOAD_ERROR": "Error loading data: {error_msg}",
         "NO_VALID_QUESTIONS_ERROR": "No valid questions found in the uploaded file.",
@@ -197,10 +198,10 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Download Generated PDF",
         "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Error during PDF creation.",
-        "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the sidebar, and press 'Generate PDF Tests'.",
+        "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the sidebar, and press 'Generate PDF Tests'.", # Updated
         "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
 
-        # Intro Text (UPDATED WITH WRSwOR CONDITION)
+        # Intro Text (UPDATED WITH WRSwOR CONDITION n > 2k)
         "INTRO_TEXT_NEW": """
 EvilProf (Block Version) generates PDF tests by selecting an exact number of questions from blocks defined in your Excel or CSV file.
 
@@ -226,7 +227,7 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
 4.  Repeat steps 2 and 3 for all desired blocks.
 5.  **Do not include topic names or column headers.**
 
-*See example image below.*
+*See example images below.*
 """,
         # Texts used in PDF
         "PDF_TEST_TITLE": "Test for {subject_name}",
@@ -278,15 +279,15 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
         "TEST_WRONG_Q_PER_BLOCK_COUNT": "ERROR Test Data: Block {block_id} has {found} questions, expected {expected}.",
         "STAT_TEST_K_INVALID": "ERROR Test: Requested k={k} is invalid for any block.",
         "STAT_TEST_GENERATION_FAILED_KPB": "❌ Failed test sequence generation for k_per_block={k_per_block}.",
-        "MC_TEST_UNIFIED_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k/block values [{k_range}], {num_tests} tests/seq)...",
+        "MC_TEST_UNIFIED_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k/block values [{k_range}], {num_tests} tests/seq)...", # Updated key
         "MC_TEST_RUN_PROGRESS": "Monte Carlo Progress: Run {current_run}/{total_runs}...",
-        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Analysis failed for k/block={k_per_block} (Method: {method}) in run {run}.",
+        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Analysis failed for k/block={k_per_block} (Method: {method}) in run {run}.", # Updated key
         "MC_TEST_ALL_COMPLETE": "--- Monte Carlo simulation completed. ---",
         "STAT_TEST_EXCEL_CREATED": "✅ Excel file with statistical results '{filename}' created.",
         "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Error saving Excel file '{filename}': {error}",
         "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ No detailed data collected to create the Excel file.",
         "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Download Statistical Results (.xlsx)",
-        "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis (WRSwOR/Simple) by distance and k/block.",
+        "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis (WRSwOR/Simple) by distance and k/block.", # Updated
         "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during functional test execution: {error}",
         "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
     }
