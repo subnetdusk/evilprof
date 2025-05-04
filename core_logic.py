@@ -1,10 +1,17 @@
-# core_logic.py (Unified sampling logic: Simple Random if k >= n/2)
+# core_logic.py (Unified sampling logic - Cleaned Indentation)
 import random
 import math
 import heapq
+from collections import defaultdict # Necessario per raggruppare domande
 
-# Funzione WRSwOR (invariata)
+# ================================================================
+# Funzione Helper WRSwOR / WRSwOR Helper Function
+# ================================================================
 def weighted_random_sample_without_replacement(population, weights, k):
+    """
+    Seleziona k elementi unici da una popolazione data, senza reinserimento,
+    utilizzando un campionamento ponderato. (Implementazione A-ExpJ)
+    """
     n = len(population)
     if k < 0: raise ValueError("k non può essere negativo")
     if k == 0: return []
@@ -31,7 +38,9 @@ def weighted_random_sample_without_replacement(population, weights, k):
         elif key > min_heap[0][0]: heapq.heapreplace(min_heap, (key, item))
     return [item for key, item in min_heap]
 
-# Logica Generazione Test basata su Blocchi (con soglia n=2k per Simple Random)
+# ================================================================
+# Logica Generazione Test basata su Blocchi / Block-Based Test Generation Logic
+# ================================================================
 def generate_all_tests_data(all_questions_list, block_requests, num_tests, status_callback):
     """
     Genera dati test. Usa Simple Random Sampling se k richiesto >= n_blocco / 2,
@@ -40,12 +49,14 @@ def generate_all_tests_data(all_questions_list, block_requests, num_tests, statu
     """
     all_tests_question_data = []
     final_messages = []
-    fallback_activated_ever = False # Traccia fallback *solo* per WRSwOR
+    fallback_activated_ever = False
 
+    # Raggruppa le domande per block_id
     questions_by_block = defaultdict(list)
     for q in all_questions_list:
         questions_by_block[q['block_id']].append(q)
 
+    # Stato WRSwOR per ogni blocco
     wors_state_per_block = {}
     for block_id, questions in questions_by_block.items():
         wors_state_per_block[block_id] = {
@@ -54,9 +65,11 @@ def generate_all_tests_data(all_questions_list, block_requests, num_tests, statu
             'n_block': len(questions)
         }
 
+    # Ciclo principale per generare ogni test
     for i_test in range(1, num_tests + 1):
         current_test_questions = []
 
+        # Itera sui blocchi richiesti dall'utente
         for block_id, k_requested in block_requests.items():
             if k_requested <= 0: continue
 
@@ -75,19 +88,16 @@ def generate_all_tests_data(all_questions_list, block_requests, num_tests, statu
                  continue
 
             selected_indices_for_block = []
-            use_simple_random = (k_requested * 2 >= n_block) # Condizione n <= 2k
+            use_simple_random = (k_requested * 2 >= n_block)
 
             if use_simple_random:
                 # --- Usa Campionamento Casuale Semplice ---
                 candidate_indices_simple = list(block_question_indices_set)
                 try:
-                    # Assicura k <= n
                     actual_k = min(k_requested, len(candidate_indices_simple))
-                    if actual_k < k_requested: # Non dovrebbe succedere
+                    if actual_k < k_requested:
                          final_messages.append(("warning", "BLOCK_K_ADJUSTED_IN_FALLBACK", {"block_id": block_id, "requested": k_requested, "actual": actual_k}))
                     selected_indices_for_block = random.sample(candidate_indices_simple, actual_k)
-                    # Non resettare last_used_indices qui, WRSwOR lo farà se/quando verrà usato di nuovo per k < n/2
-                    # Do not reset last_used_indices here, WRSwOR will handle it if/when used again for k < n/2
                 except ValueError:
                     final_messages.append(("error", "BLOCK_CRITICAL_SAMPLING_ERROR", {"block_id": block_id, "k": k_requested, "n": len(candidate_indices_simple)}))
                     continue
@@ -118,7 +128,6 @@ def generate_all_tests_data(all_questions_list, block_requests, num_tests, statu
                          final_messages.append(("error", "BLOCK_WRSWOR_ERROR", {"block_id": block_id, "k": k_requested, "error": str(e)}))
                          continue
                 # Aggiorna last_used solo quando si usa WRSwOR
-                # Update last_used only when using WRSwOR
                 block_state['last_used_indices'] = set(selected_indices_for_block)
 
             # Aggiunge domande selezionate
