@@ -29,9 +29,7 @@ TEXTS = {
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
         "VALIDATE_BUTTON_LABEL": "🧪 Esegui Test Funzionale",
         "VALIDATE_BUTTON_HELP_NEW": "[TEST DISABILITATO] Esegue test interni sulla logica.",
-        "DOWNLOAD_SOURCE_BUTTON_LABEL": "📥 Scarica Codice App (app.py)",
-        "DOWNLOAD_SOURCE_CAPTION": "Scarica gli altri file (.py) separatamente.",
-        "SOURCE_UNAVAILABLE_WARNING": "Download codice sorgente non disponibile: {error}",
+        # Download codice rimosso
 
         # Messaggi di Stato / Errori / Warning
         "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
@@ -101,6 +99,8 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "FH_NO_VALID_QUESTIONS": "Errore: Nessuna domanda valida trovata nel file '{file_name}'.",
         "FH_UNEXPECTED_ERROR": "Errore imprevisto durante la lettura/analisi del file Excel '{file_name}': {error}",
         "FH_BLOCK_MIXED_TYPES": "⚠️ Attenzione Blocco {block_id}: Trovata domanda di tipo '{found}' (riga {row_num}), ma il blocco era stato identificato come '{expected}'. La domanda verrà ignorata.",
+        "FH_CSV_READ_ERROR": "Errore lettura CSV '{filename}'. Controlla delimitatore (virgola/punto e virgola) e codifica. Dettagli: {error}",
+        "FH_UNSUPPORTED_FORMAT": "ERRORE: Formato file non supportato '{extension}' per il file '{filename}'. Usare .xlsx, .xls o .csv.",
 
         # Messaggi core_logic
         "CL_FALLBACK_MC_WARNING": "[Blocco {block_id} - Test {test_num}] Fallback attivo (Scelta Multipla): non abbastanza domande diverse ({candidates}) rispetto al test precedente nel blocco. Campiono da tutte ({total}) nel blocco.",
@@ -110,6 +110,7 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "BLOCK_CRITICAL_SAMPLING_ERROR": "Errore Critico Campionamento Blocco {block_id}: Impossibile campionare {k} da {n} candidati.",
         "BLOCK_WRSWOR_ERROR": "Errore Critico WRSwOR Blocco {block_id} (k={k}): {error}",
         "CL_FINAL_FALLBACK_ACTIVE": "‼️ ATTENZIONE GENERALE: Il fallback è stato attivato per almeno un blocco durante la generazione. La diversità *all'interno* di quei blocchi potrebbe non essere garantita per tutti i test.",
+        "BLOCK_K_ADJUSTED_IN_FALLBACK": "⚠️ Attenzione Blocco {block_id}: Richieste {requested} domande, ma solo {actual} disponibili durante il fallback. Numero adattato.",
 
         # Messaggi pdf_generator
         "PG_PDF_GENERATION_START": "⚙️ Inizio generazione PDF...",
@@ -128,9 +129,15 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "TEST_LOAD_ERROR": "ERRORE imprevisto durante il caricamento del file di test '{filename}': {error}",
         "TEST_ABORTED_LOAD_FAILED": "❌ Test annullato: impossibile caricare i dati di test.",
         "TEST_WRONG_QUESTION_COUNT": "ERRORE Dati Test: Trovate {mc} MC e {oe} OE domande, attese {expected} per tipo.",
+        "TEST_WRONG_BLOCK_COUNT": "ERRORE Dati Test: Trovati {found} blocchi, attesi {expected}.",
+        "TEST_WRONG_Q_PER_BLOCK_COUNT": "ERRORE Dati Test: Blocco {block_id} ha {found} domande, attese {expected}.",
+        "STAT_TEST_K_INVALID": "ERRORE Test: k={k} richiesto non è valido per nessun blocco.",
+        "STAT_TEST_GENERATION_FAILED_KPB": "❌ Fallita generazione sequenza test per k_per_block={k_per_block}.",
         "MC_TEST_STARTING": "Avvio simulazione Monte Carlo ({num_runs} run, {num_k} valori di k, {num_tests} test/k)...",
+        "MC_TEST_KPB_STARTING": "Avvio simulazione Monte Carlo ({num_runs} run, {num_k} valori di k/blocco, {num_tests} test/seq)...",
         "MC_TEST_RUN_PROGRESS": "Progresso Monte Carlo: Run {current_run}/{total_runs}...",
         "MC_TEST_FAILED_FOR_K_IN_RUN": "⚠️ Fallita analisi per k={k} nella run {run}.",
+        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Fallita analisi per k/blocco={k_per_block} nella run {run}.",
         "MC_TEST_ALL_COMPLETE": "--- Simulazione Monte Carlo completata. ---",
         "STAT_TEST_EXCEL_CREATED": "✅ File Excel con risultati statistici '{filename}' creato.",
         "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Errore durante il salvataggio del file Excel '{filename}': {error}",
@@ -167,9 +174,7 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
         "VALIDATE_BUTTON_LABEL": "🧪 Run Functional Test",
         "VALIDATE_BUTTON_HELP_NEW": "[TEST DISABLED] Runs internal test scenarios using 'test_questions.xlsx' to verify logic.",
-        "DOWNLOAD_SOURCE_BUTTON_LABEL": "📥 Download App Code (app.py)",
-        "DOWNLOAD_SOURCE_CAPTION": "Download other (.py) files separately.",
-        "SOURCE_UNAVAILABLE_WARNING": "Source code download unavailable: {error}",
+        # Source code download removed
 
         # Status / Error / Warning Messages
         "WEASYPRINT_ERROR": "🚨 **Warning:** The WeasyPrint library is not available or not functional. PDF generation is blocked...",
@@ -239,6 +244,8 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
         "FH_NO_VALID_QUESTIONS": "Error: No valid questions found in file '{file_name}'.",
         "FH_UNEXPECTED_ERROR": "Unexpected error while reading/analyzing Excel file '{file_name}': {error}",
         "FH_BLOCK_MIXED_TYPES": "⚠️ Warning Block {block_id}: Found question of type '{found}' (row {row_num}), but block was identified as '{expected}'. Question will be ignored.",
+        "FH_CSV_READ_ERROR": "Error reading CSV '{filename}'. Check delimiter (comma/semicolon) and encoding. Details: {error}",
+        "FH_UNSUPPORTED_FORMAT": "ERROR: Unsupported file format '{extension}' for file '{filename}'. Use .xlsx, .xls, or .csv.",
 
         # core_logic messages
         "CL_FALLBACK_MC_WARNING": "[Block {block_id} - Test {test_num}] Fallback active (Multiple Choice): not enough diverse questions ({candidates}) compared to the previous test in the block. Sampling from all ({total}) in block.",
@@ -248,6 +255,7 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
         "BLOCK_CRITICAL_SAMPLING_ERROR": "Critical Sampling Error Block {block_id}: Cannot sample {k} from {n} candidates.",
         "BLOCK_WRSWOR_ERROR": "Critical WRSwOR Error Block {block_id} (k={k}): {error}",
         "CL_FINAL_FALLBACK_ACTIVE": "‼️ GENERAL WARNING: Fallback was activated for at least one block during generation. Diversity *within* those blocks might not be guaranteed for all tests.",
+        "BLOCK_K_ADJUSTED_IN_FALLBACK": "⚠️ Warning Block {block_id}: Requested {requested} questions, but only {actual} available during fallback. Number adjusted.",
 
         # pdf_generator messages
         "PG_PDF_GENERATION_START": "⚙️ Starting PDF generation...",
@@ -258,7 +266,7 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERROR WeasyPrint: Missing dependencies (GTK+/Pango/Cairo?). Details: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERROR during PDF generation with WeasyPrint: {error}",
 
-        # Test keys (kept for future update of test.py)
+        # Test keys
         "TEST_FILE_NOT_FOUND": "ERROR: Test file '{filename}' not found. Please run the 'generate_test_excel.py' script first.",
         "TEST_LOADING_DATA": "Loading data from test file '{filename}'...",
         "TEST_NO_QUESTIONS_FOUND": "ERROR: No valid questions found in test file '{filename}'.",
@@ -266,9 +274,15 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
         "TEST_LOAD_ERROR": "Unexpected ERROR while loading test file '{filename}': {error}",
         "TEST_ABORTED_LOAD_FAILED": "❌ Test aborted: failed to load test data.",
         "TEST_WRONG_QUESTION_COUNT": "ERROR Test Data: Found {mc} MC and {oe} OE questions, expected {expected} of each.",
-        "MC_TEST_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k-values, {num_tests} tests/k)...",
+        "TEST_WRONG_BLOCK_COUNT": "ERROR Test Data: Found {found} blocks, expected {expected}.",
+        "TEST_WRONG_Q_PER_BLOCK_COUNT": "ERROR Test Data: Block {block_id} has {found} questions, expected {expected}.",
+        "STAT_TEST_K_INVALID": "ERROR Test: Requested k={k} is invalid for any block.",
+        "STAT_TEST_GENERATION_FAILED_KPB": "❌ Failed test sequence generation for k_per_block={k_per_block}.",
+        "MC_TEST_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k-values, {num_tests} tests/k)...", # Old
+        "MC_TEST_KPB_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k/block values, {num_tests} tests/seq)...", # New
         "MC_TEST_RUN_PROGRESS": "Monte Carlo Progress: Run {current_run}/{total_runs}...",
-        "MC_TEST_FAILED_FOR_K_IN_RUN": "⚠️ Analysis failed for k={k} in run {run}.",
+        "MC_TEST_FAILED_FOR_K_IN_RUN": "⚠️ Analysis failed for k={k} in run {run}.", # Old
+        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Analysis failed for k/block={k_per_block} in run {run}.", # New
         "MC_TEST_ALL_COMPLETE": "--- Monte Carlo simulation completed. ---",
         "STAT_TEST_EXCEL_CREATED": "✅ Excel file with statistical results '{filename}' created.",
         "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Error saving Excel file '{filename}': {error}",
