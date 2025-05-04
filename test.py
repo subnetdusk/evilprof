@@ -1,19 +1,19 @@
-# test.py (Unified analysis k=1-11, WRSwOR/Simple Random split, Excel Formatting)
+# test.py (Unified analysis k=1-11, WRSwOR/Simple Random split, Excel Formatting, Import Fix)
 import pandas as pd
 import random
 import os
 import math
+# --- AGGIUNTA IMPORT MANCANTE ---
+# --- ADDED MISSING IMPORT ---
 from collections import defaultdict
+# --- FINE AGGIUNTA ---
 
 # Importa la funzione di generazione principale da core_logic
-# Import the main generation function from core_logic
-# Nota: Ora useremo la versione aggiornata di generate_all_tests_data
-# Note: We will now use the updated version of generate_all_tests_data
 from core_logic import generate_all_tests_data
 
 # Costante per il nome del file di test e output
 TEST_EXCEL_FILE = "test_set_4_by_12_questions.xlsx"
-OUTPUT_EXCEL_FILE = "similarity_analysis_unified_dice_mc_15t.xlsx" # Nome file output aggiornato
+OUTPUT_EXCEL_FILE = "similarity_analysis_unified_dice_mc_15t.xlsx"
 
 def _load_test_questions(status_callback):
     """
@@ -114,12 +114,8 @@ def _run_single_unified_analysis_for_k(k_per_block, blocks_info, all_questions_l
          return None, generation_error_messages
 
     # Chiama la funzione generate_all_tests_data aggiornata da core_logic
-    # Questa funzione ora gestisce internamente la scelta tra WRSwOR e Simple Random
     generated_tests_data, gen_messages_internal = generate_all_tests_data(
-        all_questions_list,
-        block_requests,
-        num_tests_to_generate,
-        nop_callback # Passa il callback silenziato
+        all_questions_list, block_requests, num_tests_to_generate, nop_callback
     )
     # Raccoglie solo errori critici
     generation_error_messages.extend([msg for msg in gen_messages_internal if msg[0] == 'error'])
@@ -182,30 +178,25 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
 
     # 2. Definisci parametri
     num_tests_per_sequence = 15
-    k_per_block_values = range(1, 12) # Da 1 a 11 / From 1 to 11
+    k_per_block_values = range(1, 12) # Da 1 a 11
     max_distance_overall = 0
     progress_update_frequency = 5
 
-    # Aggiorna messaggio iniziale / Update initial message
-    monte_carlo_summary.append(("info", "MC_TEST_UNIFIED_STARTING", {
-        "num_runs": num_monte_carlo_runs,
-        "num_k": len(k_per_block_values),
-        "k_range": f"1-{max(k_per_block_values)}",
-        "num_tests": num_tests_per_sequence
-    })) # Nuova chiave / New key
+    # --- RIMOSSO MESSAGGIO INIZIO TEST ---
+    # monte_carlo_summary.append(("info", "MC_TEST_UNIFIED_STARTING", {...}))
 
     # 3. Ciclo Monte Carlo Esterno
     for run in range(1, num_monte_carlo_runs + 1):
-        if run % progress_update_frequency == 0 or run == num_monte_carlo_runs:
-             status_callback("info", "MC_TEST_RUN_PROGRESS", current_run=run, total_runs=num_monte_carlo_runs)
+        # --- RIMOSSO MESSAGGIO PROGRESSO RUN ---
+        # if run % progress_update_frequency == 0 or run == num_monte_carlo_runs:
+        #      status_callback("info", "MC_TEST_RUN_PROGRESS", current_run=run, total_runs=num_monte_carlo_runs)
 
         # Ciclo sui valori di k_per_block interno
         for k_block in k_per_block_values:
-            # Determina il metodo che verrà usato da core_logic / Determine method core_logic will use
-            # Assumiamo n=12 per blocco / Assume n=12 per block
+            # Determina il metodo che verrà usato da core_logic
             method = "WRSwOR" if (k_block * 2 < expected_q_per_block) else "Simple Random"
             if k_block not in sampling_method_used:
-                sampling_method_used[k_block] = method # Registra metodo / Record method
+                sampling_method_used[k_block] = method
 
             # Esegui una singola analisi per questo k_block
             avg_dice_by_distance, gen_errors = _run_single_unified_analysis_for_k(
@@ -220,6 +211,7 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
                         results_accumulator[k_block][d]['count'] += 1
                         max_distance_overall = max(max_distance_overall, d)
             else:
+                # Mantieni il warning per fallimento di una run specifica
                 monte_carlo_summary.append(("warning", "MC_TEST_FAILED_FOR_KPB_IN_RUN", {"k_per_block": k_block, "run": run, "method": method}))
 
     # 4. Calcola Medie Finali e Prepara Output per Excel
@@ -231,38 +223,38 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
         for d in range(1, max_distance_overall + 1):
             data = results_accumulator[k_block].get(d)
             final_avg, num_samples = (data['sum'] / data['count'], data['count']) if data and data['count'] > 0 else (None, 0)
-            # Aggiunge dati per Excel / Add data for Excel
             detailed_results_for_excel.append({
                 'k_per_block': k_block,
                 'distance': d,
                 'avg_dice': final_avg,
                 'num_samples': num_samples,
-                'method': sampling_method_used.get(k_block, 'Unknown') # Aggiunge metodo / Add method
+                'method': sampling_method_used.get(k_block, 'Unknown')
             })
+        # --- RIMOSSO MESSAGGIO RISULTATI PER K ---
 
-    # 5. Crea e salva il file Excel con formattazione e foglio unico
+    # 5. Crea e salva il file Excel
     excel_created = False
     excel_filename = None
     if detailed_results_for_excel:
         try:
             df_results = pd.DataFrame(detailed_results_for_excel)
-            # Pivot per avere k vs distanza / Pivot for k vs distance
+            # Pivot per avere k vs distanza
             df_pivot = pd.pivot_table(df_results, values='avg_dice', index='k_per_block', columns='distance')
-
-            # --- Formattazione Indice e Colonne ---
-            # Crea nuovo indice formattato / Create new formatted index
+            # Aggiungi colonna Metodo all'indice (o come colonna separata)
+            # Add Method column to index (or as separate column)
+            method_map = pd.Series(sampling_method_used, name='Metodo')
+            df_pivot = df_pivot.join(method_map)
+            # Formatta indice k
             df_pivot.index = [f"{k} / {expected_q_per_block}" for k in df_pivot.index]
-            df_pivot.index.name = "k / n (per blocco)" # Nome indice / Index name
-            # Crea nuovi nomi colonna / Create new column names
-            df_pivot.columns = [f"Distanza {col}" for col in df_pivot.columns]
-            # --- Fine Formattazione ---
+            df_pivot.index.name = f"k / n (n={expected_q_per_block} per blocco)"
+            # Formatta colonne distanza
+            df_pivot.columns = [f"Distanza {col}" if isinstance(col, int) else col for col in df_pivot.columns] # Gestisce colonna Metodo
+            # Ordina
+            df_pivot = df_pivot.sort_index(ascending=True)
+            df_pivot = df_pivot.reindex(sorted([col for col in df_pivot.columns if col.startswith('Distanza')], key=lambda x: int(x.split()[-1])) + ['Metodo'], axis=1) # Ordina colonne
 
-            df_pivot = df_pivot.sort_index(ascending=True) # Ordina per k crescente / Sort by k ascending
-            df_pivot = df_pivot.reindex(sorted(df_pivot.columns, key=lambda x: int(x.split()[-1])), axis=1) # Ordina per distanza / Sort by distance
-
-            # Salva su foglio unico / Save to single sheet
             df_pivot.to_excel(OUTPUT_EXCEL_FILE, sheet_name='Similarity_Analysis')
-
+            # Messaggio creazione Excel
             monte_carlo_summary.append(("success", "STAT_TEST_EXCEL_CREATED", {"filename": OUTPUT_EXCEL_FILE}))
             excel_created = True
             excel_filename = OUTPUT_EXCEL_FILE
