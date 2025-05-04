@@ -1,6 +1,8 @@
 # EvilProf 😈
 
-Generatore di verifiche casuali e diverse da Excel a PDF (Streamlit App)
+Generatore di verifiche casuali e diverse da Excel a PDF. 
+
+Con un numero sufficiente di domande, l'app **assicura l’eterogeneità tra test adiacenti** e **massimizza la diversità locale** tramite campionamento ponderato a decadimento esponenziale.
 
 [English Version](#english-version)
 
@@ -19,8 +21,8 @@ Le caratteristiche principali includono:
 -   **Personalizzazione:** Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
 -   **Randomizzazione:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
 -   **Diversità Migliorata (con Fallback):** L'applicazione tenta di utilizzare una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)** per selezionare le domande. Questo metodo:
-    -   Tenta di **garantire** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*. Ciò richiede che il numero totale di domande di un certo tipo (`n`) sia strettamente maggiore del doppio del numero di domande di quel tipo richieste per verifica (`k`), ovvero `n >= 2k`.
-    -   Tenta di **favorire statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k`.
+    -   **Garantisce** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*. Ciò richiede che il numero totale di domande di un certo tipo (`n`) sia strettamente maggiore del doppio del numero di domande di quel tipo richieste per verifica (`k`), ovvero `n >= 2k`.
+    -   **Favorisce statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k`.
     -   **Fallback:** Se non ci sono abbastanza domande uniche disponibili per garantire la diversità rispetto al test precedente (`n <= 2k`), l'applicazione **passerà a un campionamento casuale semplice** da *tutte* le domande disponibili per quel tipo, **perdendo la garanzia di diversità** tra test adiacenti. Verrà mostrato un avviso rosso prominente in tal caso.
 -   **Output PDF:** Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
 
@@ -41,6 +43,8 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
 ## 🇬🇧 English Version <a name="english-version"></a>
 
 EvilProf is a web application built with Streamlit that allows you to quickly generate PDF files containing custom tests.
+
+If the number of questions is sufficient, **it ensures that two adjacent tests are entirely distinct** and **maximizes diversity among nearby tests** following an exponential decay pattern—by employing a weighted question sampling technique.
 
 This app is [hosted here in streamlit.app](https://evilprof.streamlit.app/)
 
