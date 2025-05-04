@@ -1,7 +1,7 @@
-# file_handler.py (Gestisce sia CSV che XLSX)
+# file_handler.py (Rimosso caching basato sul nome file)
 import pandas as pd
 import streamlit as st
-import os # Necessario per controllare estensione file
+import os
 
 def load_questions_from_excel(uploaded_file, status_callback):
     """
@@ -14,61 +14,51 @@ def load_questions_from_excel(uploaded_file, status_callback):
         - error_key: Chiave errore (str) o None se successo.
     """
     if uploaded_file is None:
+        # Questo errore viene gestito a monte in app.py
         return None, None, "UPLOAD_FIRST_WARNING"
 
     file_name = uploaded_file.name
-    df = None # Inizializza DataFrame a None
+    df = None
 
     try:
         # Controlla l'estensione del file per usare il lettore corretto
-        # Check file extension to use the correct reader
         _, file_extension = os.path.splitext(file_name)
         file_extension = file_extension.lower()
 
-        # Usa cache sessione basata sul nome file
-        # Use session cache based on filename
-        if 'processed_filename' not in st.session_state or st.session_state.processed_filename != file_name:
-            # status_callback("info", "FH_READING_FILE", filename=file_name) # Messaggio generico lettura
+        # --- RIMOZIONE LOGICA CACHE ---
+        # Legge sempre il file fornito / Always read the provided file
+        # status_callback("info", "FH_READING_FILE", filename=file_name) # Silenziato
 
-            if file_extension in ['.xlsx', '.xls']:
-                excel_df = pd.read_excel(uploaded_file, header=None)
-                # Converti tutto in stringa subito per consistenza
-                # Convert everything to string immediately for consistency
-                df = excel_df.fillna('').astype(str)
-            elif file_extension == '.csv':
-                # Prova con virgola, poi punto e virgola come delimitatori comuni
-                # Try comma, then semicolon as common delimiters
+        if file_extension in ['.xlsx', '.xls']:
+            excel_df = pd.read_excel(uploaded_file, header=None)
+            df = excel_df.fillna('').astype(str)
+        elif file_extension == '.csv':
+            try:
+                content_bytes = uploaded_file.getvalue()
+                content_str = content_bytes.decode('utf-8-sig')
+                from io import StringIO
+                csv_file_like = StringIO(content_str)
+                csv_df = pd.read_csv(csv_file_like, header=None, sep=',', skipinitialspace=True)
+                df = csv_df.fillna('').astype(str)
+            except Exception as e_comma:
                 try:
-                    # Legge i bytes e decodifica, gestendo potenziali BOM
-                    # Read bytes and decode, handling potential BOM
+                    # Rilegge i bytes perché getvalue() potrebbe consumare lo stream
+                    uploaded_file.seek(0) # Torna all'inizio dello stream
                     content_bytes = uploaded_file.getvalue()
-                    content_str = content_bytes.decode('utf-8-sig') # utf-8-sig gestisce BOM
+                    content_str = content_bytes.decode('utf-8-sig')
                     from io import StringIO
                     csv_file_like = StringIO(content_str)
-                    csv_df = pd.read_csv(csv_file_like, header=None, sep=',', skipinitialspace=True)
+                    csv_df = pd.read_csv(csv_file_like, header=None, sep=';', skipinitialspace=True)
                     df = csv_df.fillna('').astype(str)
-                except Exception as e_comma: # Se fallisce con virgola, prova punto e virgola
-                    try:
-                        content_bytes = uploaded_file.getvalue()
-                        content_str = content_bytes.decode('utf-8-sig')
-                        from io import StringIO
-                        csv_file_like = StringIO(content_str)
-                        csv_df = pd.read_csv(csv_file_like, header=None, sep=';', skipinitialspace=True)
-                        df = csv_df.fillna('').astype(str)
-                    except Exception as e_semicolon:
-                        status_callback("error", "FH_CSV_READ_ERROR", filename=file_name, error=f"Comma: {e_comma}, Semicolon: {e_semicolon}")
-                        return None, None, "FH_CSV_READ_ERROR" # Nuova chiave errore CSV
-            else:
-                status_callback("error", "FH_UNSUPPORTED_FORMAT", filename=file_name, extension=file_extension)
-                return None, None, "FH_UNSUPPORTED_FORMAT" # Nuova chiave errore formato
-
-            st.session_state.excel_df = df # Salva il DataFrame letto in sessione
-            st.session_state.processed_filename = file_name
+                except Exception as e_semicolon:
+                    status_callback("error", "FH_CSV_READ_ERROR", filename=file_name, error=f"Comma: {e_comma}, Semicolon: {e_semicolon}")
+                    return None, None, "FH_CSV_READ_ERROR"
         else:
-            # status_callback("info", "FH_USING_CACHE", file_name=file_name) # Silenziato
-            df = st.session_state.excel_df # Recupera dalla sessione
+            status_callback("error", "FH_UNSUPPORTED_FORMAT", filename=file_name, extension=file_extension)
+            return None, None, "FH_UNSUPPORTED_FORMAT"
+        # --- FINE RIMOZIONE LOGICA CACHE ---
 
-        # --- Logica di analisi blocchi (invariata da qui in poi) ---
+        # --- Logica di analisi blocchi (invariata) ---
         all_questions = []
         blocks_summary = []
         current_block_id = 1
@@ -76,18 +66,14 @@ def load_questions_from_excel(uploaded_file, status_callback):
         current_block_type = None
         first_question_in_block = True
 
-        # Aggiunge riga vuota virtuale
-        df.loc[len(df)] = [""] * df.shape[1] # Usa stringa vuota per coerenza
+        df.loc[len(df)] = [""] * df.shape[1] # Riga vuota virtuale
 
         for index, row in df.iterrows():
-            # Ora tutti i dati sono stringhe, controllo più semplice per vuoto
-            # Now all data are strings, easier check for empty
             is_empty_row = all(s is None or str(s).strip() == "" for s in row)
 
             if is_empty_row:
                 if current_block_questions:
-                    if current_block_type is None:
-                         current_block_type = 'Indeterminato'
+                    if current_block_type is None: current_block_type = 'Indeterminato'
                     blocks_summary.append({
                         'block_id': current_block_id,
                         'type': current_block_type,
@@ -99,13 +85,11 @@ def load_questions_from_excel(uploaded_file, status_callback):
                 current_block_type = None
                 first_question_in_block = True
             else:
-                row_list = [str(s).strip() for s in row] # Già stringhe, basta strip
+                row_list = [str(s).strip() for s in row]
                 question_text = row_list[0]
-                answers = [ans for ans in row_list[1:] if ans] # Filtra stringhe vuote
+                answers = [ans for ans in row_list[1:] if ans]
 
                 if question_text:
-                    # Determina tipo domanda (MC se >= 2 risposte)
-                    # Determine question type (MC if >= 2 answers)
                     question_type = 'Scelta Multipla' if len(answers) >= 2 else 'Aperte'
 
                     if first_question_in_block:
@@ -131,10 +115,15 @@ def load_questions_from_excel(uploaded_file, status_callback):
             return None, None, "FH_NO_VALID_QUESTIONS"
 
         # status_callback("info", "FH_LOAD_COMPLETE_BLOCKS", count=len(all_questions), num_blocks=len(blocks_summary)) # Silenziato
+        # Salva comunque in sessione per evitare ricaricamenti non necessari *durante la stessa esecuzione* di app.py
+        # Still save in session to avoid unnecessary reloads *during the same run* of app.py
+        st.session_state.excel_df = df
+        st.session_state.processed_filename = file_name
         return all_questions, blocks_summary, None
 
     except Exception as e:
         status_callback("error", "FH_UNEXPECTED_ERROR", filename=file_name, error=str(e))
+        # Pulisce lo stato in caso di errore / Clear state on error
         if 'processed_filename' in st.session_state: del st.session_state['processed_filename']
         if 'excel_df' in st.session_state: del st.session_state['excel_df']
         return None, None, "FH_UNEXPECTED_ERROR"
