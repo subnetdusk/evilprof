@@ -1,6 +1,6 @@
 # EvilProf 😈
 
-Generatore di verifiche casuali e diverse da Excel a PDF. 
+EvilProf è un generatore di verifiche casuali e diverse in PDF da un insieme di domande prelevate da un file Excel.
 
 Con un numero sufficiente di domande, l'app **assicura l’eterogeneità tra test adiacenti** e **massimizza la diversità locale** tramite campionamento ponderato a decadimento esponenziale.
 
@@ -42,7 +42,7 @@ Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la 
 
 ## 🇬🇧 English Version <a name="english-version"></a>
 
-EvilProf is a web application built with Streamlit that allows you to quickly generate PDF files containing custom tests.
+EvilProf is a webapp that allows you to generate randomized tests in a PDF file retrieving questions from an Excel file.
 
 If the number of questions is sufficient, **it ensures that two adjacent tests are entirely distinct** and **maximizes diversity among nearby tests** following an exponential decay pattern—by employing a weighted question sampling technique.
 
