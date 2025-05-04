@@ -1,4 +1,4 @@
-# EvilProf 😈 - Versione a Blocchi
+# EvilProf 😈 - v1.1
 
 Generatore di verifiche PDF selezionando un numero esatto di domande per blocco da Excel/CSV (Streamlit App)
 
