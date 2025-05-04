@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# app.py (Validation Button Re-enabled)
+# app.py (Cleaned & Final)
 
 import streamlit as st
 from datetime import datetime
@@ -13,7 +13,7 @@ from config import (
 )
 from file_handler import load_questions_from_excel
 from core_logic import generate_all_tests_data
-from test import run_all_tests # Mantiene la chiamata a run_all_tests
+from test import run_all_tests
 from pdf_generator import generate_pdf_data, WEASYPRINT_AVAILABLE
 
 # ================================================================
@@ -24,6 +24,7 @@ if 'blocks_summary' not in st.session_state: st.session_state.blocks_summary = N
 if 'all_questions' not in st.session_state: st.session_state.all_questions = None
 if 'block_requests' not in st.session_state: st.session_state.block_requests = {}
 if 'action_performed' not in st.session_state: st.session_state.action_performed = False
+if 'processed_filename' not in st.session_state: st.session_state.processed_filename = None # Aggiunto per sicurezza
 
 def T(key): return get_text(st.session_state.lang, key)
 def F(key, **kwargs): kwargs = kwargs or {}; return format_text(st.session_state.lang, key, **kwargs)
@@ -70,7 +71,7 @@ st.sidebar.header(T("GENERATION_PARAMS_HEADER"))
 # --- 1. Caricamento File ---
 uploaded_file = st.sidebar.file_uploader(
     T("UPLOAD_LABEL"),
-    type=['xlsx', 'xls', 'csv'], # Aggiunto CSV ai tipi permessi
+    type=['xlsx', 'xls', 'csv'],
     help=T("UPLOAD_HELP"),
     key="file_uploader"
 )
@@ -88,42 +89,60 @@ def sidebar_status_callback(msg_type, msg_key, **kwargs):
      elif msg_type == "error": sidebar_status_placeholder.error(formatted_text)
 
 # --- 2. Logica di Caricamento e Creazione Input Dinamici ---
-if uploaded_file is not None:
-    # Tenta di caricare/analizzare solo se il file è cambiato o non ancora processato
-    if 'processed_filename' not in st.session_state or st.session_state.processed_filename != uploaded_file.name:
-        sidebar_status_placeholder.info(F("FH_READING_EXCEL", file_name=uploaded_file.name))
-        all_q, blocks_sum, error_k = load_questions_from_excel(uploaded_file, sidebar_status_callback)
-        if error_k:
-            st.session_state.all_questions = None
-            st.session_state.blocks_summary = None
-            st.session_state.block_requests = {}
-            st.session_state.processed_filename = None
-        else:
-            st.session_state.all_questions = all_q
-            st.session_state.blocks_summary = blocks_sum
-            st.session_state.block_requests = {b['block_id']: 0 for b in blocks_sum}
-            st.session_state.processed_filename = uploaded_file.name
-            sidebar_status_placeholder.success(F("FH_LOAD_COMPLETE_BLOCKS", count=len(all_q), num_blocks=len(blocks_sum)))
+# Processa file solo se caricato e diverso dal precedente o non ancora processato
+if uploaded_file is not None and st.session_state.processed_filename != uploaded_file.name:
+    sidebar_status_placeholder.info(F("FH_READING_EXCEL", file_name=uploaded_file.name))
+    all_q, blocks_sum, error_k = load_questions_from_excel(uploaded_file, sidebar_status_callback)
+    if error_k:
+        st.session_state.all_questions = None
+        st.session_state.blocks_summary = None
+        st.session_state.block_requests = {}
+        st.session_state.processed_filename = None # Reset nome file processato
+    else:
+        st.session_state.all_questions = all_q
+        st.session_state.blocks_summary = blocks_sum
+        # Resetta le richieste quando un nuovo file viene caricato con successo
+        st.session_state.block_requests = {b['block_id']: 0 for b in blocks_sum}
+        st.session_state.processed_filename = uploaded_file.name
+        sidebar_status_placeholder.success(F("FH_LOAD_COMPLETE_BLOCKS", count=len(all_q), num_blocks=len(blocks_sum)))
+elif uploaded_file is None and st.session_state.processed_filename is not None:
+     # Se il file viene rimosso, resetta lo stato
+     st.session_state.all_questions = None
+     st.session_state.blocks_summary = None
+     st.session_state.block_requests = {}
+     st.session_state.processed_filename = None
+     sidebar_status_placeholder.empty() # Pulisce messaggi sidebar
+
 
 # --- 3. Mostra Input Dinamici se Blocchi sono stati Identificati ---
 total_questions_requested = 0
 if st.session_state.blocks_summary:
     st.sidebar.markdown("---")
     st.sidebar.subheader(T("BLOCK_REQUESTS_HEADER"))
+    # Assicura che block_requests sia un dizionario
+    if not isinstance(st.session_state.block_requests, dict):
+        st.session_state.block_requests = {b['block_id']: 0 for b in st.session_state.blocks_summary}
+
     for block_info in st.session_state.blocks_summary:
         block_id = block_info['block_id']
         block_type_str = block_info['type']
         available_count = block_info['count']
         label = F("BLOCK_REQUEST_LABEL", block_id=block_id, type=block_type_str, n=available_count)
+        # Usa .get() con default 0 per sicurezza
+        current_value = st.session_state.block_requests.get(block_id, 0)
+        # Assicura che il valore non superi il massimo disponibile
+        value_to_set = min(current_value, available_count)
+
         st.session_state.block_requests[block_id] = st.sidebar.number_input(
             label=label, min_value=0, max_value=available_count,
-            value=st.session_state.block_requests.get(block_id, 0),
+            value=value_to_set, # Usa valore corretto
             step=1, key=f"block_input_{block_id}"
         )
         total_questions_requested += st.session_state.block_requests[block_id]
     st.sidebar.markdown(f"**{T('TOTAL_QUESTIONS_SELECTED')}: {total_questions_requested}**")
-else:
-    st.session_state.block_requests = {}
+# else: # Non serve resettare qui, viene fatto sopra se il file viene rimosso/cambiato
+#     st.session_state.block_requests = {}
+
 
 # --- 4. Input Generali Rimasti ---
 st.sidebar.markdown("---")
@@ -133,17 +152,15 @@ num_tests_input = st.sidebar.number_input(T("NUM_TESTS_LABEL"), min_value=1, val
 # --- 5. Bottone Generazione ---
 generate_button = st.sidebar.button(T("GENERATE_BUTTON_LABEL"), type="primary", use_container_width=True)
 
-# --- 6. Test Funzionale (RIABILITATO) ---
+# --- 6. Test Funzionale ---
 st.sidebar.markdown("---")
 st.sidebar.subheader(T("VALIDATION_TEST_HEADER"))
-# --- CORREZIONE QUI: Rimosso disabled=True ---
 validation_button = st.sidebar.button(
     T("VALIDATE_BUTTON_LABEL"),
-    help=T("VALIDATE_BUTTON_HELP_NEW"), # Usa il nuovo testo di aiuto
+    help=T("VALIDATE_BUTTON_HELP_NEW"),
     use_container_width=True
-    # disabled=True # <-- RIMOSSO / REMOVED
+    # disabled=True # Lasciato attivo per testare
 )
-# --- FINE CORREZIONE ---
 
 # ================================================================
 # Area Output Principale e Gestione Messaggi / Main Output Area and Message Handling
@@ -176,22 +193,19 @@ if validation_button:
     transient_status_placeholder.empty()
     excel_file_created = None
     test_results = []
-    # Messaggio iniziale spostato dentro lo spinner per coerenza
-    # Initial message moved inside spinner for consistency
+    st.session_state.action_performed = True # Segna azione eseguita
     with st.spinner(T("VALIDATION_LOGIC_SPINNER")):
-        display_critical_message("info", "VALIDATION_START") # Mostra inizio nel placeholder temporaneo (verrà sovrascritto)
         try:
+            # Passa il callback corretto
             test_results, excel_file_created = run_all_tests(status_callback)
         except Exception as e:
-             # Cattura eccezioni impreviste e le mostra nel placeholder principale
              with output_placeholder:
                  st.error(F("CL_VALIDATION_UNEXPECTED_ERROR", error=str(e)))
-             test_results = None # Assicura che non si provi a mostrare risultati parziali
+             test_results = None # Impedisce di mostrare risultati parziali
 
     # Mostra i risultati sommari finali nel placeholder principale
     with output_placeholder:
-        # Solo se il test non ha generato un errore critico subito
-        if test_results is not None:
+        if test_results is not None: # Mostra solo se il test non ha crashato subito
             st.markdown(f"**{T('VALIDATION_RESULTS_HEADER')}**")
             if not test_results and not excel_file_created:
                  st.warning(T("VALIDATION_NO_MESSAGES"))
@@ -222,26 +236,39 @@ if validation_button:
 if generate_button:
     output_placeholder.empty()
     transient_status_placeholder.empty()
+    st.session_state.action_performed = True # Segna azione eseguita
+
+    # 1. Recupera richieste utente dai widget dinamici
+    current_block_requests = st.session_state.get('block_requests', {})
+    active_block_requests = {bid: k for bid, k in current_block_requests.items() if k > 0}
+    total_requested = sum(active_block_requests.values())
+
+    # 2. Validazione Input
     if uploaded_file is None:
         output_placeholder.warning(T("UPLOAD_FIRST_WARNING")); st.stop()
+    if not st.session_state.all_questions or not st.session_state.blocks_summary:
+         output_placeholder.error(T("LOAD_ERROR", error_msg="Dati blocchi non caricati. Ricarica il file.")); st.stop()
+    if total_requested <= 0:
+        output_placeholder.error(T("TOTAL_QUESTIONS_ZERO_ERROR_BLOCKS")); st.stop()
+
+    # 3. Esecuzione Generazione
     pdf_generated = False
     pdf_data = None
     final_generation_messages = []
+
     with st.spinner(T("GENERATING_DATA_SPINNER")):
         try:
-            all_questions, error_key_load = load_questions_from_excel(uploaded_file, status_callback)
-            if error_key_load: raise ValueError(error_key_load)
-            if not all_questions: raise ValueError("NO_VALID_QUESTIONS_ERROR")
-            current_block_requests = st.session_state.get('block_requests', {})
-            active_block_requests = {bid: k for bid, k in current_block_requests.items() if k > 0}
-            total_requested = sum(active_block_requests.values())
-            if total_requested <= 0: raise ValueError("TOTAL_QUESTIONS_ZERO_ERROR_BLOCKS")
+            # Usa i dati già in session_state (caricati sopra)
+            # Use data already in session_state (loaded above)
             all_tests_data, generation_messages = generate_all_tests_data(
-                st.session_state.all_questions, active_block_requests,
-                num_tests_input, status_callback
+                st.session_state.all_questions,
+                active_block_requests,
+                num_tests_input, # Usa la variabile corretta dall'input sidebar
+                status_callback
             )
             final_generation_messages.extend(generation_messages)
             if all_tests_data is None: raise ValueError("Test data generation failed.")
+
             pdf_strings = {
                 "title_format": T("PDF_TEST_TITLE"), "name_label": T("PDF_NAME_LABEL"),
                 "date_label": T("PDF_DATE_LABEL"), "class_label": T("PDF_CLASS_LABEL"),
@@ -250,6 +277,7 @@ if generate_button:
             pdf_data = generate_pdf_data(all_tests_data, subject_name, status_callback, pdf_strings)
             if pdf_data is None: raise ValueError("PDF generation failed.")
             pdf_generated = True
+
         except ValueError as ve:
             msg_key = str(ve)
             if msg_key in TEXTS['it'] or msg_key in TEXTS['en']:
@@ -258,6 +286,8 @@ if generate_button:
                  if not any(m[1] == "GENERATION_FAILED_ERROR" for m in final_generation_messages): final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": msg_key}))
         except Exception as e:
              if not any(m[1] == "GENERATION_FAILED_ERROR" for m in final_generation_messages): final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": str(e)}))
+
+    # 4. Mostra Risultati Finali
     with output_placeholder:
         if final_generation_messages:
              st.markdown(f"**{T('GENERATION_MESSAGES_HEADER')}**")
@@ -265,6 +295,7 @@ if generate_button:
                  final_formatted_text = F(msg_key, **msg_kwargs)
                  if msg_type == "warning": st.warning(final_formatted_text)
                  elif msg_type == "error": st.error(final_formatted_text)
+
         if pdf_generated and pdf_data:
             st.success(T("PDF_SUCCESS"))
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -281,10 +312,11 @@ if generate_button:
 # ================================================================
 # Messaggio Iniziale / Initial Message
 # ================================================================
-if 'action_performed' not in st.session_state: st.session_state.action_performed = False
-if validation_button: st.session_state.action_performed = True
-if generate_button: st.session_state.action_performed = True
+# Mostra solo se nessuna azione è stata fatta E non ci sono messaggi critici visibili
 if not st.session_state.action_performed:
+    # Verifica se transient_status_placeholder è "visibile" (contiene qualcosa)
+    # Questo è un hack, potrebbe non essere affidabile al 100%
+    # if transient_status_placeholder._st_get_widget_state() is None or not transient_status_placeholder._st_get_widget_state().get('value'):
     output_placeholder.info(T("INITIAL_INFO_NEW"))
 
 # ================================================================
