@@ -1,76 +1,84 @@
-# EvilProf 😈
+# EvilProf 😈 - Versione 1.1
 
-EvilProf è un generatore di verifiche casuali e diverse in PDF da un insieme di domande prelevate da un file Excel.
-
-Con un numero sufficiente di domande, l'app **assicura l’eterogeneità tra test adiacenti** e **massimizza la diversità locale** tramite campionamento ponderato a decadimento esponenziale.
+Generatore di verifiche PDF selezionando un numero esatto di domande per blocco da Excel/CSV (Streamlit App)
 
 [English Version](#english-version)
 
 ---
 
-## 🇮🇹 Istruzioni e Preparazione File Excel
+## 🇮🇹 Istruzioni e Preparazione File Excel/CSV (Logica a Blocchi)
 
-EvilProf è un'applicazione web realizzata con Streamlit che permette di generare rapidamente file PDF contenenti verifiche personalizzate.
+EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto di domande da blocchi definiti nel tuo file Excel o CSV.
 
-Questa app è [hostata su Streamlit](https://evilprof.streamlit.app/)
+**Caratteristiche:**
 
-Le caratteristiche principali includono:
+* **Input da Excel/CSV:** Carica un file `.xlsx`, `.xls` o `.csv`.
+* **Struttura a Blocchi:** Organizza le domande in blocchi separati da **una riga completamente vuota**.
+* **Tipi di Blocco:** Ogni blocco deve contenere **solo domande a scelta multipla** OPPURE **solo domande aperte**. L'app rileva automaticamente il tipo. Non mischiare i tipi nello stesso blocco.
+* **Selezione Esatta:** Dopo aver caricato il file, potrai specificare nella sidebar **quante domande esatte (`k`)** vuoi selezionare da ciascun blocco identificato (che contiene `n` domande).
+* **Randomizzazione e Diversità:**
+    * Se per un blocco il numero totale di domande disponibili (`n`) è **strettamente maggiore** del doppio delle domande richieste (`k`) (cioè, **`n > 2k`**), l'applicazione userà un **Campionamento Ponderato (WRSwOR)** per selezionare le `k` domande da quel blocco. Questo metodo tenta di evitare la ripetizione immediata delle stesse domande *da quel blocco* nelle verifiche consecutive.
+    * Se invece **`n <= 2k`** (cioè se chiedi la metà o più delle domande disponibili nel blocco), l'applicazione userà un **Campionamento Casuale Semplice** per selezionare le `k` domande da quel blocco, perdendo la garanzia di diversità tra test consecutivi per quel blocco.
+    * Il fallback a campionamento casuale semplice può attivarsi anche per WRSwOR se le richieste (`k`) sono alte rispetto ai candidati *nuovi* disponibili in quel momento.
+* **Output PDF:** Genera un singolo file PDF con le verifiche composte secondo le tue selezioni.
+* **Test Funzionale:** Include un test statistico (Monte Carlo) che analizza la similarità (tramite coefficiente di Dice) tra verifiche generate consecutivamente al variare del numero di domande richieste per blocco (`k`), usando un file di test dedicato (`test_set_4_by_12_questions.xlsx`). I risultati vengono salvati in un file Excel.
 
--   **Input da Excel:** Carica facilmente le tue domande da un file `.xlsx` o `.xls`.
--   **Tipi di Domande:** Supporta sia domande a scelta multipla (con risposte casualizzate) sia domande a risposta aperta.
--   **Personalizzazione:** Scegli il numero di verifiche da generare, il numero di domande per tipo (multiple/aperte) per ciascuna verifica e il nome della materia.
--   **Randomizzazione:** Le domande in ogni verifica sono selezionate casualmente dal pool disponibile nel file Excel. L'ordine delle risposte multiple è casuale.
--   **Diversità Migliorata (con Fallback):** L'applicazione tenta di utilizzare una tecnica di **Campionamento Casuale Ponderato Senza Reinserimento (WRSwOR)** per selezionare le domande. Questo metodo:
-    -   **Garantisce** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva*. Ciò richiede che il numero totale di domande di un certo tipo (`n`) sia strettamente maggiore del doppio del numero di domande di quel tipo richieste per verifica (`k`), ovvero `n >= 2k`.
-    -   **Favorisce statisticamente** la selezione di domande che non vengono utilizzate da più tempo. Per una buona rotazione e diversità a lungo termine, è **fortemente consigliato** avere un numero totale di domande almeno **tre volte superiore** (`n >= 3k`) a quelle richieste per singola verifica. L'app mostrerà un avviso se `n < 3k`.
-    -   **Fallback:** Se non ci sono abbastanza domande uniche disponibili per garantire la diversità rispetto al test precedente (`n <= 2k`), l'applicazione **passerà a un campionamento casuale semplice** da *tutte* le domande disponibili per quel tipo, **perdendo la garanzia di diversità** tra test adiacenti. Verrà mostrato un avviso rosso prominente in tal caso.
--   **Output PDF:** Genera un singolo file PDF pronto per la stampa, con ogni verifica che inizia su una nuova pagina e un'intestazione per nome, data e classe.
+**Preparazione File Excel/CSV:**
 
-**Struttura del File Excel**
+1.  Inizia a inserire le domande del primo blocco (tutte MC o tutte OE) dalla riga 1.
+    * **Colonna A (o prima colonna):** Testo della domanda.
+    * **Colonne B, C,... (o successive, solo per MC):** Opzioni di risposta. Lasciare vuote per domande Aperte.
+2.  Quando vuoi iniziare un nuovo blocco (di tipo uguale o diverso), **inserisci una riga completamente vuota**.
+3.  Nella riga successiva a quella vuota, inizia a inserire le domande del nuovo blocco.
+4.  Ripeti i passaggi 2 e 3 per tutti i blocchi desiderati.
+5.  **Non inserire nomi di argomento o intestazioni di colonna.**
 
-Perché l'applicazione funzioni correttamente, il file Excel deve rispettare la seguente struttura **senza intestazioni di colonna**:
-
--   **Colonna A:** Contiene il testo completo della domanda.
--   **Colonne B, C, D, ...:** Contengono le diverse opzioni di risposta *solo* per le domande a scelta multipla. Devono esserci almeno due opzioni di risposta perché la domanda sia considerata a scelta multipla.
--   **Domande Aperte:** Per una domanda aperta, lasciare semplicemente vuote le celle nelle colonne B, C, D, ...
-
-*Immagine di esempio*
+*Vedi immagini di esempio qui sotto (assicurati che i file `.jpg` siano nella root del repository):*
 
 ![Esempio Struttura Excel](excel_example.jpg)
 
 ---
 
+![Esempio Analisi Similarità](analisi.jpg)
+
+---
+
 ## 🇬🇧 English Version <a name="english-version"></a>
 
-EvilProf is a webapp that allows you to generate randomized tests in a PDF file retrieving questions from an Excel file.
+EvilProf generates PDF tests by selecting an exact number of questions from blocks defined in your Excel or CSV file.
 
-If the number of questions is sufficient, **it ensures that two adjacent tests are entirely distinct** and **maximizes diversity among nearby tests** following an exponential decay pattern—by employing a weighted question sampling technique.
+**Features as of 1.1:**
 
-This app is [hosted here in streamlit.app](https://evilprof.streamlit.app/)
+* **Input from Excel/CSV:** Load an `.xlsx`, `.xls`, or `.csv` file.
+* **Block Structure:** Organize questions into blocks separated by **a completely empty row**.
+* **Block Types:** Each block must contain **only multiple-choice questions** OR **only open-ended questions**. The app detects the type automatically. Do not mix types within the same block.
+* **Exact Selection:** After uploading the file, you can specify in the sidebar **exactly how many questions (`k`)** you want to select from each identified block (which contains `n` questions).
+* **Randomization and Diversity:**
+    * If, for a block, the total number of available questions (`n`) is **strictly greater** than twice the requested questions (`k`) (i.e., **`n > 2k`**), the application will use **Weighted Sampling (WRSwOR)** to select the `k` questions from that block. This method attempts to avoid immediate repetition of the same questions *from that block* in consecutive tests.
+    * If **`n <= 2k`** (i.e., if you request half or more of the available questions in the block), the application will use **Simple Random Sampling** to select the `k` questions from that block, losing the diversity guarantee between consecutive tests for that block.
+    * Fallback to simple random sampling may also occur for WRSwOR if requests (`k`) are high relative to the *new* available candidates at that moment.
+* **PDF Output:** Generates a single PDF file with the tests composed according to your selections.
+* **Functional Test:** Includes a statistical test (Monte Carlo) that analyzes the similarity (using Dice coefficient) between consecutively generated tests as the number of requested questions per block (`k`) varies, using a dedicated test file (`test_set_4_by_12_questions.xlsx`). Results are saved to an Excel file.
 
-Main features include:
+**Excel/CSV File Preparation:**
 
--   **Input from Excel:** Easily load your questions from an `.xlsx` or `.xls` file.
--   **Question Types:** Supports both multiple-choice questions (with randomized answers) and open-ended questions.
--   **Customization:** Choose the number of tests to generate, the number of questions per type (multiple/open) for each test, and the subject name.
--   **Randomization:** Questions in each test are randomly selected from the pool available in the Excel file. The order of multiple-choice answers is randomized.
--   **Improved Diversity (with Fallback):** The application attempts to use a **Weighted Random Sampling without Replacement (WRSwOR)** technique to select questions. This method:
-    -   **Ensures** that questions used in one test are not repeated in the *immediately following* test. This requires the total number of questions of a certain type (`n`) to be strictly greater than twice the number of questions of that type required per test (`k`), i.e., `n >= 2k`.
-    -   **Statistically favors** the selection of questions that haven't been used for the longest time. For good long-term rotation and diversity, it is **strongly recommended** to have a total number of questions at least **three times greater** (`n >= 3k`) than those required per single test. The app will show a warning if `n < 3k`.
-    -   **Fallback:** If there are not enough unique questions available to ensure diversity compared to the previous test (`n <= 2k`), the application **will switch to simple random sampling** from *all* available questions of that type, **losing the guarantee of diversity** between adjacent tests. A prominent red warning will be displayed in this case.
--   **PDF Output:** Generates a single PDF file ready for printing, with each test starting on a new page and a header for name, date, and class.
+1.  Start entering questions for the first block (all MC or all OE) from row 1.
+    * **Column A (or first column):** Question text.
+    * **Columns B, C,... (or subsequent, MC Only):** Answer options. Leave empty for Open-Ended questions.
+2.  When you want to start a new block, **insert a completely empty row**.
+3.  On the row after the empty one, start entering the questions for the new block.
+4.  Repeat steps 2 and 3 for all desired blocks.
+5.  **Do not include topic names or column headers.**
 
-**Excel File Structure**
-
-For the application to work correctly, the Excel file must adhere to the following structure **without column headers**:
-
--   **Column A:** Contains the full text of the question.
--   **Columns B, C, D, ...:** Contain the different answer options *only* for multiple-choice questions. There must be at least two answer options for the question to be considered multiple-choice.
--   **Open-Ended Questions:** For an open-ended question, simply leave the cells in columns B, C, D, ... empty.
-
-*See example image below (ensure `excel_example.jpg` is in the repository root):*
+*See example images below (ensure the `.jpg` files are in the repository root):*
 
 ![Excel Structure Example](excel_example.jpg)
 
 ---
+
+![Similarity Analysis Example](analisi.jpg)
+
+---
+
+*(README updated for the block-based version with unified sampling logic and i18n)*
 
