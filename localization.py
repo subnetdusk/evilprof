@@ -1,12 +1,12 @@
-# localization.py (Versione COMPLETA con logica campionamento aggiornata n > 2k)
+# localization.py (Aggiunta descrizione test statistico CORRETTA nelle istruzioni)
 
 TEXTS = {
     "it": {
         # Titoli e Intestazioni
         "PAGE_TITLE": "EvilProf 😈 - Per Blocchi",
         "MAIN_TITLE": "EvilProf 😈 - Generatore per Blocchi",
-        "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel/CSV.", # Aggiornato
-        "INSTRUCTIONS_HEADER": "ℹ️ Istruzioni e Preparazione File Excel/CSV (Logica a Blocchi)", # Aggiornato
+        "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel/CSV.",
+        "INSTRUCTIONS_HEADER": "ℹ️ Istruzioni e Preparazione File Excel/CSV (Logica a Blocchi)",
         "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
         "VALIDATION_TEST_HEADER": "Test Funzionale",
         "OUTPUT_AREA_HEADER": "Output e Messaggi",
@@ -15,8 +15,8 @@ TEXTS = {
         "FOOTER_TEXT": "EvilProf v1.1 (Blocchi) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
         # Widget Sidebar
-        "UPLOAD_LABEL": "1. Carica File Excel/CSV", # Aggiornato
-        "UPLOAD_HELP": "Trascina o seleziona il file (.xlsx, .xls, .csv) con le domande organizzate in blocchi separati da righe vuote.", # Aggiornato
+        "UPLOAD_LABEL": "1. Carica File Excel/CSV",
+        "UPLOAD_HELP": "Trascina o seleziona il file (.xlsx, .xls, .csv) con le domande organizzate in blocchi separati da righe vuote.",
         "SUBJECT_LABEL": "2. Nome della Materia",
         "SUBJECT_HELP": "Apparirà nel titolo di ogni verifica.",
         "SUBJECT_DEFAULT": "Informatica",
@@ -27,17 +27,17 @@ TEXTS = {
         "TOTAL_QUESTIONS_SELECTED": "Domande Totali Selezionate",
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
         "VALIDATE_BUTTON_LABEL": "🧪 Esegui Test Funzionale",
-        "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.", # Aggiornato
+        "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.",
 
         # Messaggi di Stato / Errori / Warning
-        "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante. La generazione del PDF è bloccata. Assicurati di averla installata e che le sue dipendenze (GTK+, Pango, Cairo) siano presenti nel sistema.",
+        "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
         "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)",
-        "ANALYSIS_IMAGE_CAPTION": "Esempio di analisi di similarità generata dal test funzionale", # Aggiunto
+        "ANALYSIS_IMAGE_CAPTION": "Esempio di analisi di similarità generata dal test funzionale",
         "IMAGE_NOT_FOUND_WARNING": "Nota: Immagine di esempio '{image_path}' non trovata.",
         "IMAGE_LOAD_ERROR": "Errore caricamento immagine '{image_path}': {error}",
         "VALIDATION_START": "Avvio Test Funzionale...",
         "GENERATION_START": "Avvio Generazione Verifiche...",
-        "UPLOAD_FIRST_WARNING": "⚠️ Per favore, carica prima un file Excel/CSV.", # Aggiornato
+        "UPLOAD_FIRST_WARNING": "⚠️ Per favore, carica prima un file Excel/CSV.",
         "LOADING_DATA_SPINNER": "⏳ Analisi file e identificazione blocchi...",
         "LOAD_ERROR": "Errore caricamento dati: {error_msg}",
         "NO_VALID_QUESTIONS_ERROR": "Nessuna domanda valida trovata nel file caricato.",
@@ -53,10 +53,10 @@ TEXTS = {
         "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Scarica PDF Generato",
         "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Errore durante la creazione del file PDF.",
-        "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nella sidebar e premi 'Genera Verifiche PDF'.", # Aggiornato
+        "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nella sidebar e premi 'Genera Verifiche PDF'.",
         "VALIDATION_NO_MESSAGES": "Il test funzionale non ha prodotto messaggi specifici.",
 
-        # Testo Intro (AGGIORNATO CON CONDIZIONE WRSwOR n > 2k)
+        # Testo Intro (AGGIORNATO CON SEZIONE TEST STATISTICO CORRETTA)
         "INTRO_TEXT_NEW": """
 EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto di domande da blocchi definiti nel tuo file Excel o CSV.
 
@@ -67,7 +67,7 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
 - **Tipi di Blocco:** Ogni blocco deve contenere **solo domande a scelta multipla** OPPURE **solo domande aperte**. L'app rileva automaticamente il tipo. Non mischiare i tipi nello stesso blocco.
 - **Selezione Esatta:** Dopo aver caricato il file, potrai specificare nella sidebar **quante domande esatte (`k`)** vuoi selezionare da ciascun blocco identificato (che contiene `n` domande).
 - **Randomizzazione e Diversità:**
-    - Se per un blocco il numero totale di domande disponibili (`n`) è **strettamente maggiore** del doppio delle domande richieste (`k`) (cioè, **`n > 2k`**), l'applicazione userà un **Campionamento Ponderato (WRSwOR)** per selezionare le `k` domande da quel blocco. Questo metodo tenta di evitare la ripetizione immediata delle stesse domande *da quel blocco* nelle verifiche consecutive.
+    - Se per un blocco il numero totale di domande disponibili (`n`) è **strettamente maggiore** del doppio delle domande richieste (`k`) (cioè, **`n > 2k`**), l'applicazione userà un **Campionamento Ponderato (WRSwOR)** per selezionare le `k` domande da quel blocco. Questo metodo **garantisce** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva* (per quel blocco) e favorisce la selezione di domande meno recenti.
     - Se invece **`n <= 2k`** (cioè se chiedi la metà o più delle domande disponibili nel blocco), l'applicazione userà un **Campionamento Casuale Semplice** per selezionare le `k` domande da quel blocco, perdendo la garanzia di diversità tra test consecutivi per quel blocco.
     - Il fallback a campionamento casuale semplice può attivarsi anche per WRSwOR se le richieste (`k`) sono alte rispetto ai candidati *nuovi* disponibili in quel momento.
 - **Output PDF:** Genera un singolo file PDF con le verifiche composte secondo le tue selezioni.
@@ -83,6 +83,28 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
 5.  **Non inserire nomi di argomento o intestazioni di colonna.**
 
 *Vedi immagini di esempio qui sotto.*
+
+---
+
+### Analisi Statistica (Accessibile tramite Bottone "Test Funzionale")
+
+L'applicazione include un test funzionale che esegue un'analisi statistica approfondita sulla logica di campionamento:
+
+1.  Utilizza un file predefinito (`test_set_4_by_12_questions.xlsx`) contenente 4 blocchi di 12 domande ciascuno (2 blocchi MC, 2 blocchi OE).
+2.  Esegue una simulazione Monte Carlo (30 ripetizioni) per diversi scenari di selezione.
+3.  Per ogni scenario, varia il numero di domande richieste per blocco (`k`) da 1 a 11.
+4.  Genera sequenze di 15 test consecutivi per ogni `k` e ogni run Monte Carlo, applicando la logica di campionamento appropriata (WRSwOR se `12 > 2k`, Simple Random se `12 <= 2k`).
+5.  Calcola la similarità media tra test consecutivi a diverse "distanze" (da 1 a 14 test di distanza) usando il **coefficiente di Sørensen-Dice**. Un valore di 0 indica nessuna domanda in comune, 1 indica test identici.
+6.  Salva i risultati medi finali (per ogni `k` e distanza) in un file Excel (`similarity_analysis_unified_dice_mc_15t.xlsx`), che può essere scaricato dall'interfaccia dopo l'esecuzione del test.
+
+**Interpretazione dei Risultati del Test:**
+
+* **Distanza 1:** L'indice di Dice medio **dovrebbe essere 0** per `k` da 1 a 5 (dove si usa WRSwOR e `n > 2k`), poiché l'algoritmo garantisce che non ci siano domande in comune tra test immediatamente consecutivi per quel blocco. Per `k` da 6 a 11 (dove si usa Simple Random), ci si aspetta un Dice > 0 già a distanza 1.
+* **Distanze Maggiori (d > 1):** L'effetto "memoria" di WRSwOR si attenua rapidamente. La similarità media tende a convergere verso il valore atteso per un campionamento casuale semplice (che dipende da `k`). Ad esempio, per `k=6` (12 domande totali su 48), la similarità converge a circa 0.25.
+* **Soglia `k=6` (n=2k):** Questo test permette di osservare il comportamento al limite e oltre la soglia dove il campionamento passa da WRSwOR a Simple Random.
+* **Consiglio Pratico:** Per massimizzare la diversità tra test consecutivi usando WRSwOR, è consigliabile scegliere un numero di domande per blocco (`k`) tale che `n > 2k` (cioè `k < n/2`), idealmente `k <= n/3` per una rotazione ottimale (es. `k=4` per un blocco da 12).
+
+*Vedi immagine di esempio dell'analisi qui sotto.*
 """,
         # Testi usati nel PDF
         "PDF_TEST_TITLE": "Verifica di {subject_name}",
@@ -149,19 +171,18 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         # Titles & Headers
         "PAGE_TITLE": "EvilProf 😈 - By Blocks",
         "MAIN_TITLE": "EvilProf 😈 - Block-Based Generator",
-        "SUBHEADER_NEW": "Generate tests by selecting the exact number of questions per block from Excel/CSV.", # Updated
-        "INSTRUCTIONS_HEADER": "ℹ️ Instructions & Excel/CSV File Preparation (Block Logic)", # Updated
+        "SUBHEADER_NEW": "Generate tests by selecting the exact number of questions per block from Excel/CSV.",
+        "INSTRUCTIONS_HEADER": "ℹ️ Instructions & Excel/CSV File Preparation (Block Logic)",
         "GENERATION_PARAMS_HEADER": "Generation Parameters",
         "VALIDATION_TEST_HEADER": "Functional Test",
-        # "SOURCE_CODE_HEADER": "Source Code", # Removed
         "OUTPUT_AREA_HEADER": "Output & Messages",
         "VALIDATION_RESULTS_HEADER": "--- Functional Test Results ---",
         "GENERATION_MESSAGES_HEADER": "--- Messages from Generation ---",
         "FOOTER_TEXT": "EvilProf v1.1 (Blocks) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
         # Widget Sidebar
-        "UPLOAD_LABEL": "1. Upload Excel/CSV File", # Updated
-        "UPLOAD_HELP": "Drag and drop or select the Excel/CSV file (.xlsx, .xls, .csv) with questions organized in blocks separated by empty rows.", # Updated
+        "UPLOAD_LABEL": "1. Upload Excel/CSV File",
+        "UPLOAD_HELP": "Drag and drop or select the Excel/CSV file (.xlsx, .xls, .csv) with questions organized in blocks separated by empty rows.",
         "SUBJECT_LABEL": "2. Subject Name",
         "SUBJECT_HELP": "Will appear in the title of each test.",
         "SUBJECT_DEFAULT": "Computer Science",
@@ -172,17 +193,17 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "TOTAL_QUESTIONS_SELECTED": "Total Questions Selected",
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
         "VALIDATE_BUTTON_LABEL": "🧪 Run Functional Test",
-        "VALIDATE_BUTTON_HELP_NEW": "Runs the Monte Carlo statistical analysis (using 'test_set_4_by_12_questions.xlsx') on test similarity.", # Updated
+        "VALIDATE_BUTTON_HELP_NEW": "Runs the Monte Carlo statistical analysis (using 'test_set_4_by_12_questions.xlsx') on test similarity.",
 
         # Status / Error / Warning Messages
         "WEASYPRINT_ERROR": "🚨 **Warning:** The WeasyPrint library is not available or not functional. PDF generation is blocked...",
         "IMAGE_CAPTION": "Example of valid Excel file structure (with separated blocks)",
-        "ANALYSIS_IMAGE_CAPTION": "Example of similarity analysis generated by the functional test", # Added
+        "ANALYSIS_IMAGE_CAPTION": "Example of similarity analysis generated by the functional test",
         "IMAGE_NOT_FOUND_WARNING": "Note: Example image '{image_path}' not found.",
         "IMAGE_LOAD_ERROR": "Error loading image '{image_path}': {error}",
         "VALIDATION_START": "Starting Functional Test...",
         "GENERATION_START": "Starting Test Generation...",
-        "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel/CSV file first.", # Updated
+        "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel/CSV file first.",
         "LOADING_DATA_SPINNER": "⏳ Analyzing file and identifying blocks...",
         "LOAD_ERROR": "Error loading data: {error_msg}",
         "NO_VALID_QUESTIONS_ERROR": "No valid questions found in the uploaded file.",
@@ -198,10 +219,10 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Download Generated PDF",
         "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Error during PDF creation.",
-        "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the sidebar, and press 'Generate PDF Tests'.", # Updated
+        "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the sidebar, and press 'Generate PDF Tests'.",
         "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
 
-        # Intro Text (UPDATED WITH WRSwOR CONDITION n > 2k)
+        # Intro Text (UPDATED WITH STATS ANALYSIS & CORRECTED WRSwOR CONDITION)
         "INTRO_TEXT_NEW": """
 EvilProf (Block Version) generates PDF tests by selecting an exact number of questions from blocks defined in your Excel or CSV file.
 
@@ -212,7 +233,7 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
 - **Block Types:** Each block must contain **only multiple-choice questions** OR **only open-ended questions**. The app detects the type automatically. Do not mix types within the same block.
 - **Exact Selection:** After uploading the file, you can specify in the sidebar **exactly how many questions (`k`)** you want to select from each identified block (which contains `n` questions).
 - **Randomization and Diversity:**
-    - If, for a block, the total number of available questions (`n`) is **strictly greater** than twice the requested questions (`k`) (i.e., **`n > 2k`**), the application will use **Weighted Sampling (WRSwOR)** to select the `k` questions from that block. This method attempts to avoid immediate repetition of the same questions *from that block* in consecutive tests.
+    - If, for a block, the total number of available questions (`n`) is **strictly greater** than twice the requested questions (`k`) (i.e., **`n > 2k`**), the application will use **Weighted Sampling (WRSwOR)** to select the `k` questions from that block. This method **guarantees** that questions used in one test are not repeated in the *immediately following* test (for that block) and favors selecting less recently used questions.
     - If **`n <= 2k`** (i.e., if you request half or more of the available questions in the block), the application will use **Simple Random Sampling** to select the `k` questions from that block, losing the diversity guarantee between consecutive tests for that block.
     - Fallback to simple random sampling may also occur for WRSwOR if requests (`k`) are high relative to the *new* available candidates at that moment.
 - **PDF Output:** Generates a single PDF file with the tests composed according to your selections.
@@ -228,6 +249,28 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
 5.  **Do not include topic names or column headers.**
 
 *See example images below.*
+
+---
+
+### Statistical Analysis (Accessible via "Functional Test" Button)
+
+The application includes a functional test that performs an in-depth statistical analysis of the sampling logic:
+
+1.  It uses a predefined file (`test_set_4_by_12_questions.xlsx`) containing 4 blocks of 12 questions each (2 MC blocks, 2 OE blocks).
+2.  It runs a Monte Carlo simulation (30 repetitions) for different selection scenarios.
+3.  For each scenario, it varies the number of questions requested per block (`k`) from 1 to 11.
+4.  It generates sequences of 15 consecutive tests for each `k` and each Monte Carlo run, applying the appropriate sampling logic (WRSwOR if `12 > 2k`, Simple Random if `12 <= 2k`).
+5.  It calculates the average similarity between consecutive tests at different "distances" (from 1 to 14 tests apart) using the **Sørensen-Dice coefficient**. A value of 0 indicates no common questions, 1 indicates identical tests.
+6.  It saves the final average results (for each `k` and distance) to an Excel file (`similarity_analysis_unified_dice_mc_15t.xlsx`), which can be downloaded from the interface after running the test.
+
+**Interpreting the Test Results:**
+
+* **Distance 1:** The average Dice index **should be 0** for `k` from 1 to 5 (where WRSwOR is used and `n > 2k`), as the algorithm guarantees no common questions between immediately consecutive tests for that block. For `k` from 6 to 11 (where Simple Random is used), Dice > 0 is expected even at distance 1.
+* **Greater Distances (d > 1):** The "memory" effect of WRSwOR quickly fades. The average similarity tends to converge towards the value expected for simple random sampling (which depends on `k`). For example, for `k=6` (12 total questions out of 48), the similarity converges to about 0.25.
+* **Threshold `k=6` (n=2k):** This test allows observing the behavior at and beyond the threshold where sampling switches from WRSwOR to Simple Random.
+* **Practical Advice:** To maximize diversity between consecutive tests using WRSwOR, it's advisable to choose a number of questions per block (`k`) such that `n > 2k` (i.e., `k < n/2`), ideally `k <= n/3` for optimal rotation (e.g., `k=4` for a block of 12).
+
+*See example image of the analysis below.*
 """,
         # Texts used in PDF
         "PDF_TEST_TITLE": "Test for {subject_name}",
@@ -279,15 +322,15 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
         "TEST_WRONG_Q_PER_BLOCK_COUNT": "ERROR Test Data: Block {block_id} has {found} questions, expected {expected}.",
         "STAT_TEST_K_INVALID": "ERROR Test: Requested k={k} is invalid for any block.",
         "STAT_TEST_GENERATION_FAILED_KPB": "❌ Failed test sequence generation for k_per_block={k_per_block}.",
-        "MC_TEST_UNIFIED_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k/block values [{k_range}], {num_tests} tests/seq)...", # Updated key
+        "MC_TEST_UNIFIED_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k/block values [{k_range}], {num_tests} tests/seq)...",
         "MC_TEST_RUN_PROGRESS": "Monte Carlo Progress: Run {current_run}/{total_runs}...",
-        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Analysis failed for k/block={k_per_block} (Method: {method}) in run {run}.", # Updated key
+        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Analysis failed for k/block={k_per_block} (Method: {method}) in run {run}.",
         "MC_TEST_ALL_COMPLETE": "--- Monte Carlo simulation completed. ---",
         "STAT_TEST_EXCEL_CREATED": "✅ Excel file with statistical results '{filename}' created.",
         "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Error saving Excel file '{filename}': {error}",
         "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ No detailed data collected to create the Excel file.",
         "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Download Statistical Results (.xlsx)",
-        "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis (WRSwOR/Simple) by distance and k/block.", # Updated
+        "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis (WRSwOR/Simple) by distance and k/block.",
         "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during functional test execution: {error}",
         "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
     }
