@@ -1,4 +1,4 @@
-# localization.py
+# localization.py (Cleaned Indentation & Updated Keys)
 
 TEXTS = {
     "it": {
@@ -9,15 +9,14 @@ TEXTS = {
         "INSTRUCTIONS_HEADER": "ℹ️ Istruzioni e Preparazione File Excel (Logica a Blocchi)",
         "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
         "VALIDATION_TEST_HEADER": "Test Funzionale",
-        # "SOURCE_CODE_HEADER": "Codice Sorgente", # Rimosso
         "OUTPUT_AREA_HEADER": "Output e Messaggi",
         "VALIDATION_RESULTS_HEADER": "--- Risultato Test Funzionale ---",
         "GENERATION_MESSAGES_HEADER": "--- Messaggi dalla Generazione ---",
         "FOOTER_TEXT": "EvilProf v1.1 (Blocchi) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
         # Widget Sidebar
-        "UPLOAD_LABEL": "1. Carica File Excel (.xlsx, .xls)",
-        "UPLOAD_HELP": "Trascina o seleziona il file Excel con le domande organizzate in blocchi separati da righe vuote.",
+        "UPLOAD_LABEL": "1. Carica File Excel/CSV",
+        "UPLOAD_HELP": "Trascina o seleziona il file (.xlsx, .xls, .csv) con le domande organizzate in blocchi separati da righe vuote.",
         "SUBJECT_LABEL": "2. Nome della Materia",
         "SUBJECT_HELP": "Apparirà nel titolo di ogni verifica.",
         "SUBJECT_DEFAULT": "Informatica",
@@ -28,8 +27,7 @@ TEXTS = {
         "TOTAL_QUESTIONS_SELECTED": "Domande Totali Selezionate",
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
         "VALIDATE_BUTTON_LABEL": "🧪 Esegui Test Funzionale",
-        "VALIDATE_BUTTON_HELP_NEW": "Esegue una analisi statistica sulla similarità dei test.",
-        # Download codice rimosso
+        "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.",
 
         # Messaggi di Stato / Errori / Warning
         "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
@@ -38,8 +36,8 @@ TEXTS = {
         "IMAGE_LOAD_ERROR": "Errore caricamento immagine '{image_path}': {error}",
         "VALIDATION_START": "Avvio Test Funzionale...",
         "GENERATION_START": "Avvio Generazione Verifiche...",
-        "UPLOAD_FIRST_WARNING": "⚠️ Per favore, carica prima un file Excel.",
-        "LOADING_DATA_SPINNER": "⏳ Analisi file Excel e identificazione blocchi...",
+        "UPLOAD_FIRST_WARNING": "⚠️ Per favore, carica prima un file Excel/CSV.",
+        "LOADING_DATA_SPINNER": "⏳ Analisi file e identificazione blocchi...",
         "LOAD_ERROR": "Errore caricamento dati: {error_msg}",
         "NO_VALID_QUESTIONS_ERROR": "Nessuna domanda valida trovata nel file caricato.",
         "TOTAL_QUESTIONS_ZERO_ERROR_BLOCKS": "ERRORE: Non hai selezionato nessuna domanda dai blocchi.",
@@ -54,27 +52,30 @@ TEXTS = {
         "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Scarica PDF Generato",
         "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Errore durante la creazione del file PDF.",
-        "INITIAL_INFO_NEW": "Carica un file Excel, specifica quante domande prendere da ogni blocco nella sidebar e premi 'Genera Verifiche PDF'.",
+        "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nella sidebar e premi 'Genera Verifiche PDF'.",
         "VALIDATION_NO_MESSAGES": "Il test funzionale non ha prodotto messaggi specifici.",
 
-        # Testo Intro (NUOVO)
+        # Testo Intro (AGGIORNATO CON CONDIZIONE WRSwOR)
         "INTRO_TEXT_NEW": """
-EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto di domande da blocchi definiti nel tuo file Excel.
+EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto di domande da blocchi definiti nel tuo file Excel o CSV.
 
 **Caratteristiche:**
 
-- **Input da Excel:** Carica un file `.xlsx` o `.xls`.
+- **Input da Excel/CSV:** Carica un file `.xlsx`, `.xls` o `.csv`.
 - **Struttura a Blocchi:** Organizza le domande in blocchi separati da **una riga completamente vuota**.
 - **Tipi di Blocco:** Ogni blocco deve contenere **solo domande a scelta multipla** OPPURE **solo domande aperte**. L'app rileva automaticamente il tipo. Non mischiare i tipi nello stesso blocco.
-- **Selezione Esatta:** Dopo aver caricato il file, potrai specificare nella sidebar **quante domande esatte** vuoi selezionare da ciascun blocco identificato.
-- **Randomizzazione e Diversità:** Le domande all'interno di ogni blocco vengono selezionate casualmente usando un campionamento ponderato (WRSwOR) che tenta di **evitare la ripetizione immediata** delle stesse domande *da quel blocco* nelle verifiche consecutive. Il fallback a selezione casuale semplice può attivarsi se le richieste per un blocco sono alte rispetto alle domande disponibili in esso.
+- **Selezione Esatta:** Dopo aver caricato il file, potrai specificare nella sidebar **quante domande esatte (`k`)** vuoi selezionare da ciascun blocco identificato (che contiene `n` domande).
+- **Randomizzazione e Diversità:**
+    - Se per un blocco il numero totale di domande disponibili (`n`) è **strettamente maggiore** del doppio delle domande richieste (`k`) (cioè, **`n > 2k`**), l'applicazione userà un **Campionamento Ponderato (WRSwOR)** per selezionare le `k` domande da quel blocco. Questo metodo tenta di evitare la ripetizione immediata delle stesse domande *da quel blocco* nelle verifiche consecutive.
+    - Se invece **`n <= 2k`** (cioè se chiedi la metà o più delle domande disponibili nel blocco), l'applicazione userà un **Campionamento Casuale Semplice** per selezionare le `k` domande da quel blocco, perdendo la garanzia di diversità tra test consecutivi per quel blocco.
+    - Il fallback a campionamento casuale semplice può attivarsi anche per WRSwOR se le richieste (`k`) sono alte rispetto ai candidati *nuovi* disponibili in quel momento.
 - **Output PDF:** Genera un singolo file PDF con le verifiche composte secondo le tue selezioni.
 
-**Preparazione File Excel:**
+**Preparazione File Excel/CSV:**
 
 1.  Inizia a inserire le domande del primo blocco (tutte MC o tutte OE) dalla riga 1.
-    * **Colonna A:** Testo della domanda.
-    * **Colonne B, C,... (Solo per MC):** Opzioni di risposta. Lasciare vuote per domande Aperte.
+    * **Colonna A (o prima colonna):** Testo della domanda.
+    * **Colonne B, C,... (o successive, solo per MC):** Opzioni di risposta. Lasciare vuote per domande Aperte.
 2.  Quando vuoi iniziare un nuovo blocco (di tipo uguale o diverso), **inserisci una riga completamente vuota**.
 3.  Nella riga successiva a quella vuota, inizia a inserire le domande del nuovo blocco.
 4.  Ripeti i passaggi 2 e 3 per tutti i blocchi desiderati.
@@ -91,25 +92,24 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "PDF_NO_OPTIONS": "<em>(Nessuna opzione di risposta fornita)</em>",
 
         # Messaggi file_handler
-        "FH_READING_EXCEL": "⏳ Analisi file Excel: {file_name}...",
-        "FH_USING_CACHE": "ℹ️ Utilizzo dati già analizzati per: {file_name}",
-        "FH_ROW_WARNING_ANSWERS_ONLY": "Attenzione: Riga Excel {row_num} ha risposte ma manca la domanda e sarà ignorata.",
-        "FH_ROW_WARNING_ONE_ANSWER": "Attenzione: Domanda '{q_text}' (riga Excel {row_num}) ha solo 1 risposta ed è stata trattata come Aperta.",
+        "FH_READING_EXCEL": "⏳ Analisi file: {filename}...",
+        "FH_USING_CACHE": "ℹ️ Utilizzo dati già analizzati per: {filename}",
+        "FH_ROW_WARNING_ANSWERS_ONLY": "Attenzione: Riga {row_num} ha risposte ma manca la domanda e sarà ignorata.",
+        "FH_ROW_WARNING_ONE_ANSWER": "Attenzione: Domanda '{q_text}' (riga {row_num}) ha solo 1 risposta ed è stata trattata come Aperta.",
         "FH_LOAD_COMPLETE_BLOCKS": "✅ File analizzato: {num_blocks} blocchi trovati ({count} domande totali).",
-        "FH_NO_VALID_QUESTIONS": "Errore: Nessuna domanda valida trovata nel file '{file_name}'.",
-        "FH_UNEXPECTED_ERROR": "Errore imprevisto durante la lettura/analisi del file Excel '{file_name}': {error}",
+        "FH_NO_VALID_QUESTIONS": "Errore: Nessuna domanda valida trovata nel file '{filename}'.",
+        "FH_UNEXPECTED_ERROR": "Errore imprevisto durante la lettura/analisi del file '{filename}': {error}",
         "FH_BLOCK_MIXED_TYPES": "⚠️ Attenzione Blocco {block_id}: Trovata domanda di tipo '{found}' (riga {row_num}), ma il blocco era stato identificato come '{expected}'. La domanda verrà ignorata.",
         "FH_CSV_READ_ERROR": "Errore lettura CSV '{filename}'. Controlla delimitatore (virgola/punto e virgola) e codifica. Dettagli: {error}",
         "FH_UNSUPPORTED_FORMAT": "ERRORE: Formato file non supportato '{extension}' per il file '{filename}'. Usare .xlsx, .xls o .csv.",
 
         # Messaggi core_logic
-        "CL_FALLBACK_MC_WARNING": "[Blocco {block_id} - Test {test_num}] Fallback attivo (Scelta Multipla): non abbastanza domande diverse ({candidates}) rispetto al test precedente nel blocco. Campiono da tutte ({total}) nel blocco.",
-        "CL_FALLBACK_OE_WARNING": "[Blocco {block_id} - Test {test_num}] Fallback attivo (Aperte): non abbastanza domande diverse ({candidates}) rispetto al test precedente nel blocco. Campiono da tutte ({total}) nel blocco.",
+        "BLOCK_FALLBACK_WARNING": "[Blocco {block_id} - Test {test_num}] Fallback WRSwOR: non abbastanza domande nuove ({candidates} < {k}). Campiono da tutte ({total}) nel blocco.",
         "BLOCK_NOT_FOUND_OR_EMPTY": "ERRORE Interno: Blocco {block_id} richiesto ma non trovato o vuoto.",
         "BLOCK_REQUEST_EXCEEDS_AVAILABLE": "ERRORE Interno: Richieste {k} domande dal Blocco {block_id}, ma ne sono disponibili solo {n}.",
         "BLOCK_CRITICAL_SAMPLING_ERROR": "Errore Critico Campionamento Blocco {block_id}: Impossibile campionare {k} da {n} candidati.",
         "BLOCK_WRSWOR_ERROR": "Errore Critico WRSwOR Blocco {block_id} (k={k}): {error}",
-        "CL_FINAL_FALLBACK_ACTIVE": "‼️ ATTENZIONE GENERALE: Il fallback è stato attivato per almeno un blocco durante la generazione. La diversità *all'interno* di quei blocchi potrebbe non essere garantita per tutti i test.",
+        "CL_FINAL_FALLBACK_ACTIVE": "‼️ ATTENZIONE GENERALE: Il fallback WRSwOR è stato attivato per almeno un blocco durante la generazione. La diversità *all'interno* di quei blocchi potrebbe non essere garantita per tutti i test.",
         "BLOCK_K_ADJUSTED_IN_FALLBACK": "⚠️ Attenzione Blocco {block_id}: Richieste {requested} domande, ma solo {actual} disponibili durante il fallback. Numero adattato.",
 
         # Messaggi pdf_generator
@@ -121,8 +121,8 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERRORE WeasyPrint: Dipendenze mancanti (GTK+/Pango/Cairo?). Dettagli: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERRORE durante la generazione PDF con WeasyPrint: {error}",
 
-        # Chiavi Test Funzionale (da aggiornare quando si rifà test.py)
-        "TEST_FILE_NOT_FOUND": "ERRORE: File di test '{filename}' non trovato...",
+        # Chiavi per test.py (Test Statistici e Monte Carlo)
+        "TEST_FILE_NOT_FOUND": "ERRORE: File di test '{filename}' non trovato. Assicurati che sia nella stessa cartella dell'app.",
         "TEST_LOADING_DATA": "Caricamento dati dal file di test '{filename}'...",
         "TEST_NO_QUESTIONS_FOUND": "ERRORE: Nessuna domanda valida trovata nel file di test '{filename}'.",
         "TEST_LOAD_SUCCESS": "Dati di test caricati: {count} domande ({mc} MC, {oe} OE).",
@@ -133,17 +133,15 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "TEST_WRONG_Q_PER_BLOCK_COUNT": "ERRORE Dati Test: Blocco {block_id} ha {found} domande, attese {expected}.",
         "STAT_TEST_K_INVALID": "ERRORE Test: k={k} richiesto non è valido per nessun blocco.",
         "STAT_TEST_GENERATION_FAILED_KPB": "❌ Fallita generazione sequenza test per k_per_block={k_per_block}.",
-        "MC_TEST_STARTING": "Avvio simulazione Monte Carlo ({num_runs} run, {num_k} valori di k, {num_tests} test/k)...",
-        "MC_TEST_KPB_STARTING": "Avvio simulazione Monte Carlo ({num_runs} run, {num_k} valori di k/blocco, {num_tests} test/seq)...",
+        "MC_TEST_UNIFIED_STARTING": "Avvio simulazione Monte Carlo ({num_runs} run, {num_k} valori k/blocco [{k_range}], {num_tests} test/seq)...",
         "MC_TEST_RUN_PROGRESS": "Progresso Monte Carlo: Run {current_run}/{total_runs}...",
-        "MC_TEST_FAILED_FOR_K_IN_RUN": "⚠️ Fallita analisi per k={k} nella run {run}.",
-        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Fallita analisi per k/blocco={k_per_block} nella run {run}.",
+        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Fallita analisi per k/blocco={k_per_block} (Metodo: {method}) nella run {run}.",
         "MC_TEST_ALL_COMPLETE": "--- Simulazione Monte Carlo completata. ---",
         "STAT_TEST_EXCEL_CREATED": "✅ File Excel con risultati statistici '{filename}' creato.",
         "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Errore durante il salvataggio del file Excel '{filename}': {error}",
         "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ Nessun dato dettagliato raccolto per creare il file Excel.",
         "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Scarica Risultati Statistici (.xlsx)",
-        "DOWNLOAD_STATS_EXCEL_HELP": "Scarica il file Excel con l'analisi di similarità Dice per distanza e k.",
+        "DOWNLOAD_STATS_EXCEL_HELP": "Scarica il file Excel con l'analisi di similarità Dice (WRSwOR/Semplice) per distanza e k/blocco.",
         "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Errore imprevisto durante l'esecuzione del test funzionale: {error}",
     },
     "en": {
@@ -161,8 +159,8 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "FOOTER_TEXT": "EvilProf v1.1 (Blocks) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
         # Widget Sidebar
-        "UPLOAD_LABEL": "1. Upload Excel File (.xlsx, .xls)",
-        "UPLOAD_HELP": "Drag and drop or select the Excel file with questions organized in blocks separated by empty rows.",
+        "UPLOAD_LABEL": "1. Upload Excel/CSV File",
+        "UPLOAD_HELP": "Drag and drop or select the Excel/CSV file (.xlsx, .xls, .csv) with questions organized in blocks separated by empty rows.",
         "SUBJECT_LABEL": "2. Subject Name",
         "SUBJECT_HELP": "Will appear in the title of each test.",
         "SUBJECT_DEFAULT": "Computer Science",
@@ -173,7 +171,7 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "TOTAL_QUESTIONS_SELECTED": "Total Questions Selected",
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
         "VALIDATE_BUTTON_LABEL": "🧪 Run Functional Test",
-        "VALIDATE_BUTTON_HELP_NEW": "Runs a montecarlo simulation test to verify logic.",
+        "VALIDATE_BUTTON_HELP_NEW": "Runs the Monte Carlo statistical analysis (using 'test_set_4_by_12_questions.xlsx') on test similarity.",
         # Source code download removed
 
         # Status / Error / Warning Messages
@@ -183,8 +181,8 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "IMAGE_LOAD_ERROR": "Error loading image '{image_path}': {error}",
         "VALIDATION_START": "Starting Functional Test...",
         "GENERATION_START": "Starting Test Generation...",
-        "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel file first.",
-        "LOADING_DATA_SPINNER": "⏳ Analyzing Excel file and identifying blocks...",
+        "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel/CSV file first.",
+        "LOADING_DATA_SPINNER": "⏳ Analyzing file and identifying blocks...",
         "LOAD_ERROR": "Error loading data: {error_msg}",
         "NO_VALID_QUESTIONS_ERROR": "No valid questions found in the uploaded file.",
         "TOTAL_QUESTIONS_ZERO_ERROR_BLOCKS": "ERROR: You haven't selected any questions from the blocks.",
@@ -199,28 +197,31 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
         "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Download Generated PDF",
         "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Error during PDF creation.",
-        "INITIAL_INFO_NEW": "Upload an Excel file, specify how many questions to take from each block in the sidebar, and press 'Generate PDF Tests'.",
+        "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the sidebar, and press 'Generate PDF Tests'.",
         "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
 
-        # Intro Text (NEW)
+        # Intro Text (UPDATED WITH WRSwOR CONDITION)
         "INTRO_TEXT_NEW": """
-EvilProf (Block Version) generates PDF tests by selecting an exact number of questions from blocks defined in your Excel file.
+EvilProf (Block Version) generates PDF tests by selecting an exact number of questions from blocks defined in your Excel or CSV file.
 
 **Features:**
 
-- **Input from Excel:** Load an `.xlsx` or `.xls` file.
+- **Input from Excel/CSV:** Load an `.xlsx`, `.xls`, or `.csv` file.
 - **Block Structure:** Organize questions into blocks separated by **a completely empty row**.
 - **Block Types:** Each block must contain **only multiple-choice questions** OR **only open-ended questions**. The app detects the type automatically. Do not mix types within the same block.
-- **Exact Selection:** After uploading the file, you can specify in the sidebar **exactly how many questions** you want to select from each identified block.
-- **Randomization and Diversity:** Questions within each block are randomly selected using weighted sampling (WRSwOR) that attempts to **avoid immediate repetition** of the same questions *from that block* in consecutive tests. Fallback to simple random sampling may occur if requests for a block are high relative to its available questions.
+- **Exact Selection:** After uploading the file, you can specify in the sidebar **exactly how many questions (`k`)** you want to select from each identified block (which contains `n` questions).
+- **Randomization and Diversity:**
+    - If, for a block, the total number of available questions (`n`) is **strictly greater** than twice the requested questions (`k`) (i.e., **`n > 2k`**), the application will use **Weighted Sampling (WRSwOR)** to select the `k` questions from that block. This method attempts to avoid immediate repetition of the same questions *from that block* in consecutive tests.
+    - If **`n <= 2k`** (i.e., if you request half or more of the available questions in the block), the application will use **Simple Random Sampling** to select the `k` questions from that block, losing the diversity guarantee between consecutive tests for that block.
+    - Fallback to simple random sampling may also occur for WRSwOR if requests (`k`) are high relative to the *new* available candidates at that moment.
 - **PDF Output:** Generates a single PDF file with the tests composed according to your selections.
 
-**Excel File Preparation:**
+**Excel/CSV File Preparation:**
 
 1.  Start entering questions for the first block (all MC or all OE) from row 1.
-    * **Column A:** Question text.
-    * **Columns B, C,... (MC Only):** Answer options. Leave empty for Open-Ended questions.
-2.  When you want to start a new block (of the same or different type), **insert a completely empty row**.
+    * **Column A (or first column):** Question text.
+    * **Columns B, C,... (or subsequent, MC Only):** Answer options. Leave empty for Open-Ended questions.
+2.  When you want to start a new block, **insert a completely empty row**.
 3.  On the row after the empty one, start entering the questions for the new block.
 4.  Repeat steps 2 and 3 for all desired blocks.
 5.  **Do not include topic names or column headers.**
@@ -236,25 +237,24 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
         "PDF_NO_OPTIONS": "<em>(No answer options provided)</em>",
 
         # file_handler messages
-        "FH_READING_EXCEL": "⏳ Analyzing Excel file: {file_name}...",
-        "FH_USING_CACHE": "ℹ️ Using already analyzed data for: {file_name}",
-        "FH_ROW_WARNING_ANSWERS_ONLY": "Warning: Excel row {row_num} has answers but is missing the question and will be ignored.",
-        "FH_ROW_WARNING_ONE_ANSWER": "Warning: Question '{q_text}' (Excel row {row_num}) has only 1 answer and was treated as Open-Ended.",
+        "FH_READING_EXCEL": "⏳ Analyzing file: {filename}...",
+        "FH_USING_CACHE": "ℹ️ Using already analyzed data for: {filename}",
+        "FH_ROW_WARNING_ANSWERS_ONLY": "Warning: Row {row_num} has answers but is missing the question and will be ignored.",
+        "FH_ROW_WARNING_ONE_ANSWER": "Warning: Question '{q_text}' (row {row_num}) has only 1 answer and was treated as Open-Ended.",
         "FH_LOAD_COMPLETE_BLOCKS": "✅ File analyzed: {num_blocks} blocks found ({count} total questions).",
-        "FH_NO_VALID_QUESTIONS": "Error: No valid questions found in file '{file_name}'.",
-        "FH_UNEXPECTED_ERROR": "Unexpected error while reading/analyzing Excel file '{file_name}': {error}",
+        "FH_NO_VALID_QUESTIONS": "Error: No valid questions found in file '{filename}'.",
+        "FH_UNEXPECTED_ERROR": "Unexpected error while reading/analyzing file '{filename}': {error}",
         "FH_BLOCK_MIXED_TYPES": "⚠️ Warning Block {block_id}: Found question of type '{found}' (row {row_num}), but block was identified as '{expected}'. Question will be ignored.",
         "FH_CSV_READ_ERROR": "Error reading CSV '{filename}'. Check delimiter (comma/semicolon) and encoding. Details: {error}",
         "FH_UNSUPPORTED_FORMAT": "ERROR: Unsupported file format '{extension}' for file '{filename}'. Use .xlsx, .xls, or .csv.",
 
         # core_logic messages
-        "CL_FALLBACK_MC_WARNING": "[Block {block_id} - Test {test_num}] Fallback active (Multiple Choice): not enough diverse questions ({candidates}) compared to the previous test in the block. Sampling from all ({total}) in block.",
-        "CL_FALLBACK_OE_WARNING": "[Block {block_id} - Test {test_num}] Fallback active (Open-Ended): not enough diverse questions ({candidates}) compared to the previous test in the block. Sampling from all ({total}) in block.",
+        "BLOCK_FALLBACK_WARNING": "[Block {block_id} - Test {test_num}] WRSwOR Fallback: not enough new questions ({candidates} < {k}). Sampling from all ({total}) in block.",
         "BLOCK_NOT_FOUND_OR_EMPTY": "Internal ERROR: Block {block_id} requested but not found or empty.",
         "BLOCK_REQUEST_EXCEEDS_AVAILABLE": "Internal ERROR: Requested {k} questions from Block {block_id}, but only {n} are available.",
         "BLOCK_CRITICAL_SAMPLING_ERROR": "Critical Sampling Error Block {block_id}: Cannot sample {k} from {n} candidates.",
         "BLOCK_WRSWOR_ERROR": "Critical WRSwOR Error Block {block_id} (k={k}): {error}",
-        "CL_FINAL_FALLBACK_ACTIVE": "‼️ GENERAL WARNING: Fallback was activated for at least one block during generation. Diversity *within* those blocks might not be guaranteed for all tests.",
+        "CL_FINAL_FALLBACK_ACTIVE": "‼️ GENERAL WARNING: WRSwOR fallback was activated for at least one block during generation. Diversity *within* those blocks might not be guaranteed for all tests.",
         "BLOCK_K_ADJUSTED_IN_FALLBACK": "⚠️ Warning Block {block_id}: Requested {requested} questions, but only {actual} available during fallback. Number adjusted.",
 
         # pdf_generator messages
@@ -266,8 +266,8 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERROR WeasyPrint: Missing dependencies (GTK+/Pango/Cairo?). Details: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERROR during PDF generation with WeasyPrint: {error}",
 
-        # Test keys
-        "TEST_FILE_NOT_FOUND": "ERROR: Test file '{filename}' not found. Please run the 'generate_test_excel.py' script first.",
+        # Keys for test.py (Statistical Tests and Monte Carlo)
+        "TEST_FILE_NOT_FOUND": "ERROR: Test file '{filename}' not found. Ensure it's in the same folder as the app.",
         "TEST_LOADING_DATA": "Loading data from test file '{filename}'...",
         "TEST_NO_QUESTIONS_FOUND": "ERROR: No valid questions found in test file '{filename}'.",
         "TEST_LOAD_SUCCESS": "Test data loaded: {count} questions ({mc} MC, {oe} OE).",
@@ -278,17 +278,15 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
         "TEST_WRONG_Q_PER_BLOCK_COUNT": "ERROR Test Data: Block {block_id} has {found} questions, expected {expected}.",
         "STAT_TEST_K_INVALID": "ERROR Test: Requested k={k} is invalid for any block.",
         "STAT_TEST_GENERATION_FAILED_KPB": "❌ Failed test sequence generation for k_per_block={k_per_block}.",
-        "MC_TEST_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k-values, {num_tests} tests/k)...", # Old
-        "MC_TEST_KPB_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k/block values, {num_tests} tests/seq)...", # New
+        "MC_TEST_UNIFIED_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k/block values [{k_range}], {num_tests} tests/seq)...",
         "MC_TEST_RUN_PROGRESS": "Monte Carlo Progress: Run {current_run}/{total_runs}...",
-        "MC_TEST_FAILED_FOR_K_IN_RUN": "⚠️ Analysis failed for k={k} in run {run}.", # Old
-        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Analysis failed for k/block={k_per_block} in run {run}.", # New
+        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Analysis failed for k/block={k_per_block} (Method: {method}) in run {run}.",
         "MC_TEST_ALL_COMPLETE": "--- Monte Carlo simulation completed. ---",
         "STAT_TEST_EXCEL_CREATED": "✅ Excel file with statistical results '{filename}' created.",
         "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Error saving Excel file '{filename}': {error}",
         "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ No detailed data collected to create the Excel file.",
         "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Download Statistical Results (.xlsx)",
-        "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis by distance and k.",
+        "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis (WRSwOR/Simple) by distance and k/block.",
         "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during functional test execution: {error}",
         "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
     }
