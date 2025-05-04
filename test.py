@@ -3,10 +3,10 @@ import pandas as pd
 import random
 import os
 import math
-# --- AGGIUNTA IMPORT MANCANTE ---
-# --- ADDED MISSING IMPORT ---
+# --- IMPORT NECESSARIO ---
+# --- NECESSARY IMPORT ---
 from collections import defaultdict
-# --- FINE AGGIUNTA ---
+# --- FINE IMPORT ---
 
 # Importa la funzione di generazione principale da core_logic
 from core_logic import generate_all_tests_data
@@ -157,6 +157,7 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     Chiama status_callback solo per errori critici e messaggi finali.
     """
     monte_carlo_summary = []
+    # Usa defaultdict importato / Use imported defaultdict
     results_accumulator = defaultdict(lambda: defaultdict(lambda: {'sum': 0.0, 'count': 0}))
     sampling_method_used = {} # Per tracciare metodo usato per k / To track method used for k
 
@@ -183,7 +184,6 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     progress_update_frequency = 5
 
     # --- RIMOSSO MESSAGGIO INIZIO TEST ---
-    # monte_carlo_summary.append(("info", "MC_TEST_UNIFIED_STARTING", {...}))
 
     # 3. Ciclo Monte Carlo Esterno
     for run in range(1, num_monte_carlo_runs + 1):
@@ -193,16 +193,14 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
 
         # Ciclo sui valori di k_per_block interno
         for k_block in k_per_block_values:
-            # Determina il metodo che verrà usato da core_logic
             method = "WRSwOR" if (k_block * 2 < expected_q_per_block) else "Simple Random"
             if k_block not in sampling_method_used:
                 sampling_method_used[k_block] = method
 
-            # Esegui una singola analisi per questo k_block
             avg_dice_by_distance, gen_errors = _run_single_unified_analysis_for_k(
                 k_block, blocks_summary, all_questions, num_tests_per_sequence
             )
-            monte_carlo_summary.extend(gen_errors) # Accumula errori
+            monte_carlo_summary.extend(gen_errors)
 
             if avg_dice_by_distance is not None:
                 for d, avg_d in avg_dice_by_distance.items():
@@ -211,7 +209,6 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
                         results_accumulator[k_block][d]['count'] += 1
                         max_distance_overall = max(max_distance_overall, d)
             else:
-                # Mantieni il warning per fallimento di una run specifica
                 monte_carlo_summary.append(("warning", "MC_TEST_FAILED_FOR_KPB_IN_RUN", {"k_per_block": k_block, "run": run, "method": method}))
 
     # 4. Calcola Medie Finali e Prepara Output per Excel
@@ -238,23 +235,15 @@ def run_all_tests(status_callback, num_monte_carlo_runs=30):
     if detailed_results_for_excel:
         try:
             df_results = pd.DataFrame(detailed_results_for_excel)
-            # Pivot per avere k vs distanza
             df_pivot = pd.pivot_table(df_results, values='avg_dice', index='k_per_block', columns='distance')
-            # Aggiungi colonna Metodo all'indice (o come colonna separata)
-            # Add Method column to index (or as separate column)
             method_map = pd.Series(sampling_method_used, name='Metodo')
             df_pivot = df_pivot.join(method_map)
-            # Formatta indice k
             df_pivot.index = [f"{k} / {expected_q_per_block}" for k in df_pivot.index]
             df_pivot.index.name = f"k / n (n={expected_q_per_block} per blocco)"
-            # Formatta colonne distanza
-            df_pivot.columns = [f"Distanza {col}" if isinstance(col, int) else col for col in df_pivot.columns] # Gestisce colonna Metodo
-            # Ordina
+            df_pivot.columns = [f"Distanza {col}" if isinstance(col, int) else col for col in df_pivot.columns]
             df_pivot = df_pivot.sort_index(ascending=True)
-            df_pivot = df_pivot.reindex(sorted([col for col in df_pivot.columns if col.startswith('Distanza')], key=lambda x: int(x.split()[-1])) + ['Metodo'], axis=1) # Ordina colonne
-
+            df_pivot = df_pivot.reindex(sorted([col for col in df_pivot.columns if col.startswith('Distanza')], key=lambda x: int(x.split()[-1])) + ['Metodo'], axis=1)
             df_pivot.to_excel(OUTPUT_EXCEL_FILE, sheet_name='Similarity_Analysis')
-            # Messaggio creazione Excel
             monte_carlo_summary.append(("success", "STAT_TEST_EXCEL_CREATED", {"filename": OUTPUT_EXCEL_FILE}))
             excel_created = True
             excel_filename = OUTPUT_EXCEL_FILE
