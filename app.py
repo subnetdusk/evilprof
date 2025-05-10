@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# app.py (Layout Centered e Correzione Errore)
+# app.py (Senza Test Funzionale - Corretto)
 
 import streamlit as st
 from datetime import datetime
@@ -7,13 +7,13 @@ import os
 # import pandas as pd # Non direttamente usato qui, ma file_handler lo usa
 
 # Importa funzioni e costanti dai moduli separati
-from localization import TEXTS, get_text, format_text # Assicurati che localization.py sia la versione corretta
+from localization import TEXTS, get_text, format_text
 from config import (
     DEFAULT_NUM_TESTS
 )
 from file_handler import load_questions_from_excel
 from core_logic import generate_all_tests_data
-from test import run_all_tests # Per il test funzionale/statistico
+# from test import run_all_tests # RIMOSSO: Test funzionale/statistico non più usato
 from pdf_generator import generate_pdf_data, WEASYPRINT_AVAILABLE
 
 # ================================================================
@@ -23,12 +23,9 @@ if 'lang' not in st.session_state: st.session_state.lang = 'it'
 if 'blocks_summary' not in st.session_state: st.session_state.blocks_summary = None
 if 'all_questions' not in st.session_state: st.session_state.all_questions = None
 if 'block_requests' not in st.session_state: st.session_state.block_requests = {}
-if 'action_performed' not in st.session_state: st.session_state.action_performed = False
+if 'action_performed' not in st.session_state: st.session_state.action_performed = False # Traccia solo la generazione PDF
 if 'processed_filename' not in st.session_state: st.session_state.processed_filename = None
-if 'show_test_results_in_sidebar' not in st.session_state: st.session_state.show_test_results_in_sidebar = False
-if 'sidebar_test_messages' not in st.session_state: st.session_state.sidebar_test_messages = []
-if 'sidebar_excel_file' not in st.session_state: st.session_state.sidebar_excel_file = None
-
+# Le variabili di stato relative al test sono state rimosse in precedenza.
 
 def T(key): return get_text(st.session_state.lang, key)
 def F(key, **kwargs): kwargs = kwargs or {}; return format_text(st.session_state.lang, key, **kwargs)
@@ -36,21 +33,12 @@ def F(key, **kwargs): kwargs = kwargs or {}; return format_text(st.session_state
 # ================================================================
 # Setup Pagina / Page Setup
 # ================================================================
-# Modificato: layout="centered" per la gestione nativa della larghezza massima centralizzata
 st.set_page_config(page_title=T("PAGE_TITLE"), layout="centered", initial_sidebar_state="collapsed")
 
-# CSS per stilizzare la sidebar (bordo, messaggi, bottone download) e il bottone expand/collapse
+# CSS per stilizzare la sidebar e il bottone expand/collapse
 st.markdown(
     f"""
     <style>
-        /* Stile per i messaggi di output del test nella sidebar */
-        .sidebar .stAlert {{
-            font-size: 0.85rem; 
-        }}
-         .sidebar .stDownloadButton button {{
-            width: 100%; 
-            font-size: 0.9rem;
-        }}
         /* Rende il bordo della sidebar più visibile */
         section[data-testid="stSidebar"] {{
             border-right: 2px solid #e0e0e0; 
@@ -79,22 +67,18 @@ st.markdown(
 # ================================================================
 # Toggle Button Lingua / Language Toggle Button
 # ================================================================
-# Con layout="centered", i bottoni lingua possono essere messi in colonne standard
-# e saranno centrati con il resto del contenuto.
-cols_lang_title = st.columns([0.85, 0.075, 0.075]) # Proporzioni per posizionare a destra
+cols_lang_title = st.columns([0.85, 0.075, 0.075])
 with cols_lang_title[1]:
     button_it_type = "primary" if st.session_state.lang == 'it' else "secondary"
     if st.button("🇮🇹", key="lang_it_btn_main", type=button_it_type, help="Passa a Italiano / Switch to Italian", use_container_width=True):
         if st.session_state.lang != 'it':
             st.session_state.lang = 'it'
-            st.session_state.show_test_results_in_sidebar = False 
             st.rerun()
 with cols_lang_title[2]:
     button_en_type = "primary" if st.session_state.lang == 'en' else "secondary"
     if st.button("🇬🇧", key="lang_en_btn_main", type=button_en_type, help="Passa a Inglese / Switch to English", use_container_width=True):
         if st.session_state.lang != 'en':
             st.session_state.lang = 'en'
-            st.session_state.show_test_results_in_sidebar = False 
             st.rerun()
 
 # ================================================================
@@ -116,73 +100,14 @@ with st.sidebar:
     st.markdown("---")
     st.markdown(T("INTRO_TEXT_NEW"), unsafe_allow_html=True)
     st.markdown("---")
-
-    st.header(T("STAT_FUNCTIONAL_TEST_HEADER"))
-    validation_button_sidebar = st.button(
-        T("STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL"), 
-        help=T("VALIDATE_BUTTON_HELP_NEW"),
-        use_container_width=True,
-        key="validation_button_sidebar" 
-    )
-
-    sidebar_test_output_placeholder = st.container() 
-
-    if validation_button_sidebar:
-        st.session_state.action_performed = True 
-        st.session_state.show_test_results_in_sidebar = True 
-        st.session_state.sidebar_test_messages = [] 
-        st.session_state.sidebar_excel_file = None  
-        
-        # Rimosse le chiamate .empty() ai placeholder del corpo principale per evitare NameError
-        # main_upload_status_placeholder.empty() 
-        # output_placeholder.empty() 
-        # transient_status_placeholder.empty()
-
-        with st.spinner(T("VALIDATION_LOGIC_SPINNER")): 
-            try:
-                test_results_messages, excel_file_created = run_all_tests(status_callback)
-                st.session_state.sidebar_test_messages = test_results_messages
-                st.session_state.sidebar_excel_file = excel_file_created
-            except Exception as e:
-                 st.session_state.sidebar_test_messages = [("error", "CL_VALIDATION_UNEXPECTED_ERROR", {"error": str(e)})]
-        st.rerun() 
-
-    if st.session_state.show_test_results_in_sidebar:
-        with sidebar_test_output_placeholder:
-            st.markdown(f"**{T('VALIDATION_RESULTS_HEADER')}**") 
-            if not st.session_state.sidebar_test_messages and not st.session_state.sidebar_excel_file:
-                st.warning(T("VALIDATION_NO_MESSAGES")) 
-            elif st.session_state.sidebar_test_messages:
-                for msg_type, msg_key, msg_kwargs in st.session_state.sidebar_test_messages:
-                    final_formatted_text = F(msg_key, **msg_kwargs)
-                    if msg_type == "info": st.info(final_formatted_text)
-                    elif msg_type == "warning": st.warning(final_formatted_text)
-                    elif msg_type == "error": st.error(final_formatted_text)
-                    elif msg_type == "success": st.success(final_formatted_text)
-                    else: st.write(f"[{msg_type.upper()}] {final_formatted_text}")
-            if st.session_state.sidebar_excel_file and os.path.exists(st.session_state.sidebar_excel_file):
-                try:
-                    with open(st.session_state.sidebar_excel_file, "rb") as fp: excel_bytes = fp.read()
-                    st.download_button(
-                        label=T("DOWNLOAD_STATS_EXCEL_LABEL"),
-                        data=excel_bytes,
-                        file_name=os.path.basename(st.session_state.sidebar_excel_file),
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        help=T("DOWNLOAD_STATS_EXCEL_HELP"),
-                        use_container_width=True 
-                    )
-                except Exception as e: st.error(f"Errore lettura file Excel per download: {e}")
-            if st.button("Nascondi Risultati Test", key="hide_sidebar_test_results", use_container_width=True):
-                st.session_state.show_test_results_in_sidebar = False
-                st.rerun()
+    # La sezione del Test Statistico-Funzionale è stata completamente rimossa.
 
 # ================================================================
 # Corpo Principale / Main Body
 # ================================================================
-# Definizione dei placeholder del corpo principale
 main_upload_status_placeholder = st.empty()
-output_placeholder = st.container() # Usato per i risultati della generazione PDF
-transient_status_placeholder = st.empty() # Usato dalla status_callback per errori generici
+output_placeholder = st.container() 
+transient_status_placeholder = st.empty() 
 
 def main_upload_status_callback(msg_type, msg_key, **kwargs):
      if msg_type not in ["warning", "error"]: return
@@ -190,6 +115,25 @@ def main_upload_status_callback(msg_type, msg_key, **kwargs):
      if formatted_text.startswith("MISSING_TEXT["): formatted_text = f"{msg_key}: {kwargs}"
      if msg_type == "warning": main_upload_status_placeholder.warning(formatted_text)
      elif msg_type == "error": main_upload_status_placeholder.error(formatted_text)
+
+def status_callback(msg_type, msg_key, **kwargs):
+     """Callback generica per messaggi da core_logic e pdf_generator."""
+     if msg_type not in ["warning", "error"]: return
+     # Correzione: usa get_text per ottenere il template e poi formatta
+     raw_template = get_text(st.session_state.lang, msg_key)
+     if raw_template == f"MISSING_TEXT[{msg_key}]":
+         formatted_text = f"{msg_key}: {kwargs}" if kwargs else msg_key
+     else:
+        try:
+            formatted_text = raw_template.format(**kwargs)
+        except KeyError: # Se una chiave in kwargs non è nel template
+            formatted_text = f"{raw_template} (Params: {kwargs})"
+        except Exception: # Altri errori di formattazione
+            formatted_text = f"{raw_template} (Params: {kwargs})"
+
+     if msg_type == "warning": transient_status_placeholder.warning(formatted_text)
+     elif msg_type == "error": transient_status_placeholder.error(formatted_text)
+
 
 st.header(T("UPLOAD_LABEL"))
 uploaded_file = st.file_uploader(
@@ -202,10 +146,9 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
     if st.session_state.processed_filename != uploaded_file.name:
-        main_upload_status_placeholder.empty() # Pulisce messaggi di upload precedenti
-        output_placeholder.empty() # Pulisce risultati di generazione PDF precedenti
-        transient_status_placeholder.empty() # Pulisce messaggi generici precedenti
-        st.session_state.show_test_results_in_sidebar = False 
+        main_upload_status_placeholder.empty() 
+        output_placeholder.empty() 
+        transient_status_placeholder.empty() 
         with st.spinner(T("LOADING_DATA_SPINNER")):
             all_q, blocks_sum, error_k = load_questions_from_excel(uploaded_file, main_upload_status_callback)
         if error_k:
@@ -215,7 +158,7 @@ if uploaded_file is not None:
             st.session_state.all_questions = all_q; st.session_state.blocks_summary = blocks_sum
             st.session_state.block_requests = {b['block_id']: 0 for b in blocks_sum} 
             st.session_state.processed_filename = uploaded_file.name
-            for key_widget in list(st.session_state.keys()):
+            for key_widget in list(st.session_state.keys()): # Resetta i valori del form
                 if key_widget.startswith("form_block_input_"):
                     st.session_state[key_widget] = 0
 
@@ -226,7 +169,6 @@ elif st.session_state.processed_filename is not None and uploaded_file is None:
      main_upload_status_placeholder.empty()
      output_placeholder.empty()
      transient_status_placeholder.empty()
-     st.session_state.show_test_results_in_sidebar = False 
 
 st.markdown("---")
 st.header(T("GENERATION_PARAMS_HEADER"))
@@ -262,8 +204,9 @@ with st.form(key="generation_form"):
     else:
         if uploaded_file is not None and not st.session_state.blocks_summary :
              pass 
-        elif uploaded_file is None:
-            st.info(T("UPLOAD_FIRST_WARNING"))
+        elif uploaded_file is None: # Solo se nessun file è MAI stato caricato O è stato rimosso
+            if st.session_state.processed_filename is None:
+                st.info(T("UPLOAD_FIRST_WARNING"))
 
     generate_button_form = st.form_submit_button(
         T("GENERATE_BUTTON_LABEL"),
@@ -274,73 +217,60 @@ with st.form(key="generation_form"):
 
 st.markdown("---") 
 st.subheader(T("OUTPUT_AREA_HEADER"))
-# output_placeholder e transient_status_placeholder sono già definiti sopra
-
-def display_critical_message_main(message_type, key_or_raw_text, **kwargs):
-    if message_type not in ["warning", "error"]: return
-    kwargs = kwargs or {}
-    formatted_text = F(key_or_raw_text, **kwargs)
-    if formatted_text == key_or_raw_text or formatted_text.startswith("MISSING_TEXT["):
-        if kwargs:
-            try: formatted_text = key_or_raw_text.format(**kwargs)
-            except (KeyError, IndexError, ValueError, TypeError): formatted_text = key_or_raw_text
-        else: formatted_text = key_or_raw_text
-    if message_type == "warning": transient_status_placeholder.warning(formatted_text)
-    elif message_type == "error": transient_status_placeholder.error(formatted_text)
-
-def status_callback(msg_type, msg_key, **kwargs):
-     display_critical_message_main(msg_type, msg_key, **kwargs)
-
 
 if generate_button_form:
-    output_placeholder.empty(); transient_status_placeholder.empty() # Pulisce output precedente
-    main_upload_status_placeholder.empty() # Pulisce anche messaggi di upload
+    output_placeholder.empty(); transient_status_placeholder.empty() 
+    main_upload_status_placeholder.empty() 
     st.session_state.action_performed = True
-    st.session_state.show_test_results_in_sidebar = False 
 
     active_block_requests = {bid: k for bid, k in st.session_state.block_requests.items() if k > 0}
     total_requested_final = sum(active_block_requests.values())
 
-    if uploaded_file is None and st.session_state.processed_filename is None:
-        output_placeholder.warning(T("UPLOAD_FIRST_WARNING")); st.stop()
+    if uploaded_file is None and st.session_state.processed_filename is None: # Doppio controllo
+        with output_placeholder: st.warning(T("UPLOAD_FIRST_WARNING")); st.stop()
     if not st.session_state.all_questions or not st.session_state.blocks_summary:
-         output_placeholder.error(F("LOAD_ERROR", error_msg="Dati blocchi non caricati. Ricarica il file.")); st.stop()
+         with output_placeholder: st.error(F("LOAD_ERROR", error_msg="Dati blocchi non caricati. Ricarica il file.")); st.stop()
     if total_requested_final <= 0:
-        output_placeholder.error(T("TOTAL_QUESTIONS_ZERO_ERROR_BLOCKS")); st.stop()
+        with output_placeholder: st.error(T("TOTAL_QUESTIONS_ZERO_ERROR_BLOCKS")); st.stop()
 
     pdf_generated = False; pdf_data = None; final_generation_messages = []
     with st.spinner(T("GENERATING_DATA_SPINNER")):
         try:
             all_tests_data, generation_messages_core = generate_all_tests_data(
-                st.session_state.all_questions, active_block_requests, num_tests_input, status_callback
+                st.session_state.all_questions, active_block_requests, num_tests_input, status_callback 
             )
             final_generation_messages.extend(generation_messages_core)
             if all_tests_data is None or any(msg[0] == 'error' for msg in generation_messages_core):
-                raise ValueError("Test data generation failed due to errors in core logic.")
+                # Gli errori da core_logic sono già mostrati da status_callback
+                # quindi non serve un raise qui a meno che non si voglia interrompere del tutto
+                pass # Non sollevare eccezione, lascia che i messaggi vengano mostrati
 
-            pdf_strings = { "title_format": T("PDF_TEST_TITLE"), "name_label": T("PDF_NAME_LABEL"),
-                            "date_label": T("PDF_DATE_LABEL"), "class_label": T("PDF_CLASS_LABEL"),
-                            "missing_question": T("PDF_MISSING_QUESTION"), "no_options": T("PDF_NO_OPTIONS")}
-            pdf_data = generate_pdf_data(all_tests_data, subject_name, status_callback, pdf_strings)
-            if pdf_data is None:
-                if not any(msg[0] == 'error' for msg in final_generation_messages):
-                    final_generation_messages.append(("error", "PDF_GENERATION_ERROR", {}))
-            else:
-                pdf_generated = True
-        except ValueError as ve:
-            if not any(m[0] == 'error' for m in final_generation_messages):
-                 final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": str(ve)}))
-        except Exception as e:
-             if not any(m[0] == 'error' for m in final_generation_messages):
+            if all_tests_data: # Procedi alla generazione PDF solo se i dati test sono validi
+                pdf_strings = { "title_format": T("PDF_TEST_TITLE"), "name_label": T("PDF_NAME_LABEL"),
+                                "date_label": T("PDF_DATE_LABEL"), "class_label": T("PDF_CLASS_LABEL"),
+                                "missing_question": T("PDF_MISSING_QUESTION"), "no_options": T("PDF_NO_OPTIONS")}
+                pdf_data = generate_pdf_data(all_tests_data, subject_name, status_callback, pdf_strings)
+                if pdf_data is not None:
+                    pdf_generated = True
+                # else: Errore da generate_pdf_data già gestito da status_callback
+            
+        except Exception as e: # Catchall per errori non previsti durante il processo
+             if not any(m[0] == 'error' for m in final_generation_messages): 
                 final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": str(e)}))
+                # Mostra anche questo errore imprevisto tramite status_callback
+                status_callback("error", "GENERATION_FAILED_ERROR", error=str(e))
 
-    with output_placeholder: # Mostra i risultati della generazione PDF qui
-        if final_generation_messages:
+
+    with output_placeholder: 
+        # Mostra i messaggi raccolti da final_generation_messages che non sono warning/error
+        # perché quelli sono già gestiti da status_callback nel transient_status_placeholder
+        permanent_messages_to_show = [fm for fm in final_generation_messages if fm[0] not in ['warning', 'error']]
+        if permanent_messages_to_show:
              st.markdown(f"**{T('GENERATION_MESSAGES_HEADER')}**")
-             for msg_type, msg_key, msg_kwargs in final_generation_messages:
+             for msg_type, msg_key, msg_kwargs in permanent_messages_to_show:
                  final_formatted_text = F(msg_key, **msg_kwargs)
-                 if msg_type == "warning": st.warning(final_formatted_text)
-                 elif msg_type == "error": st.error(final_formatted_text)
+                 if msg_type == "info": st.info(final_formatted_text)
+                 # Altri tipi se necessario (es. success da core_logic)
 
         if pdf_generated and pdf_data:
             st.success(T("PDF_SUCCESS"))
@@ -350,11 +280,16 @@ if generate_button_form:
             st.download_button( label=T("PDF_DOWNLOAD_BUTTON_LABEL"), data=pdf_data, file_name=pdf_filename,
                                 mime="application/pdf", help=F("PDF_DOWNLOAD_BUTTON_HELP", pdf_filename=pdf_filename),
                                 use_container_width=True, type="primary")
-        elif not any(msg[0] == 'error' for msg in final_generation_messages) and not pdf_generated : 
+        elif not pdf_generated and not transient_status_placeholder.empty: 
+            # Se il PDF non è stato generato E transient_status_placeholder ha un messaggio (probabilmente un errore da status_callback)
+            # non mostrare un altro errore generico.
+            pass
+        elif not pdf_generated: # Se il PDF non è generato e non ci sono errori specifici visibili
             st.error(T("PDF_GENERATION_ERROR"))
 
+
 if not st.session_state.action_performed and not uploaded_file and st.session_state.processed_filename is None:
-    with output_placeholder: # Assicura che il messaggio iniziale sia nel placeholder corretto
+    with output_placeholder: 
         st.info(T("INITIAL_INFO_NEW"))
 
 st.markdown("---")
