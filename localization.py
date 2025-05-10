@@ -1,11 +1,11 @@
-# localization.py (floor e immagine)
+# localization.py (Subheader Aggiornato)
 
 TEXTS = {
     "it": {
         # Titoli e Header principali
         "PAGE_TITLE": "EvilProf 😈",
         "MAIN_TITLE": "EvilProf 😈",
-        "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel/CSV.",
+        "SUBHEADER_NEW": "Crea verifiche da Excel/CSV con selezione mirata per massimizzare la diversità delle domande.", # MODIFICATO
         "INSTRUCTIONS_HEADER": "ℹ️ Guida Rapida e Link Utili",
         "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
         "OUTPUT_AREA_HEADER": "Output e Messaggi",
@@ -26,14 +26,14 @@ TEXTS = {
         "NUM_TESTS_LABEL": "3. Numero di Verifiche da Generare",
         "NUM_TESTS_HELP": "Quante versioni diverse della verifica creare?",
         "BLOCK_REQUESTS_HEADER": "Domande per Blocco:",
-        "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ Per massimizzare la diversità, si consiglia di selezionare circa 1/3 delle domande disponibili per blocco (valore preimpostato con arrotondamento per difetto).", # Aggiornato per floor
+        "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ Per massimizzare la diversità, si consiglia di selezionare circa 1/3 delle domande disponibili per blocco (valore preimpostato con arrotondamento per difetto).",
         "BLOCK_REQUEST_LABEL": "N. Domande da Blocco {block_id} ({type}) (Max: {n})",
         "TOTAL_QUESTIONS_SELECTED": "Domande Totali Selezionate",
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
 
         # Messaggi di stato, errore, warning
         "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
-        "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)", # Chiave per l'immagine
+        "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)",
         "IMAGE_NOT_FOUND_WARNING": "Nota: Immagine di esempio '{image_path}' non trovata.",
         "IMAGE_LOAD_ERROR": "Errore caricamento immagine '{image_path}': {error}",
         "GENERATION_START": "Avvio Generazione Verifiche...",
@@ -123,7 +123,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         # Titles & Headers
         "PAGE_TITLE": "EvilProf 😈",
         "MAIN_TITLE": "EvilProf 😈",
-        "SUBHEADER_NEW": "Generate tests by selecting the exact number of questions per block from Excel/CSV.",
+        "SUBHEADER_NEW": "Create tests from Excel/CSV with targeted selection to maximize question diversity.", # MODIFIED
         "INSTRUCTIONS_HEADER": "ℹ️ Quick Guide & Useful Links",
         "GENERATION_PARAMS_HEADER": "Generation Parameters",
         "OUTPUT_AREA_HEADER": "Output & Messages",
@@ -144,14 +144,14 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "NUM_TESTS_LABEL": "3. Number of Tests to Generate",
         "NUM_TESTS_HELP": "How many different versions of the test to create?",
         "BLOCK_REQUESTS_HEADER": "Questions per Block:",
-        "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ To maximize diversity, selecting about 1/3 of the available questions per block is recommended (default value is preset, rounded down).", # Updated for floor
+        "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ To maximize diversity, selecting about 1/3 of the available questions per block is recommended (default value is preset, rounded down).",
         "BLOCK_REQUEST_LABEL": "N. Questions from Block {block_id} ({type}) (Max: {n})",
         "TOTAL_QUESTIONS_SELECTED": "Total Questions Selected",
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
 
         # Status / Error / Warning Messages
         "WEASYPRINT_ERROR": "🚨 **Warning:** The WeasyPrint library is not available or not functional. PDF generation is blocked...",
-        "IMAGE_CAPTION": "Example of valid Excel file structure (with separated blocks)", # Key for the image
+        "IMAGE_CAPTION": "Example of valid Excel file structure (with separated blocks)",
         "IMAGE_NOT_FOUND_WARNING": "Note: Example image '{image_path}' not found.",
         "IMAGE_LOAD_ERROR": "Error loading image '{image_path}': {error}",
         "GENERATION_START": "Starting Test Generation...",
