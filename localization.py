@@ -1,11 +1,11 @@
-# localization.py (Subheader Aggiornato)
+# localization.py (Etichette Aggiornate e Download Automatico)
 
 TEXTS = {
     "it": {
         # Titoli e Header principali
         "PAGE_TITLE": "EvilProf 😈",
         "MAIN_TITLE": "EvilProf 😈",
-        "SUBHEADER_NEW": "Crea verifiche da Excel/CSV con selezione mirata per massimizzare la diversità delle domande.", # MODIFICATO
+        "SUBHEADER_NEW": "Crea verifiche da Excel/CSV con selezione mirata per massimizzare la diversità delle domande.",
         "INSTRUCTIONS_HEADER": "ℹ️ Guida Rapida e Link Utili",
         "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
         "OUTPUT_AREA_HEADER": "Output e Messaggi",
@@ -18,12 +18,12 @@ TEXTS = {
         "README_LINK_URL_EN": "https://github.com/subnetdusk/evilprof/blob/main/README.md#english-version",
 
         # Widget e Label
-        "UPLOAD_LABEL": "1. Carica File Excel/CSV",
+        "UPLOAD_LABEL": "Carica File Excel/CSV", # MODIFICATO
         "UPLOAD_HELP": "Trascina o seleziona il file (.xlsx, .xls, .csv) con le domande organizzate in blocchi separati da righe vuote.",
-        "SUBJECT_LABEL": "2. Nome della Materia",
+        "SUBJECT_LABEL": "Nome della Materia", # MODIFICATO
         "SUBJECT_HELP": "Apparirà nel titolo di ogni verifica.",
         "SUBJECT_DEFAULT": "Informatica",
-        "NUM_TESTS_LABEL": "3. Numero di Verifiche da Generare",
+        "NUM_TESTS_LABEL": "Numero di Verifiche da Generare", # MODIFICATO
         "NUM_TESTS_HELP": "Quante versioni diverse della verifica creare?",
         "BLOCK_REQUESTS_HEADER": "Domande per Blocco:",
         "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ Per massimizzare la diversità, si consiglia di selezionare circa 1/3 delle domande disponibili per blocco (valore preimpostato con arrotondamento per difetto).",
@@ -48,9 +48,9 @@ TEXTS = {
         "GENERATION_FAILED_ERROR": "❌ Generazione fallita a causa di errori critici: {error}",
         "DATA_READY_PDF_INFO": "Dati per {num_tests} verifiche pronti. Avvio generazione PDF...",
         "PDF_CREATION_SPINNER": "⏳ Creazione del file PDF in corso...",
-        "PDF_SUCCESS": "✅ Generazione PDF completata!",
-        "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Scarica PDF Generato",
-        "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'",
+        "PDF_SUCCESS": "✅ Generazione PDF completata! Download avviato...", # Modificato per riflettere download automatico
+        # "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Scarica PDF Generato", # RIMOSSO (o non usato per download principale)
+        # "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'", # RIMOSSO (o non usato)
         "PDF_GENERATION_ERROR": "❌ Errore durante la creazione del file PDF.",
         "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nei campi appositi e premi 'Genera Verifiche PDF'.",
 
@@ -123,7 +123,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         # Titles & Headers
         "PAGE_TITLE": "EvilProf 😈",
         "MAIN_TITLE": "EvilProf 😈",
-        "SUBHEADER_NEW": "Create tests from Excel/CSV with targeted selection to maximize question diversity.", # MODIFIED
+        "SUBHEADER_NEW": "Create tests from Excel/CSV with targeted selection to maximize question diversity.",
         "INSTRUCTIONS_HEADER": "ℹ️ Quick Guide & Useful Links",
         "GENERATION_PARAMS_HEADER": "Generation Parameters",
         "OUTPUT_AREA_HEADER": "Output & Messages",
@@ -136,12 +136,12 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "README_LINK_URL_EN": "https://github.com/subnetdusk/evilprof/blob/main/README.md#english-version",
 
         # Widget Sidebar (now Main Body for these) & Labels
-        "UPLOAD_LABEL": "1. Upload Excel/CSV File",
+        "UPLOAD_LABEL": "Upload Excel/CSV File", # MODIFIED
         "UPLOAD_HELP": "Drag and drop or select the Excel/CSV file (.xlsx, .xls, .csv) with questions organized in blocks separated by empty rows.",
-        "SUBJECT_LABEL": "2. Subject Name",
+        "SUBJECT_LABEL": "Subject Name", # MODIFIED
         "SUBJECT_HELP": "Will appear in the title of each test.",
         "SUBJECT_DEFAULT": "Computer Science",
-        "NUM_TESTS_LABEL": "3. Number of Tests to Generate",
+        "NUM_TESTS_LABEL": "Number of Tests to Generate", # MODIFIED
         "NUM_TESTS_HELP": "How many different versions of the test to create?",
         "BLOCK_REQUESTS_HEADER": "Questions per Block:",
         "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ To maximize diversity, selecting about 1/3 of the available questions per block is recommended (default value is preset, rounded down).",
@@ -166,9 +166,9 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "GENERATION_FAILED_ERROR": "❌ Generation failed due to critical errors: {error}",
         "DATA_READY_PDF_INFO": "Data for {num_tests} tests ready. Starting PDF generation...",
         "PDF_CREATION_SPINNER": "⏳ Creating PDF file...",
-        "PDF_SUCCESS": "✅ PDF Generation Complete!",
-        "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Download Generated PDF",
-        "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'",
+        "PDF_SUCCESS": "✅ PDF Generation Complete! Download started...", # Modified for auto download
+        # "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Download Generated PDF", # REMOVED (or not used for main download)
+        # "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'", # REMOVED (or not used)
         "PDF_GENERATION_ERROR": "❌ Error during PDF creation.",
         "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the respective fields, and press 'Generate PDF Tests'.",
 
@@ -220,7 +220,7 @@ EvilProf generates PDF tests from Excel/CSV files, organizing questions into blo
         "FH_UNSUPPORTED_FORMAT": "ERROR: Unsupported file format '{extension}' for file '{filename}'. Use .xlsx, .xls, or .csv.",
 
         # core_logic messages
-        "BLOCK_FALLBACK_WARNING": "[Block {block_id} - Test {test_num}] WRSwOR Fallback: not enough new questions ({candidates} < {k}). Sampling from all ({total}) in block.",
+        "BLOCK_FALLBACK_WARNING": "[Blocco {block_id} - Test {test_num}] WRSwOR Fallback: not enough new questions ({candidates} < {k}). Sampling from all ({total}) in block.",
         "BLOCK_NOT_FOUND_OR_EMPTY": "Internal ERROR: Block {block_id} requested but not found or empty.",
         "BLOCK_REQUEST_EXCEEDS_AVAILABLE": "Internal ERROR: Requested {k} questions from Block {block_id}, but only {n} are available.",
         "BLOCK_CRITICAL_SAMPLING_ERROR": "Critical Sampling Error Block {block_id}: Cannot sample {k} from {n} candidates.",
