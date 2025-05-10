@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# app.py (Test in Sidebar e CSS Aggiornato)
+# app.py (Larghezza 1200px e Test in Sidebar)
 
 import streamlit as st
 from datetime import datetime
@@ -38,16 +38,21 @@ def F(key, **kwargs): kwargs = kwargs or {}; return format_text(st.session_state
 # ================================================================
 st.set_page_config(page_title=T("PAGE_TITLE"), layout="wide", initial_sidebar_state="collapsed")
 
-max_width_px = 1000
+# CSS per impostare la larghezza massima del contenuto principale
+# Il selettore [data-testid="stAppViewContainer"] punta al contenitore principale dell'app
+# e [data-testid="stBlock"] ai blocchi di contenuto al suo interno.
+# Applichiamo max-width al primo stBlock diretto figlio del main per centrare il contenuto.
+max_width_px = 1200  # Aggiornato a 1200px
 st.markdown(
     f"""
     <style>
-        .main .block-container {{
+        /* Contenitore principale dell'applicazione Streamlit */
+        .main [data-testid="stAppViewContainer"] > .block-container {{
             max-width: {max_width_px}px;
             padding-left: 1rem; 
             padding-right: 1rem;
-            margin-left: auto;
-            margin-right: auto;
+            margin-left: auto !important; /* Forza il margine per centrare */
+            margin-right: auto !important; /* Forza il margine per centrare */
         }}
         /* Stile per i messaggi di output del test nella sidebar */
         .sidebar .stAlert {{
@@ -59,20 +64,20 @@ st.markdown(
         }}
         /* Rende il bordo della sidebar più visibile */
         section[data-testid="stSidebar"] {{
-            border-right: 2px solid #e0e0e0; /* Colore del bordo leggermente più scuro */
-            box-shadow: 2px 0px 5px rgba(0,0,0,0.1); /* Aggiunge una leggera ombra */
+            border-right: 2px solid #e0e0e0; 
+            box-shadow: 2px 0px 5px rgba(0,0,0,0.1); 
         }}
-        /* Tentativo di stilizzare il bottone di espansione/collasso della sidebar */
+        /* Stile per il bottone di espansione/collasso della sidebar */
         button[title="Collapse sidebar"] svg, button[title="Expand sidebar"] svg {{
-            fill: #333 !important; /* Colore dell'icona SVG più scuro */
+            fill: #333 !important; 
         }}
          button[title="Collapse sidebar"], button[title="Expand sidebar"] {{
-            background-color: rgba(240, 242, 246, 0.5) !important; /* Sfondo leggermente trasparente */
-            border: 1px solid #cccccc !important; /* Bordo per il bottone */
+            background-color: rgba(240, 242, 246, 0.5) !important; 
+            border: 1px solid #cccccc !important; 
             border-radius: 50% !important;
-            width: 36px !important; /* Dimensioni leggermente maggiori */
+            width: 36px !important; 
             height: 36px !important;
-            box-shadow: 0px 1px 3px rgba(0,0,0,0.2) !important; /* Ombra per dare profondità */
+            box-shadow: 0px 1px 3px rgba(0,0,0,0.2) !important; 
         }}
         button[title="Collapse sidebar"]:hover, button[title="Expand sidebar"]:hover {{
             background-color: rgba(230, 230, 230, 0.7) !important;
@@ -85,28 +90,33 @@ st.markdown(
 # ================================================================
 # Toggle Button Lingua / Language Toggle Button
 # ================================================================
-_, col_lang_container, _ = st.columns([1,20,1]) 
-with col_lang_container:
-    cols_lang_inner = st.columns([0.85, 0.075, 0.075]) 
-    with cols_lang_inner[1]:
-        button_it_type = "primary" if st.session_state.lang == 'it' else "secondary"
-        if st.button("🇮🇹", key="lang_it_btn", type=button_it_type, help="Passa a Italiano / Switch to Italian", use_container_width=True):
-            if st.session_state.lang != 'it':
-                st.session_state.lang = 'it'
-                st.session_state.show_test_results_in_sidebar = False 
-                st.rerun()
-    with cols_lang_inner[2]:
-        button_en_type = "primary" if st.session_state.lang == 'en' else "secondary"
-        if st.button("🇬🇧", key="lang_en_btn", type=button_en_type, help="Passa a Inglese / Switch to English", use_container_width=True):
-            if st.session_state.lang != 'en':
-                st.session_state.lang = 'en'
-                st.session_state.show_test_results_in_sidebar = False 
-                st.rerun()
+# Per mantenere i bottoni lingua all'interno della larghezza definita,
+# li mettiamo in una colonna che sarà influenzata dal CSS sopra.
+# Questo è un workaround; idealmente Streamlit offrirebbe più controllo sul layout header.
+# Dato che il CSS ora agisce su .main [data-testid="stAppViewContainer"] > .block-container,
+# i bottoni lingua, se messi direttamente, sarebbero a larghezza piena.
+# Li collochiamo quindi all'inizio del contenuto principale.
 
-# ================================================================
-# Titolo e Contenuto Principale / Title and Main Content
-# ================================================================
+# Titolo e Sottotitolo Principale
 st.title(T("MAIN_TITLE"))
+
+# Bottoni lingua posizionati sotto il titolo ma prima del contenuto principale "stretto"
+cols_lang_title = st.columns([0.85, 0.075, 0.075])
+with cols_lang_title[1]:
+    button_it_type = "primary" if st.session_state.lang == 'it' else "secondary"
+    if st.button("🇮🇹", key="lang_it_btn_main", type=button_it_type, help="Passa a Italiano / Switch to Italian", use_container_width=True):
+        if st.session_state.lang != 'it':
+            st.session_state.lang = 'it'
+            st.session_state.show_test_results_in_sidebar = False 
+            st.rerun()
+with cols_lang_title[2]:
+    button_en_type = "primary" if st.session_state.lang == 'en' else "secondary"
+    if st.button("🇬🇧", key="lang_en_btn_main", type=button_en_type, help="Passa a Inglese / Switch to English", use_container_width=True):
+        if st.session_state.lang != 'en':
+            st.session_state.lang = 'en'
+            st.session_state.show_test_results_in_sidebar = False 
+            st.rerun()
+
 st.subheader(T("SUBHEADER_NEW"))
 if not WEASYPRINT_AVAILABLE:
     st.error(T("WEASYPRINT_ERROR"))
@@ -123,16 +133,16 @@ with st.sidebar:
     st.markdown(T("INTRO_TEXT_NEW"), unsafe_allow_html=True)
     st.markdown("---")
 
-    # --- Sezione Test Statistico-Funzionale (ORA NELLA SIDEBAR) ---
+    # --- Sezione Test Statistico-Funzionale (NELLA SIDEBAR) ---
     st.header(T("STAT_FUNCTIONAL_TEST_HEADER"))
     validation_button_sidebar = st.button(
         T("STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL"), 
         help=T("VALIDATE_BUTTON_HELP_NEW"),
         use_container_width=True,
-        key="validation_button_sidebar" # Chiave specifica per questo bottone
+        key="validation_button_sidebar" 
     )
 
-    sidebar_test_output_placeholder = st.container() # Placeholder per i risultati del test
+    sidebar_test_output_placeholder = st.container() 
 
     if validation_button_sidebar:
         st.session_state.action_performed = True 
@@ -140,21 +150,18 @@ with st.sidebar:
         st.session_state.sidebar_test_messages = [] 
         st.session_state.sidebar_excel_file = None  
         
-        # Svuota i placeholder nel corpo principale se il test è attivato dalla sidebar
-        # Questo evita che vecchi messaggi di generazione PDF rimangano visibili
-        main_upload_status_placeholder.empty() # Svuota anche i messaggi di upload
+        main_upload_status_placeholder.empty() 
         output_placeholder.empty() 
         transient_status_placeholder.empty()
 
         with st.spinner(T("VALIDATION_LOGIC_SPINNER")): 
             try:
-                # La callback status_callback mostrerà errori critici nel transient_status_placeholder principale
                 test_results_messages, excel_file_created = run_all_tests(status_callback)
                 st.session_state.sidebar_test_messages = test_results_messages
                 st.session_state.sidebar_excel_file = excel_file_created
             except Exception as e:
                  st.session_state.sidebar_test_messages = [("error", "CL_VALIDATION_UNEXPECTED_ERROR", {"error": str(e)})]
-        st.rerun() # Forza un rerun per aggiornare la sidebar con i risultati
+        st.rerun() 
 
     if st.session_state.show_test_results_in_sidebar:
         with sidebar_test_output_placeholder:
@@ -217,10 +224,9 @@ if uploaded_file is not None:
             st.session_state.block_requests = {}; st.session_state.processed_filename = None
         else:
             st.session_state.all_questions = all_q; st.session_state.blocks_summary = blocks_sum
-            st.session_state.block_requests = {b['block_id']: 0 for b in blocks_sum}
+            st.session_state.block_requests = {b['block_id']: 0 for b in blocks_sum} # Resetta a 0 per il nuovo file
             st.session_state.processed_filename = uploaded_file.name
             # Resetta i valori dei number_input nel form se un nuovo file viene caricato
-            # Iterando sulle chiavi dei widget direttamente in st.session_state
             for key_widget in list(st.session_state.keys()):
                 if key_widget.startswith("form_block_input_"):
                     st.session_state[key_widget] = 0
@@ -251,24 +257,15 @@ with st.form(key="generation_form"):
             available_count = block_info['count']
             label = F("BLOCK_REQUEST_LABEL", block_id=block_id, type=block_type_str, n=available_count)
             
-            # Il valore di default per number_input nel form deve essere preso da block_requests
-            # che è stato inizializzato/aggiornato quando il file è stato caricato/cambiato
-            # o resettato se un nuovo file è caricato.
             current_value_for_block = st.session_state.block_requests.get(block_id, 0)
             value_to_set_in_form = min(current_value_for_block, available_count)
             
             num_input_key = f"form_block_input_{block_id}"
-            # Quando il form viene sottomesso, i valori dei widget vengono automaticamente aggiornati in st.session_state
-            # quindi st.session_state.block_requests[block_id] sarà aggiornato dal valore del widget
-            # qui leggiamo il valore corrente per il number_input
-            # e lo usiamo per calcolare total_questions_requested_form
-            # IMPORTANTE: l'assegnazione a st.session_state.block_requests[block_id] DEVE avvenire
-            # all'interno del form per catturare i cambiamenti dell'utente.
             user_input_for_block = st.number_input(
                 label=label, min_value=0, max_value=available_count,
                 value=value_to_set_in_form, step=1, key=num_input_key
             )
-            st.session_state.block_requests[block_id] = user_input_for_block # Aggiorna lo stato con l'input utente
+            st.session_state.block_requests[block_id] = user_input_for_block 
             total_questions_requested_form += user_input_for_block
 
         st.markdown(f"**{T('TOTAL_QUESTIONS_SELECTED')}: {total_questions_requested_form}**")
@@ -311,8 +308,6 @@ if generate_button_form:
     st.session_state.action_performed = True
     st.session_state.show_test_results_in_sidebar = False 
 
-    # Recupera i valori più aggiornati da st.session_state.block_requests,
-    # che sono stati aggiornati dai number_input all'interno del form.
     active_block_requests = {bid: k for bid, k in st.session_state.block_requests.items() if k > 0}
     total_requested_final = sum(active_block_requests.values())
 
