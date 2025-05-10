@@ -1,4 +1,4 @@
-# localization.py (Nota Sottotitolo e Download Manuale)
+# localization.py (Alert Campionamento)
 
 TEXTS = {
     "it": {
@@ -6,7 +6,7 @@ TEXTS = {
         "PAGE_TITLE": "EvilProf 😈",
         "MAIN_TITLE": "EvilProf 😈",
         "SUBHEADER_NEW": "Crea verifiche da Excel/CSV con selezione mirata per massimizzare la diversità delle domande.",
-        "SUBHEADER_NOTE_SIDEBAR_INFO": "*(per maggiori dettagli e istruzioni, consulta la sidebar)*", # NUOVA CHIAVE
+        "SUBHEADER_NOTE_SIDEBAR_INFO": "*(per maggiori dettagli e istruzioni, consulta la sidebar)*",
         "INSTRUCTIONS_HEADER": "ℹ️ Guida Rapida e Link Utili",
         "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
         "OUTPUT_AREA_HEADER": "Output e Messaggi",
@@ -49,9 +49,9 @@ TEXTS = {
         "GENERATION_FAILED_ERROR": "❌ Generazione fallita a causa di errori critici: {error}",
         "DATA_READY_PDF_INFO": "Dati per {num_tests} verifiche pronti. Avvio generazione PDF...",
         "PDF_CREATION_SPINNER": "⏳ Creazione del file PDF in corso...",
-        "PDF_SUCCESS": "✅ Generazione PDF completata!", # Modificato
-        "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Scarica Verifiche PDF Generate", # Ripristinato/Aggiornato
-        "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'", # Ripristinato/Aggiornato
+        "PDF_SUCCESS": "✅ Generazione PDF completata!",
+        "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Scarica Verifiche PDF Generate",
+        "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Errore durante la creazione del file PDF.",
         "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nei campi appositi e premi 'Genera Verifiche PDF'.",
 
@@ -76,7 +76,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
 
 3.  **Logica di Campionamento (per una maggiore diversità tra verifiche):**
     * **Campionamento Ponderato (WRSwOR):** Se le domande disponibili nel blocco (`n`) sono più del doppio di quelle richieste (`k`), cioè **`n > 2k`**, l'app usa questo metodo. Garantisce che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva* (per quel blocco) e favorisce la selezione di domande meno recenti.
-    * **Campionamento Casuale Semplice:** Se **`n <= 2k`** (cioè se richiedi la metà o più delle domande del blocco), l'app usa questo metodo, che non garantisce la stessa diversità tra test consecutivi per quel blocco. Può attivarsi anche per WRSwOR se `k` è alto rispetto alle domande *nuove* disponibili.
+    * **Campionamento Casuale Semplice:** Se **`n <= 2k`** (cioè se richiedi la metà o più delle domande del blocco), l'app usa questo metodo, che non garantisce la stessa diversità tra test consecutivi per quel blocco. Può attivarsi anche per WRSwOR se `k` è alto rispetto alle domande *nuove* disponibili. Un messaggio ti informerà quando viene usato il campionamento semplice.
 
 4.  **Genera PDF:** Ottieni un singolo file PDF con tutte le verifiche generate.
 
@@ -103,7 +103,8 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "FH_UNSUPPORTED_FORMAT": "ERRORE: Formato file non supportato '{extension}' per il file '{filename}'. Usare .xlsx, .xls o .csv.",
 
         # Messaggi core_logic
-        "BLOCK_FALLBACK_WARNING": "[Blocco {block_id} - Test {test_num}] Fallback WRSwOR: non abbastanza domande nuove ({candidates} < {k}). Campiono da tutte ({total}) nel blocco.",
+        "BLOCK_FALLBACK_WARNING": "ℹ️ [Blocco {block_id} - Test {test_num}] WRSwOR fallback: non abbastanza domande nuove ({candidates} < {k}). Si usa campionamento casuale semplice da tutte le {total} domande del blocco.", # Modificato in INFO
+        "BLOCK_INFO_SIMPLE_SAMPLING_USED": "ℹ️ [Blocco {block_id} - Test {test_num}] Si usa campionamento casuale semplice perché il n. domande richieste ({k}) è ≥ della metà delle disponibili ({n_block}).", # NUOVA CHIAVE
         "BLOCK_NOT_FOUND_OR_EMPTY": "ERRORE Interno: Blocco {block_id} richiesto ma non trovato o vuoto.",
         "BLOCK_REQUEST_EXCEEDS_AVAILABLE": "ERRORE Interno: Richieste {k} domande dal Blocco {block_id}, ma ne sono disponibili solo {n}.",
         "BLOCK_CRITICAL_SAMPLING_ERROR": "Errore Critico Campionamento Blocco {block_id}: Impossibile campionare {k} da {n} candidati.",
@@ -125,7 +126,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "PAGE_TITLE": "EvilProf 😈",
         "MAIN_TITLE": "EvilProf 😈",
         "SUBHEADER_NEW": "Create tests from Excel/CSV with targeted selection to maximize question diversity.",
-        "SUBHEADER_NOTE_SIDEBAR_INFO": "*(for more details and instructions, see the sidebar)*", # NEW KEY
+        "SUBHEADER_NOTE_SIDEBAR_INFO": "*(for more details and instructions, see the sidebar)*",
         "INSTRUCTIONS_HEADER": "ℹ️ Quick Guide & Useful Links",
         "GENERATION_PARAMS_HEADER": "Generation Parameters",
         "OUTPUT_AREA_HEADER": "Output & Messages",
@@ -168,9 +169,9 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "GENERATION_FAILED_ERROR": "❌ Generation failed due to critical errors: {error}",
         "DATA_READY_PDF_INFO": "Data for {num_tests} tests ready. Starting PDF generation...",
         "PDF_CREATION_SPINNER": "⏳ Creating PDF file...",
-        "PDF_SUCCESS": "✅ PDF Generation Complete!", # Modified
-        "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Download Generated PDF Tests", # Restored/Updated
-        "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'", # Restored/Updated
+        "PDF_SUCCESS": "✅ PDF Generation Complete!",
+        "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Download Generated PDF Tests",
+        "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Error during PDF creation.",
         "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the respective fields, and press 'Generate PDF Tests'.",
 
@@ -195,7 +196,7 @@ EvilProf generates PDF tests from Excel/CSV files, organizing questions into blo
 
 3.  **Sampling Logic (for greater diversity between tests):**
     * **Weighted Sampling (WRSwOR):** If the available questions in the block (`n`) are more than double the requested ones (`k`), i.e., **`n > 2k`**, the app uses this method. It ensures that questions used in one test are not repeated in the *immediately following* test (for that block) and favors selecting less recently used questions.
-    * **Simple Random Sampling:** If **`n <= 2k`** (i.e., if you request half or more of the block's questions), the app uses this method, which doesn't guarantee the same diversity between consecutive tests for that block. It may also be triggered for WRSwOR if `k` is high relative to the *new* available questions.
+    * **Simple Random Sampling:** If **`n <= 2k`** (i.e., if you request half or more of the block's questions), the app uses this method, which doesn't guarantee the same diversity between consecutive tests for that block. It may also be triggered for WRSwOR if `k` is high relative to the *new* available questions. A message will inform you when simple sampling is used.
 
 4.  **Generate PDF:** Get a single PDF file with all generated tests.
 
@@ -222,7 +223,8 @@ EvilProf generates PDF tests from Excel/CSV files, organizing questions into blo
         "FH_UNSUPPORTED_FORMAT": "ERROR: Unsupported file format '{extension}' for file '{filename}'. Use .xlsx, .xls, or .csv.",
 
         # core_logic messages
-        "BLOCK_FALLBACK_WARNING": "[Blocco {block_id} - Test {test_num}] WRSwOR Fallback: not enough new questions ({candidates} < {k}). Sampling from all ({total}) in block.",
+        "BLOCK_FALLBACK_WARNING": "ℹ️ [Block {block_id} - Test {test_num}] WRSwOR fallback: not enough new questions ({candidates} < {k}). Using simple random sampling from all {total} questions in the block.", # Modified to INFO
+        "BLOCK_INFO_SIMPLE_SAMPLING_USED": "ℹ️ [Block {block_id} - Test {test_num}] Simple random sampling is used because the no. of requested questions ({k}) is ≥ half of the available ones ({n_block}).", # NEW KEY
         "BLOCK_NOT_FOUND_OR_EMPTY": "Internal ERROR: Block {block_id} requested but not found or empty.",
         "BLOCK_REQUEST_EXCEEDS_AVAILABLE": "Internal ERROR: Requested {k} questions from Block {block_id}, but only {n} are available.",
         "BLOCK_CRITICAL_SAMPLING_ERROR": "Critical Sampling Error Block {block_id}: Cannot sample {k} from {n} candidates.",
