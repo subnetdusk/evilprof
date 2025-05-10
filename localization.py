@@ -1,4 +1,4 @@
-# localization.py (Aggiornamenti Finali v1.2 - Obiettivo aggiornato)
+# localization.py (Senza Test Funzionale)
 
 TEXTS = {
     "it": {
@@ -8,9 +8,9 @@ TEXTS = {
         "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel/CSV.",
         "INSTRUCTIONS_HEADER": "ℹ️ Guida Rapida e Link Utili",
         "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
-        "STAT_FUNCTIONAL_TEST_HEADER": "Test Statistico-Funzionale",
+        # "STAT_FUNCTIONAL_TEST_HEADER": "Test Statistico-Funzionale", # RIMOSSO
         "OUTPUT_AREA_HEADER": "Output e Messaggi",
-        "VALIDATION_RESULTS_HEADER": "--- Risultato Test Statistico-Funzionale ---",
+        # "VALIDATION_RESULTS_HEADER": "--- Risultato Test Statistico-Funzionale ---", # RIMOSSO
         "GENERATION_MESSAGES_HEADER": "--- Messaggi dalla Generazione ---",
         "FOOTER_TEXT": "EvilProf v1.2 - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
@@ -31,16 +31,16 @@ TEXTS = {
         "BLOCK_REQUEST_LABEL": "N. Domande da Blocco {block_id} ({type}) (Max: {n})",
         "TOTAL_QUESTIONS_SELECTED": "Domande Totali Selezionate",
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
-        "STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL": "🔬 Esegui Test Statistico-Funzionale",
-        "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.",
+        # "STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL": "🔬 Esegui Test Statistico-Funzionale", # RIMOSSO
+        # "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.", # RIMOSSO
 
         # Messaggi di stato, errore, warning
         "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
-        "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)",
-        "ANALYSIS_IMAGE_CAPTION": "Esempio di analisi di similarità generata dal test funzionale",
-        "IMAGE_NOT_FOUND_WARNING": "Nota: Immagine di esempio '{image_path}' non trovata.",
+        "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)", # Mantenuto se serve nel README
+        # "ANALYSIS_IMAGE_CAPTION": "Esempio di analisi di similarità generata dal test funzionale", # RIMOSSO
+        "IMAGE_NOT_FOUND_WARNING": "Nota: Immagine di esempio '{image_path}' non trovata.", # Riferito a EXAMPLE_IMAGE_PATH
         "IMAGE_LOAD_ERROR": "Errore caricamento immagine '{image_path}': {error}",
-        "VALIDATION_START": "Avvio Test Statistico-Funzionale...",
+        # "VALIDATION_START": "Avvio Test Statistico-Funzionale...", # RIMOSSO
         "GENERATION_START": "Avvio Generazione Verifiche...",
         "UPLOAD_FIRST_WARNING": "⚠️ Per favore, carica prima un file Excel/CSV.",
         "LOADING_DATA_SPINNER": "⏳ Analisi file e identificazione blocchi...",
@@ -50,7 +50,7 @@ TEXTS = {
         "PARAMS_OK_INFO": "Parametri OK. Generazione di {num_tests} verifiche...",
         "CORRECT_ERRORS_ERROR": "Correggi gli errori nei parametri prima di generare.",
         "GENERATING_DATA_SPINNER": "⏳ Generazione verifiche...",
-        "VALIDATION_LOGIC_SPINNER": "⏳ Esecuzione test statistico-funzionale...",
+        # "VALIDATION_LOGIC_SPINNER": "⏳ Esecuzione test statistico-funzionale...", # RIMOSSO
         "GENERATION_FAILED_ERROR": "❌ Generazione fallita a causa di errori critici: {error}",
         "DATA_READY_PDF_INFO": "Dati per {num_tests} verifiche pronti. Avvio generazione PDF...",
         "PDF_CREATION_SPINNER": "⏳ Creazione del file PDF in corso...",
@@ -59,9 +59,9 @@ TEXTS = {
         "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Errore durante la creazione del file PDF.",
         "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nei campi appositi e premi 'Genera Verifiche PDF'.",
-        "VALIDATION_NO_MESSAGES": "Il test statistico-funzionale non ha prodotto messaggi specifici.",
+        # "VALIDATION_NO_MESSAGES": "Il test statistico-funzionale non ha prodotto messaggi specifici.", # RIMOSSO
 
-        # Testo Intro (OBIETTIVO AGGIORNATO)
+        # Testo Intro (Senza riferimenti al test statistico)
         "INTRO_TEXT_NEW": """
 EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in blocchi.
 
@@ -85,7 +85,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
 
 4.  **Genera PDF:** Ottieni un singolo file PDF con tutte le verifiche generate.
 
-*Per istruzioni dettagliate sulla preparazione del file, esempi e approfondimenti sull'analisi statistica (accessibile dal Test Statistico-Funzionale nella sidebar), consulta la guida completa su GitHub.*
+*Per istruzioni dettagliate sulla preparazione del file ed esempi, consulta la guida completa su GitHub.*
 """,
         # Testi usati nel PDF
         "PDF_TEST_TITLE": "Verifica di {subject_name}",
@@ -125,28 +125,12 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERRORE WeasyPrint: Dipendenze mancanti (GTK+/Pango/Cairo?). Dettagli: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERRORE durante la generazione PDF con WeasyPrint: {error}",
 
-        # Chiavi per test.py (Test Statistici e Monte Carlo)
-        "TEST_FILE_NOT_FOUND": "ERRORE: File di test '{filename}' non trovato. Assicurati che sia nella stessa cartella dell'app.",
-        "TEST_LOADING_DATA": "Caricamento dati dal file di test '{filename}'...",
-        "TEST_NO_QUESTIONS_FOUND": "ERRORE: Nessuna domanda valida trovata nel file di test '{filename}'.",
-        "TEST_LOAD_SUCCESS": "Dati di test caricati: {count} domande ({mc} MC, {oe} OE).",
-        "TEST_LOAD_ERROR": "ERRORE imprevisto durante il caricamento del file di test '{filename}': {error}",
-        "TEST_ABORTED_LOAD_FAILED": "❌ Test annullato: impossibile caricare i dati di test.",
-        "TEST_WRONG_QUESTION_COUNT": "ERRORE Dati Test: Trovate {mc} MC e {oe} OE domande, attese {expected} per tipo.",
-        "TEST_WRONG_BLOCK_COUNT": "ERRORE Dati Test: Trovati {found} blocchi, attesi {expected}.",
-        "TEST_WRONG_Q_PER_BLOCK_COUNT": "ERRORE Dati Test: Blocco {block_id} ha {found} domande, attese {expected}.",
-        "STAT_TEST_K_INVALID": "ERRORE Test: k={k} richiesto non è valido per nessun blocco.",
-        "STAT_TEST_GENERATION_FAILED_KPB": "❌ Fallita generazione sequenza test per k_per_block={k_per_block}.",
-        "MC_TEST_UNIFIED_STARTING": "Avvio simulazione Monte Carlo ({num_runs} run, {num_k} valori k/blocco [{k_range}], {num_tests} test/seq)...",
-        "MC_TEST_RUN_PROGRESS": "Progresso Monte Carlo: Run {current_run}/{total_runs}...",
-        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Fallita analisi per k/blocco={k_per_block} (Metodo: {method}) nella run {run}.",
-        "MC_TEST_ALL_COMPLETE": "--- Simulazione Monte Carlo completata. ---",
-        "STAT_TEST_EXCEL_CREATED": "✅ File Excel con risultati statistici '{filename}' creato.",
-        "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Errore durante il salvataggio del file Excel '{filename}': {error}",
-        "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ Nessun dato dettagliato raccolto per creare il file Excel.",
-        "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Scarica Risultati Statistici (.xlsx)",
-        "DOWNLOAD_STATS_EXCEL_HELP": "Scarica il file Excel con l'analisi di similarità Dice (WRSwOR/Semplice) per distanza e k/blocco.",
-        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Errore imprevisto durante l'esecuzione del test statistico-funzionale: {error}",
+        # Chiavi per test.py RIMOSSE
+        # "TEST_FILE_NOT_FOUND": "ERRORE: File di test '{filename}' non trovato...",
+        # ... (tutte le altre chiavi specifiche del test)
+        # "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Scarica Risultati Statistici (.xlsx)", # RIMOSSO
+        # "DOWNLOAD_STATS_EXCEL_HELP": "Scarica il file Excel con l'analisi di similarità Dice...", # RIMOSSO
+        # "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Errore imprevisto durante l'esecuzione del test statistico-funzionale: {error}", # RIMOSSO
     },
     "en": {
         # Titles & Headers
@@ -155,9 +139,9 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "SUBHEADER_NEW": "Generate tests by selecting the exact number of questions per block from Excel/CSV.",
         "INSTRUCTIONS_HEADER": "ℹ️ Quick Guide & Useful Links",
         "GENERATION_PARAMS_HEADER": "Generation Parameters",
-        "STAT_FUNCTIONAL_TEST_HEADER": "Statistical-Functional Test",
+        # "STAT_FUNCTIONAL_TEST_HEADER": "Statistical-Functional Test", # REMOVED
         "OUTPUT_AREA_HEADER": "Output & Messages",
-        "VALIDATION_RESULTS_HEADER": "--- Statistical-Functional Test Results ---",
+        # "VALIDATION_RESULTS_HEADER": "--- Statistical-Functional Test Results ---", # REMOVED
         "GENERATION_MESSAGES_HEADER": "--- Messages from Generation ---",
         "FOOTER_TEXT": "EvilProf v1.2 - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
@@ -178,16 +162,16 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "BLOCK_REQUEST_LABEL": "N. Questions from Block {block_id} ({type}) (Max: {n})",
         "TOTAL_QUESTIONS_SELECTED": "Total Questions Selected",
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
-        "STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL": "🔬 Run Statistical-Functional Test",
-        "VALIDATE_BUTTON_HELP_NEW": "Runs the Monte Carlo statistical analysis (using 'test_set_4_by_12_questions.xlsx') on test similarity.",
+        # "STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL": "🔬 Run Statistical-Functional Test", # REMOVED
+        # "VALIDATE_BUTTON_HELP_NEW": "Runs the Monte Carlo statistical analysis...", # REMOVED
 
         # Status / Error / Warning Messages
         "WEASYPRINT_ERROR": "🚨 **Warning:** The WeasyPrint library is not available or not functional. PDF generation is blocked...",
         "IMAGE_CAPTION": "Example of valid Excel file structure (with separated blocks)",
-        "ANALYSIS_IMAGE_CAPTION": "Example of similarity analysis generated by the functional test",
+        # "ANALYSIS_IMAGE_CAPTION": "Example of similarity analysis generated by the functional test", # REMOVED
         "IMAGE_NOT_FOUND_WARNING": "Note: Example image '{image_path}' not found.",
         "IMAGE_LOAD_ERROR": "Error loading image '{image_path}': {error}",
-        "VALIDATION_START": "Starting Statistical-Functional Test...",
+        # "VALIDATION_START": "Starting Statistical-Functional Test...", # REMOVED
         "GENERATION_START": "Starting Test Generation...",
         "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel/CSV file first.",
         "LOADING_DATA_SPINNER": "⏳ Analyzing file and identifying blocks...",
@@ -197,7 +181,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "PARAMS_OK_INFO": "Parameters OK. Generating {num_tests} tests...",
         "CORRECT_ERRORS_ERROR": "Please correct the parameter errors before generating.",
         "GENERATING_DATA_SPINNER": "⏳ Generating tests...",
-        "VALIDATION_LOGIC_SPINNER": "⏳ Running statistical-functional test...",
+        # "VALIDATION_LOGIC_SPINNER": "⏳ Running statistical-functional test...", # REMOVED
         "GENERATION_FAILED_ERROR": "❌ Generation failed due to critical errors: {error}",
         "DATA_READY_PDF_INFO": "Data for {num_tests} tests ready. Starting PDF generation...",
         "PDF_CREATION_SPINNER": "⏳ Creating PDF file...",
@@ -206,9 +190,9 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Error during PDF creation.",
         "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the respective fields, and press 'Generate PDF Tests'.",
-        "VALIDATION_NO_MESSAGES": "The statistical-functional test produced no specific messages.",
+        # "VALIDATION_NO_MESSAGES": "The statistical-functional test produced no specific messages.", # REMOVED
 
-        # Intro Text (OBJECTIVE UPDATED)
+        # Intro Text (Without references to statistical test)
         "INTRO_TEXT_NEW": """
 EvilProf generates PDF tests from Excel/CSV files, organizing questions into blocks.
 
@@ -232,7 +216,7 @@ EvilProf generates PDF tests from Excel/CSV files, organizing questions into blo
 
 4.  **Generate PDF:** Get a single PDF file with all generated tests.
 
-*For detailed file preparation instructions, examples, and insights into the statistical analysis (accessible from the Statistical-Functional Test in the sidebar), please refer to the full guide on GitHub.*
+*For detailed file preparation instructions and examples, please refer to the full guide on GitHub.*
 """,
         # Texts used in PDF
         "PDF_TEST_TITLE": "Test for {subject_name}",
@@ -271,29 +255,6 @@ EvilProf generates PDF tests from Excel/CSV files, organizing questions into blo
         "PG_PDF_CONVERSION_COMPLETE": "⚙️ PDF conversion complete.",
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERROR WeasyPrint: Missing dependencies (GTK+/Pango/Cairo?). Details: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERROR during PDF generation with WeasyPrint: {error}",
-
-        # Keys for test.py (Statistical Tests and Monte Carlo)
-        "TEST_FILE_NOT_FOUND": "ERROR: Test file '{filename}' not found. Ensure it's in the same folder as the app.",
-        "TEST_LOADING_DATA": "Loading data from test file '{filename}'...",
-        "TEST_NO_QUESTIONS_FOUND": "ERROR: No valid questions found in test file '{filename}'.",
-        "TEST_LOAD_SUCCESS": "Test data loaded: {count} questions ({mc} MC, {oe} OE).",
-        "TEST_LOAD_ERROR": "Unexpected ERROR while loading test file '{filename}': {error}",
-        "TEST_ABORTED_LOAD_FAILED": "❌ Test aborted: failed to load test data.",
-        "TEST_WRONG_QUESTION_COUNT": "ERROR Test Data: Found {mc} MC and {oe} OE questions, expected {expected} of each.",
-        "TEST_WRONG_BLOCK_COUNT": "ERROR Test Data: Found {found} blocks, expected {expected}.",
-        "TEST_WRONG_Q_PER_BLOCK_COUNT": "ERROR Test Data: Block {block_id} has {found} questions, expected {expected}.",
-        "STAT_TEST_K_INVALID": "ERROR Test: Requested k={k} is invalid for any block.",
-        "STAT_TEST_GENERATION_FAILED_KPB": "❌ Failed test sequence generation for k_per_block={k_per_block}.",
-        "MC_TEST_UNIFIED_STARTING": "Starting Monte Carlo simulation ({num_runs} runs, {num_k} k/block values [{k_range}], {num_tests} tests/seq)...",
-        "MC_TEST_RUN_PROGRESS": "Monte Carlo Progress: Run {current_run}/{total_runs}...",
-        "MC_TEST_FAILED_FOR_KPB_IN_RUN": "⚠️ Analysis failed for k/block={k_per_block} (Method: {method}) in run {run}.",
-        "MC_TEST_ALL_COMPLETE": "--- Monte Carlo simulation completed. ---",
-        "STAT_TEST_EXCEL_CREATED": "✅ Excel file with statistical results '{filename}' created.",
-        "STAT_TEST_EXCEL_SAVE_ERROR": "❌ Error saving Excel file '{filename}': {error}",
-        "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ No detailed data collected to create the Excel file.",
-        "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Download Statistical Results (.xlsx)",
-        "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis (WRSwOR/Simple) by distance and k/block.",
-        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during statistical-functional test execution: {error}",
     }
 }
 
