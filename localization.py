@@ -1,4 +1,4 @@
-# localization.py (con Testo Suggerimento e logica ceil)
+# localization.py (floor e immagine)
 
 TEXTS = {
     "it": {
@@ -26,14 +26,14 @@ TEXTS = {
         "NUM_TESTS_LABEL": "3. Numero di Verifiche da Generare",
         "NUM_TESTS_HELP": "Quante versioni diverse della verifica creare?",
         "BLOCK_REQUESTS_HEADER": "Domande per Blocco:",
-        "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ Per massimizzare la diversità, si consiglia di selezionare circa 1/3 delle domande disponibili per blocco (valore preimpostato).", # NUOVA CHIAVE
+        "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ Per massimizzare la diversità, si consiglia di selezionare circa 1/3 delle domande disponibili per blocco (valore preimpostato con arrotondamento per difetto).", # Aggiornato per floor
         "BLOCK_REQUEST_LABEL": "N. Domande da Blocco {block_id} ({type}) (Max: {n})",
         "TOTAL_QUESTIONS_SELECTED": "Domande Totali Selezionate",
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
 
         # Messaggi di stato, errore, warning
         "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
-        "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)",
+        "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)", # Chiave per l'immagine
         "IMAGE_NOT_FOUND_WARNING": "Nota: Immagine di esempio '{image_path}' non trovata.",
         "IMAGE_LOAD_ERROR": "Errore caricamento immagine '{image_path}': {error}",
         "GENERATION_START": "Avvio Generazione Verifiche...",
@@ -67,10 +67,11 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
     * **Colonne B, C,... (solo per Scelta Multipla):** Opzioni di risposta.
     * **Blocchi:** Separa gruppi di domande (blocchi) con una **riga completamente vuota**. Ogni blocco deve contenere solo domande dello stesso tipo (tutte a Scelta Multipla o tutte Aperte). L'app rileva il tipo automaticamente.
     * Non includere intestazioni di colonna o nomi per i blocchi nel file.
+    * *Vedi un esempio della struttura del file nella sidebar.*
 
 2.  **Carica e Configura:**
     * Carica il tuo file Excel/CSV nell'applicazione.
-    * Per ogni blocco identificato, specifica **quante domande esatte (`k`)** vuoi estrarre. Il sistema suggerisce un valore ottimale (circa 1/3 delle disponibili).
+    * Per ogni blocco identificato, specifica **quante domande esatte (`k`)** vuoi estrarre. Il sistema suggerisce un valore ottimale (circa 1/3 delle disponibili, arrotondato per difetto).
 
 3.  **Logica di Campionamento (per una maggiore diversità tra verifiche):**
     * **Campionamento Ponderato (WRSwOR):** Se le domande disponibili nel blocco (`n`) sono più del doppio di quelle richieste (`k`), cioè **`n > 2k`**, l'app usa questo metodo. Garantisce che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva* (per quel blocco) e favorisce la selezione di domande meno recenti.
@@ -143,14 +144,14 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "NUM_TESTS_LABEL": "3. Number of Tests to Generate",
         "NUM_TESTS_HELP": "How many different versions of the test to create?",
         "BLOCK_REQUESTS_HEADER": "Questions per Block:",
-        "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ To maximize diversity, selecting about 1/3 of the available questions per block is recommended (default value is preset).", # NEW KEY
+        "BLOCK_REQUEST_SUGGESTION_INFO_TEXT": "ℹ️ To maximize diversity, selecting about 1/3 of the available questions per block is recommended (default value is preset, rounded down).", # Updated for floor
         "BLOCK_REQUEST_LABEL": "N. Questions from Block {block_id} ({type}) (Max: {n})",
         "TOTAL_QUESTIONS_SELECTED": "Total Questions Selected",
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
 
         # Status / Error / Warning Messages
         "WEASYPRINT_ERROR": "🚨 **Warning:** The WeasyPrint library is not available or not functional. PDF generation is blocked...",
-        "IMAGE_CAPTION": "Example of valid Excel file structure (with separated blocks)",
+        "IMAGE_CAPTION": "Example of valid Excel file structure (with separated blocks)", # Key for the image
         "IMAGE_NOT_FOUND_WARNING": "Note: Example image '{image_path}' not found.",
         "IMAGE_LOAD_ERROR": "Error loading image '{image_path}': {error}",
         "GENERATION_START": "Starting Test Generation...",
@@ -184,10 +185,11 @@ EvilProf generates PDF tests from Excel/CSV files, organizing questions into blo
     * **Columns B, C,... (Multiple Choice only):** Answer options.
     * **Blocks:** Separate groups of questions (blocks) with a **completely empty row**. Each block must contain only questions of the same type (all Multiple Choice or all Open Ended). The app detects the type automatically.
     * Do not include column headers or block names in the file.
+    * *See an example of the file structure in the sidebar.*
 
 2.  **Upload and Configure:**
     * Upload your Excel/CSV file into the application.
-    * For each identified block, specify **exactly how many questions (`k`)** you want to extract. The system suggests an optimal value (about 1/3 of available).
+    * For each identified block, specify **exactly how many questions (`k`)** you want to extract. The system suggests an optimal value (about 1/3 of available, rounded down).
 
 3.  **Sampling Logic (for greater diversity between tests):**
     * **Weighted Sampling (WRSwOR):** If the available questions in the block (`n`) are more than double the requested ones (`k`), i.e., **`n > 2k`**, the app uses this method. It ensures that questions used in one test are not repeated in the *immediately following* test (for that block) and favors selecting less recently used questions.
