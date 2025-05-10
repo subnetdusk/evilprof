@@ -1,4 +1,4 @@
-# localization.py (Aggiornamenti Finali v1.2)
+# localization.py (Aggiornamenti Finali v1.2 - Obiettivo aggiornato)
 
 TEXTS = {
     "it": {
@@ -8,11 +8,11 @@ TEXTS = {
         "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel/CSV.",
         "INSTRUCTIONS_HEADER": "ℹ️ Guida Rapida e Link Utili",
         "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
-        "STAT_FUNCTIONAL_TEST_HEADER": "Test Statistico-Funzionale", # Modificato
+        "STAT_FUNCTIONAL_TEST_HEADER": "Test Statistico-Funzionale",
         "OUTPUT_AREA_HEADER": "Output e Messaggi",
-        "VALIDATION_RESULTS_HEADER": "--- Risultato Test Statistico-Funzionale ---", # Modificato
+        "VALIDATION_RESULTS_HEADER": "--- Risultato Test Statistico-Funzionale ---",
         "GENERATION_MESSAGES_HEADER": "--- Messaggi dalla Generazione ---",
-        "FOOTER_TEXT": "EvilProf v1.2 - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit", # Ripristinato v1.2
+        "FOOTER_TEXT": "EvilProf v1.2 - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
         # Link README
         "README_LINK_TEXT": "🔗 Consulta la guida completa su GitHub (README)",
@@ -31,8 +31,8 @@ TEXTS = {
         "BLOCK_REQUEST_LABEL": "N. Domande da Blocco {block_id} ({type}) (Max: {n})",
         "TOTAL_QUESTIONS_SELECTED": "Domande Totali Selezionate",
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
-        "STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL": "🔬 Esegui Test Statistico-Funzionale", # Modificato
-        "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.", # Potrebbe necessitare di aggiornamento se il nome del test è cambiato nel testo
+        "STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL": "🔬 Esegui Test Statistico-Funzionale",
+        "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.",
 
         # Messaggi di stato, errore, warning
         "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
@@ -40,7 +40,7 @@ TEXTS = {
         "ANALYSIS_IMAGE_CAPTION": "Esempio di analisi di similarità generata dal test funzionale",
         "IMAGE_NOT_FOUND_WARNING": "Nota: Immagine di esempio '{image_path}' non trovata.",
         "IMAGE_LOAD_ERROR": "Errore caricamento immagine '{image_path}': {error}",
-        "VALIDATION_START": "Avvio Test Statistico-Funzionale...", # Modificato
+        "VALIDATION_START": "Avvio Test Statistico-Funzionale...",
         "GENERATION_START": "Avvio Generazione Verifiche...",
         "UPLOAD_FIRST_WARNING": "⚠️ Per favore, carica prima un file Excel/CSV.",
         "LOADING_DATA_SPINNER": "⏳ Analisi file e identificazione blocchi...",
@@ -50,7 +50,7 @@ TEXTS = {
         "PARAMS_OK_INFO": "Parametri OK. Generazione di {num_tests} verifiche...",
         "CORRECT_ERRORS_ERROR": "Correggi gli errori nei parametri prima di generare.",
         "GENERATING_DATA_SPINNER": "⏳ Generazione verifiche...",
-        "VALIDATION_LOGIC_SPINNER": "⏳ Esecuzione test statistico-funzionale...", # Modificato
+        "VALIDATION_LOGIC_SPINNER": "⏳ Esecuzione test statistico-funzionale...",
         "GENERATION_FAILED_ERROR": "❌ Generazione fallita a causa di errori critici: {error}",
         "DATA_READY_PDF_INFO": "Dati per {num_tests} verifiche pronti. Avvio generazione PDF...",
         "PDF_CREATION_SPINNER": "⏳ Creazione del file PDF in corso...",
@@ -59,13 +59,13 @@ TEXTS = {
         "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Errore durante la creazione del file PDF.",
         "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nei campi appositi e premi 'Genera Verifiche PDF'.",
-        "VALIDATION_NO_MESSAGES": "Il test statistico-funzionale non ha prodotto messaggi specifici.", # Modificato
+        "VALIDATION_NO_MESSAGES": "Il test statistico-funzionale non ha prodotto messaggi specifici.",
 
-        # Testo Intro (SNELLITO E CONDENSATO)
+        # Testo Intro (OBIETTIVO AGGIORNATO)
         "INTRO_TEXT_NEW": """
 EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in blocchi.
 
-**Obiettivo:** Creare rapidamente multiple versioni di verifiche, diversificando le domande estratte.
+**Obiettivo:** Creare rapidamente multiple versioni di verifiche, mirando alla **massima diversità possibile delle domande in un intorno ristretto di test consecutivi**, grazie all'uso del campionamento pesato (WRSwOR) quando le condizioni lo permettono.
 
 **Come Funziona:**
 
@@ -86,7 +86,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
 4.  **Genera PDF:** Ottieni un singolo file PDF con tutte le verifiche generate.
 
 *Per istruzioni dettagliate sulla preparazione del file, esempi e approfondimenti sull'analisi statistica (accessibile dal Test Statistico-Funzionale nella sidebar), consulta la guida completa su GitHub.*
-""", # Aggiunto riferimento al test nella sidebar
+""",
         # Testi usati nel PDF
         "PDF_TEST_TITLE": "Verifica di {subject_name}",
         "PDF_NAME_LABEL": "Nome e Cognome:",
@@ -146,7 +146,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ Nessun dato dettagliato raccolto per creare il file Excel.",
         "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Scarica Risultati Statistici (.xlsx)",
         "DOWNLOAD_STATS_EXCEL_HELP": "Scarica il file Excel con l'analisi di similarità Dice (WRSwOR/Semplice) per distanza e k/blocco.",
-        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Errore imprevisto durante l'esecuzione del test statistico-funzionale: {error}", # Modificato
+        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Errore imprevisto durante l'esecuzione del test statistico-funzionale: {error}",
     },
     "en": {
         # Titles & Headers
@@ -155,11 +155,11 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "SUBHEADER_NEW": "Generate tests by selecting the exact number of questions per block from Excel/CSV.",
         "INSTRUCTIONS_HEADER": "ℹ️ Quick Guide & Useful Links",
         "GENERATION_PARAMS_HEADER": "Generation Parameters",
-        "STAT_FUNCTIONAL_TEST_HEADER": "Statistical-Functional Test", # Modified
+        "STAT_FUNCTIONAL_TEST_HEADER": "Statistical-Functional Test",
         "OUTPUT_AREA_HEADER": "Output & Messages",
-        "VALIDATION_RESULTS_HEADER": "--- Statistical-Functional Test Results ---", # Modified
+        "VALIDATION_RESULTS_HEADER": "--- Statistical-Functional Test Results ---",
         "GENERATION_MESSAGES_HEADER": "--- Messages from Generation ---",
-        "FOOTER_TEXT": "EvilProf v1.2 - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit", # Restored v1.2
+        "FOOTER_TEXT": "EvilProf v1.2 - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
 
         # Link README
         "README_LINK_TEXT": "🔗 Check out the full guide on GitHub (README)",
@@ -178,7 +178,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "BLOCK_REQUEST_LABEL": "N. Questions from Block {block_id} ({type}) (Max: {n})",
         "TOTAL_QUESTIONS_SELECTED": "Total Questions Selected",
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
-        "STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL": "🔬 Run Statistical-Functional Test", # Modified
+        "STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL": "🔬 Run Statistical-Functional Test",
         "VALIDATE_BUTTON_HELP_NEW": "Runs the Monte Carlo statistical analysis (using 'test_set_4_by_12_questions.xlsx') on test similarity.",
 
         # Status / Error / Warning Messages
@@ -187,7 +187,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "ANALYSIS_IMAGE_CAPTION": "Example of similarity analysis generated by the functional test",
         "IMAGE_NOT_FOUND_WARNING": "Note: Example image '{image_path}' not found.",
         "IMAGE_LOAD_ERROR": "Error loading image '{image_path}': {error}",
-        "VALIDATION_START": "Starting Statistical-Functional Test...", # Modified
+        "VALIDATION_START": "Starting Statistical-Functional Test...",
         "GENERATION_START": "Starting Test Generation...",
         "UPLOAD_FIRST_WARNING": "⚠️ Please upload an Excel/CSV file first.",
         "LOADING_DATA_SPINNER": "⏳ Analyzing file and identifying blocks...",
@@ -197,7 +197,7 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "PARAMS_OK_INFO": "Parameters OK. Generating {num_tests} tests...",
         "CORRECT_ERRORS_ERROR": "Please correct the parameter errors before generating.",
         "GENERATING_DATA_SPINNER": "⏳ Generating tests...",
-        "VALIDATION_LOGIC_SPINNER": "⏳ Running statistical-functional test...", # Modificato
+        "VALIDATION_LOGIC_SPINNER": "⏳ Running statistical-functional test...",
         "GENERATION_FAILED_ERROR": "❌ Generation failed due to critical errors: {error}",
         "DATA_READY_PDF_INFO": "Data for {num_tests} tests ready. Starting PDF generation...",
         "PDF_CREATION_SPINNER": "⏳ Creating PDF file...",
@@ -206,13 +206,13 @@ EvilProf genera verifiche PDF da file Excel/CSV, organizzando le domande in bloc
         "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Error during PDF creation.",
         "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the respective fields, and press 'Generate PDF Tests'.",
-        "VALIDATION_NO_MESSAGES": "The statistical-functional test produced no specific messages.", # Modificato
+        "VALIDATION_NO_MESSAGES": "The statistical-functional test produced no specific messages.",
 
-        # Intro Text (STREAMLINED AND CONDENSED)
+        # Intro Text (OBJECTIVE UPDATED)
         "INTRO_TEXT_NEW": """
 EvilProf generates PDF tests from Excel/CSV files, organizing questions into blocks.
 
-**Objective:** Quickly create multiple test versions with diverse question selection.
+**Objective:** Quickly create multiple test versions, aiming for the **maximum possible diversity of questions within a close range of consecutive tests**, by using weighted sampling (WRSwOR) when conditions allow.
 
 **How It Works:**
 
@@ -233,7 +233,7 @@ EvilProf generates PDF tests from Excel/CSV files, organizing questions into blo
 4.  **Generate PDF:** Get a single PDF file with all generated tests.
 
 *For detailed file preparation instructions, examples, and insights into the statistical analysis (accessible from the Statistical-Functional Test in the sidebar), please refer to the full guide on GitHub.*
-""", # Added reference to the test in the sidebar
+""",
         # Texts used in PDF
         "PDF_TEST_TITLE": "Test for {subject_name}",
         "PDF_NAME_LABEL": "Name:",
@@ -293,7 +293,7 @@ EvilProf generates PDF tests from Excel/CSV files, organizing questions into blo
         "STAT_TEST_NO_DATA_FOR_EXCEL": "⚠️ No detailed data collected to create the Excel file.",
         "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Download Statistical Results (.xlsx)",
         "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis (WRSwOR/Simple) by distance and k/block.",
-        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during statistical-functional test execution: {error}", # Modificato
+        "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during statistical-functional test execution: {error}",
     }
 }
 
