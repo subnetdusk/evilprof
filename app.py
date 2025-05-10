@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# app.py (Senza Test Funzionale - Corretto)
+# app.py (Default Domande Suggerite)
 
 import streamlit as st
 from datetime import datetime
 import os
-# import pandas as pd # Non direttamente usato qui, ma file_handler lo usa
+import math # Importato math
 
 # Importa funzioni e costanti dai moduli separati
 from localization import TEXTS, get_text, format_text
@@ -13,7 +13,6 @@ from config import (
 )
 from file_handler import load_questions_from_excel
 from core_logic import generate_all_tests_data
-# from test import run_all_tests # RIMOSSO: Test funzionale/statistico non più usato
 from pdf_generator import generate_pdf_data, WEASYPRINT_AVAILABLE
 
 # ================================================================
@@ -23,9 +22,8 @@ if 'lang' not in st.session_state: st.session_state.lang = 'it'
 if 'blocks_summary' not in st.session_state: st.session_state.blocks_summary = None
 if 'all_questions' not in st.session_state: st.session_state.all_questions = None
 if 'block_requests' not in st.session_state: st.session_state.block_requests = {}
-if 'action_performed' not in st.session_state: st.session_state.action_performed = False # Traccia solo la generazione PDF
+if 'action_performed' not in st.session_state: st.session_state.action_performed = False
 if 'processed_filename' not in st.session_state: st.session_state.processed_filename = None
-# Le variabili di stato relative al test sono state rimosse in precedenza.
 
 def T(key): return get_text(st.session_state.lang, key)
 def F(key, **kwargs): kwargs = kwargs or {}; return format_text(st.session_state.lang, key, **kwargs)
@@ -35,16 +33,13 @@ def F(key, **kwargs): kwargs = kwargs or {}; return format_text(st.session_state
 # ================================================================
 st.set_page_config(page_title=T("PAGE_TITLE"), layout="centered", initial_sidebar_state="collapsed")
 
-# CSS per stilizzare la sidebar e il bottone expand/collapse
 st.markdown(
     f"""
     <style>
-        /* Rende il bordo della sidebar più visibile */
         section[data-testid="stSidebar"] {{
             border-right: 2px solid #e0e0e0; 
             box-shadow: 2px 0px 5px rgba(0,0,0,0.1); 
         }}
-        /* Stile per il bottone di espansione/collasso della sidebar */
         button[title="Collapse sidebar"] svg, button[title="Expand sidebar"] svg {{
             fill: #333 !important; 
         }}
@@ -100,7 +95,6 @@ with st.sidebar:
     st.markdown("---")
     st.markdown(T("INTRO_TEXT_NEW"), unsafe_allow_html=True)
     st.markdown("---")
-    # La sezione del Test Statistico-Funzionale è stata completamente rimossa.
 
 # ================================================================
 # Corpo Principale / Main Body
@@ -117,23 +111,19 @@ def main_upload_status_callback(msg_type, msg_key, **kwargs):
      elif msg_type == "error": main_upload_status_placeholder.error(formatted_text)
 
 def status_callback(msg_type, msg_key, **kwargs):
-     """Callback generica per messaggi da core_logic e pdf_generator."""
      if msg_type not in ["warning", "error"]: return
-     # Correzione: usa get_text per ottenere il template e poi formatta
      raw_template = get_text(st.session_state.lang, msg_key)
      if raw_template == f"MISSING_TEXT[{msg_key}]":
          formatted_text = f"{msg_key}: {kwargs}" if kwargs else msg_key
      else:
         try:
             formatted_text = raw_template.format(**kwargs)
-        except KeyError: # Se una chiave in kwargs non è nel template
+        except KeyError: 
             formatted_text = f"{raw_template} (Params: {kwargs})"
-        except Exception: # Altri errori di formattazione
+        except Exception: 
             formatted_text = f"{raw_template} (Params: {kwargs})"
-
      if msg_type == "warning": transient_status_placeholder.warning(formatted_text)
      elif msg_type == "error": transient_status_placeholder.error(formatted_text)
-
 
 st.header(T("UPLOAD_LABEL"))
 uploaded_file = st.file_uploader(
@@ -156,11 +146,31 @@ if uploaded_file is not None:
             st.session_state.block_requests = {}; st.session_state.processed_filename = None
         else:
             st.session_state.all_questions = all_q; st.session_state.blocks_summary = blocks_sum
-            st.session_state.block_requests = {b['block_id']: 0 for b in blocks_sum} 
             st.session_state.processed_filename = uploaded_file.name
-            for key_widget in list(st.session_state.keys()): # Resetta i valori del form
+            # Inizializza block_requests con il valore suggerito (ceil(n/3))
+            temp_block_requests = {}
+            for block_info in blocks_sum:
+                block_id = block_info['block_id']
+                available_count = block_info['count']
+                # Calcola il valore suggerito, assicurandosi che sia almeno 1 se ci sono domande, e non superi il massimo
+                suggested_value = 0
+                if available_count > 0:
+                    suggested_value = min(math.ceil(available_count / 3), available_count)
+                temp_block_requests[block_id] = suggested_value
+            st.session_state.block_requests = temp_block_requests
+
+            # Resetta i valori dei widget number_input nel form (se il form esiste già)
+            for key_widget in list(st.session_state.keys()):
                 if key_widget.startswith("form_block_input_"):
-                    st.session_state[key_widget] = 0
+                    # Estrai block_id dalla chiave del widget
+                    try:
+                        block_id_from_key = int(key_widget.split("_")[-1])
+                        if block_id_from_key in st.session_state.block_requests:
+                             st.session_state[key_widget] = st.session_state.block_requests[block_id_from_key]
+                        else:
+                             st.session_state[key_widget] = 0 # Fallback se block_id non trovato
+                    except ValueError:
+                         st.session_state[key_widget] = 0 # Fallback in caso di errore parsing chiave
 
 
 elif st.session_state.processed_filename is not None and uploaded_file is None: 
@@ -180,8 +190,10 @@ with st.form(key="generation_form"):
     total_questions_requested_form = 0
     if st.session_state.blocks_summary:
         st.subheader(T("BLOCK_REQUESTS_HEADER"))
-        if not isinstance(st.session_state.block_requests, dict):
-            st.session_state.block_requests = {b['block_id']: 0 for b in st.session_state.blocks_summary}
+        st.caption(T("BLOCK_REQUEST_SUGGESTION_INFO_TEXT")) # Testo di suggerimento aggiunto qui
+        
+        if not isinstance(st.session_state.block_requests, dict): # Safety check
+            st.session_state.block_requests = {}
 
         for block_info in st.session_state.blocks_summary:
             block_id = block_info['block_id']
@@ -189,14 +201,21 @@ with st.form(key="generation_form"):
             available_count = block_info['count']
             label = F("BLOCK_REQUEST_LABEL", block_id=block_id, type=block_type_str, n=available_count)
             
-            current_value_for_block = st.session_state.block_requests.get(block_id, 0)
-            value_to_set_in_form = min(current_value_for_block, available_count)
+            # Prendi il valore predefinito da st.session_state.block_requests, che ora ha il suggerimento
+            default_value_for_block = st.session_state.block_requests.get(block_id, 0)
+            # Assicura che il default non superi il massimo disponibile
+            value_to_set_in_form = min(default_value_for_block, available_count)
+            if available_count == 0 : value_to_set_in_form = 0 # Se il blocco è vuoto, il default è 0
             
             num_input_key = f"form_block_input_{block_id}"
             user_input_for_block = st.number_input(
                 label=label, min_value=0, max_value=available_count,
-                value=value_to_set_in_form, step=1, key=num_input_key
+                value=value_to_set_in_form, # Usa il valore precalcolato
+                step=1, key=num_input_key
             )
+            # Aggiorna st.session_state.block_requests con l'input effettivo dell'utente nel form
+            # Questo è cruciale perché il form non aggiorna st.session_state.block_requests direttamente
+            # ma aggiorna st.session_state[num_input_key]
             st.session_state.block_requests[block_id] = user_input_for_block 
             total_questions_requested_form += user_input_for_block
 
@@ -204,7 +223,7 @@ with st.form(key="generation_form"):
     else:
         if uploaded_file is not None and not st.session_state.blocks_summary :
              pass 
-        elif uploaded_file is None: # Solo se nessun file è MAI stato caricato O è stato rimosso
+        elif uploaded_file is None: 
             if st.session_state.processed_filename is None:
                 st.info(T("UPLOAD_FIRST_WARNING"))
 
@@ -223,10 +242,11 @@ if generate_button_form:
     main_upload_status_placeholder.empty() 
     st.session_state.action_performed = True
 
+    # Usa i valori da st.session_state.block_requests che sono stati aggiornati nel ciclo del form
     active_block_requests = {bid: k for bid, k in st.session_state.block_requests.items() if k > 0}
     total_requested_final = sum(active_block_requests.values())
 
-    if uploaded_file is None and st.session_state.processed_filename is None: # Doppio controllo
+    if uploaded_file is None and st.session_state.processed_filename is None: 
         with output_placeholder: st.warning(T("UPLOAD_FIRST_WARNING")); st.stop()
     if not st.session_state.all_questions or not st.session_state.blocks_summary:
          with output_placeholder: st.error(F("LOAD_ERROR", error_msg="Dati blocchi non caricati. Ricarica il file.")); st.stop()
@@ -241,36 +261,29 @@ if generate_button_form:
             )
             final_generation_messages.extend(generation_messages_core)
             if all_tests_data is None or any(msg[0] == 'error' for msg in generation_messages_core):
-                # Gli errori da core_logic sono già mostrati da status_callback
-                # quindi non serve un raise qui a meno che non si voglia interrompere del tutto
-                pass # Non sollevare eccezione, lascia che i messaggi vengano mostrati
+                pass 
 
-            if all_tests_data: # Procedi alla generazione PDF solo se i dati test sono validi
+            if all_tests_data: 
                 pdf_strings = { "title_format": T("PDF_TEST_TITLE"), "name_label": T("PDF_NAME_LABEL"),
                                 "date_label": T("PDF_DATE_LABEL"), "class_label": T("PDF_CLASS_LABEL"),
                                 "missing_question": T("PDF_MISSING_QUESTION"), "no_options": T("PDF_NO_OPTIONS")}
                 pdf_data = generate_pdf_data(all_tests_data, subject_name, status_callback, pdf_strings)
                 if pdf_data is not None:
                     pdf_generated = True
-                # else: Errore da generate_pdf_data già gestito da status_callback
             
-        except Exception as e: # Catchall per errori non previsti durante il processo
+        except Exception as e: 
              if not any(m[0] == 'error' for m in final_generation_messages): 
                 final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": str(e)}))
-                # Mostra anche questo errore imprevisto tramite status_callback
                 status_callback("error", "GENERATION_FAILED_ERROR", error=str(e))
 
 
     with output_placeholder: 
-        # Mostra i messaggi raccolti da final_generation_messages che non sono warning/error
-        # perché quelli sono già gestiti da status_callback nel transient_status_placeholder
         permanent_messages_to_show = [fm for fm in final_generation_messages if fm[0] not in ['warning', 'error']]
         if permanent_messages_to_show:
              st.markdown(f"**{T('GENERATION_MESSAGES_HEADER')}**")
              for msg_type, msg_key, msg_kwargs in permanent_messages_to_show:
                  final_formatted_text = F(msg_key, **msg_kwargs)
                  if msg_type == "info": st.info(final_formatted_text)
-                 # Altri tipi se necessario (es. success da core_logic)
 
         if pdf_generated and pdf_data:
             st.success(T("PDF_SUCCESS"))
@@ -280,12 +293,11 @@ if generate_button_form:
             st.download_button( label=T("PDF_DOWNLOAD_BUTTON_LABEL"), data=pdf_data, file_name=pdf_filename,
                                 mime="application/pdf", help=F("PDF_DOWNLOAD_BUTTON_HELP", pdf_filename=pdf_filename),
                                 use_container_width=True, type="primary")
-        elif not pdf_generated and not transient_status_placeholder.empty: 
-            # Se il PDF non è stato generato E transient_status_placeholder ha un messaggio (probabilmente un errore da status_callback)
-            # non mostrare un altro errore generico.
+        elif not pdf_generated and not transient_status_placeholder.empty(): 
             pass
-        elif not pdf_generated: # Se il PDF non è generato e non ci sono errori specifici visibili
-            st.error(T("PDF_GENERATION_ERROR"))
+        elif not pdf_generated: 
+            if not any(msg[0] == 'error' for msg in final_generation_messages) and transient_status_placeholder.empty():
+                 st.error(T("PDF_GENERATION_ERROR"))
 
 
 if not st.session_state.action_performed and not uploaded_file and st.session_state.processed_filename is None:
