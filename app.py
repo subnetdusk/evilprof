@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# app.py (Larghezza 1200px e Test in Sidebar)
+# app.py (Layout Centered e Correzione Errore)
 
 import streamlit as st
 from datetime import datetime
@@ -36,24 +36,13 @@ def F(key, **kwargs): kwargs = kwargs or {}; return format_text(st.session_state
 # ================================================================
 # Setup Pagina / Page Setup
 # ================================================================
-st.set_page_config(page_title=T("PAGE_TITLE"), layout="wide", initial_sidebar_state="collapsed")
+# Modificato: layout="centered" per la gestione nativa della larghezza massima centralizzata
+st.set_page_config(page_title=T("PAGE_TITLE"), layout="centered", initial_sidebar_state="collapsed")
 
-# CSS per impostare la larghezza massima del contenuto principale
-# Il selettore [data-testid="stAppViewContainer"] punta al contenitore principale dell'app
-# e [data-testid="stBlock"] ai blocchi di contenuto al suo interno.
-# Applichiamo max-width al primo stBlock diretto figlio del main per centrare il contenuto.
-max_width_px = 1200  # Aggiornato a 1200px
+# CSS per stilizzare la sidebar (bordo, messaggi, bottone download) e il bottone expand/collapse
 st.markdown(
     f"""
     <style>
-        /* Contenitore principale dell'applicazione Streamlit */
-        .main [data-testid="stAppViewContainer"] > .block-container {{
-            max-width: {max_width_px}px;
-            padding-left: 1rem; 
-            padding-right: 1rem;
-            margin-left: auto !important; /* Forza il margine per centrare */
-            margin-right: auto !important; /* Forza il margine per centrare */
-        }}
         /* Stile per i messaggi di output del test nella sidebar */
         .sidebar .stAlert {{
             font-size: 0.85rem; 
@@ -90,18 +79,9 @@ st.markdown(
 # ================================================================
 # Toggle Button Lingua / Language Toggle Button
 # ================================================================
-# Per mantenere i bottoni lingua all'interno della larghezza definita,
-# li mettiamo in una colonna che sarà influenzata dal CSS sopra.
-# Questo è un workaround; idealmente Streamlit offrirebbe più controllo sul layout header.
-# Dato che il CSS ora agisce su .main [data-testid="stAppViewContainer"] > .block-container,
-# i bottoni lingua, se messi direttamente, sarebbero a larghezza piena.
-# Li collochiamo quindi all'inizio del contenuto principale.
-
-# Titolo e Sottotitolo Principale
-st.title(T("MAIN_TITLE"))
-
-# Bottoni lingua posizionati sotto il titolo ma prima del contenuto principale "stretto"
-cols_lang_title = st.columns([0.85, 0.075, 0.075])
+# Con layout="centered", i bottoni lingua possono essere messi in colonne standard
+# e saranno centrati con il resto del contenuto.
+cols_lang_title = st.columns([0.85, 0.075, 0.075]) # Proporzioni per posizionare a destra
 with cols_lang_title[1]:
     button_it_type = "primary" if st.session_state.lang == 'it' else "secondary"
     if st.button("🇮🇹", key="lang_it_btn_main", type=button_it_type, help="Passa a Italiano / Switch to Italian", use_container_width=True):
@@ -117,6 +97,10 @@ with cols_lang_title[2]:
             st.session_state.show_test_results_in_sidebar = False 
             st.rerun()
 
+# ================================================================
+# Titolo e Contenuto Principale / Title and Main Content
+# ================================================================
+st.title(T("MAIN_TITLE"))
 st.subheader(T("SUBHEADER_NEW"))
 if not WEASYPRINT_AVAILABLE:
     st.error(T("WEASYPRINT_ERROR"))
@@ -133,7 +117,6 @@ with st.sidebar:
     st.markdown(T("INTRO_TEXT_NEW"), unsafe_allow_html=True)
     st.markdown("---")
 
-    # --- Sezione Test Statistico-Funzionale (NELLA SIDEBAR) ---
     st.header(T("STAT_FUNCTIONAL_TEST_HEADER"))
     validation_button_sidebar = st.button(
         T("STAT_FUNCTIONAL_VALIDATE_BUTTON_LABEL"), 
@@ -150,9 +133,10 @@ with st.sidebar:
         st.session_state.sidebar_test_messages = [] 
         st.session_state.sidebar_excel_file = None  
         
-        main_upload_status_placeholder.empty() 
-        output_placeholder.empty() 
-        transient_status_placeholder.empty()
+        # Rimosse le chiamate .empty() ai placeholder del corpo principale per evitare NameError
+        # main_upload_status_placeholder.empty() 
+        # output_placeholder.empty() 
+        # transient_status_placeholder.empty()
 
         with st.spinner(T("VALIDATION_LOGIC_SPINNER")): 
             try:
@@ -195,7 +179,10 @@ with st.sidebar:
 # ================================================================
 # Corpo Principale / Main Body
 # ================================================================
+# Definizione dei placeholder del corpo principale
 main_upload_status_placeholder = st.empty()
+output_placeholder = st.container() # Usato per i risultati della generazione PDF
+transient_status_placeholder = st.empty() # Usato dalla status_callback per errori generici
 
 def main_upload_status_callback(msg_type, msg_key, **kwargs):
      if msg_type not in ["warning", "error"]: return
@@ -215,7 +202,9 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
     if st.session_state.processed_filename != uploaded_file.name:
-        main_upload_status_placeholder.empty()
+        main_upload_status_placeholder.empty() # Pulisce messaggi di upload precedenti
+        output_placeholder.empty() # Pulisce risultati di generazione PDF precedenti
+        transient_status_placeholder.empty() # Pulisce messaggi generici precedenti
         st.session_state.show_test_results_in_sidebar = False 
         with st.spinner(T("LOADING_DATA_SPINNER")):
             all_q, blocks_sum, error_k = load_questions_from_excel(uploaded_file, main_upload_status_callback)
@@ -224,9 +213,8 @@ if uploaded_file is not None:
             st.session_state.block_requests = {}; st.session_state.processed_filename = None
         else:
             st.session_state.all_questions = all_q; st.session_state.blocks_summary = blocks_sum
-            st.session_state.block_requests = {b['block_id']: 0 for b in blocks_sum} # Resetta a 0 per il nuovo file
+            st.session_state.block_requests = {b['block_id']: 0 for b in blocks_sum} 
             st.session_state.processed_filename = uploaded_file.name
-            # Resetta i valori dei number_input nel form se un nuovo file viene caricato
             for key_widget in list(st.session_state.keys()):
                 if key_widget.startswith("form_block_input_"):
                     st.session_state[key_widget] = 0
@@ -236,6 +224,8 @@ elif st.session_state.processed_filename is not None and uploaded_file is None:
      st.session_state.all_questions = None; st.session_state.blocks_summary = None
      st.session_state.block_requests = {}; st.session_state.processed_filename = None
      main_upload_status_placeholder.empty()
+     output_placeholder.empty()
+     transient_status_placeholder.empty()
      st.session_state.show_test_results_in_sidebar = False 
 
 st.markdown("---")
@@ -284,8 +274,7 @@ with st.form(key="generation_form"):
 
 st.markdown("---") 
 st.subheader(T("OUTPUT_AREA_HEADER"))
-output_placeholder = st.container() 
-transient_status_placeholder = st.empty() 
+# output_placeholder e transient_status_placeholder sono già definiti sopra
 
 def display_critical_message_main(message_type, key_or_raw_text, **kwargs):
     if message_type not in ["warning", "error"]: return
@@ -304,7 +293,8 @@ def status_callback(msg_type, msg_key, **kwargs):
 
 
 if generate_button_form:
-    output_placeholder.empty(); transient_status_placeholder.empty()
+    output_placeholder.empty(); transient_status_placeholder.empty() # Pulisce output precedente
+    main_upload_status_placeholder.empty() # Pulisce anche messaggi di upload
     st.session_state.action_performed = True
     st.session_state.show_test_results_in_sidebar = False 
 
@@ -344,7 +334,7 @@ if generate_button_form:
              if not any(m[0] == 'error' for m in final_generation_messages):
                 final_generation_messages.append(("error", "GENERATION_FAILED_ERROR", {"error": str(e)}))
 
-    with output_placeholder:
+    with output_placeholder: # Mostra i risultati della generazione PDF qui
         if final_generation_messages:
              st.markdown(f"**{T('GENERATION_MESSAGES_HEADER')}**")
              for msg_type, msg_key, msg_kwargs in final_generation_messages:
@@ -364,7 +354,7 @@ if generate_button_form:
             st.error(T("PDF_GENERATION_ERROR"))
 
 if not st.session_state.action_performed and not uploaded_file and st.session_state.processed_filename is None:
-    with output_placeholder: 
+    with output_placeholder: # Assicura che il messaggio iniziale sia nel placeholder corretto
         st.info(T("INITIAL_INFO_NEW"))
 
 st.markdown("---")
