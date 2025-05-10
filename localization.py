@@ -1,10 +1,10 @@
-# localization.py (Corretta struttura testo INTRO_TEXT_NEW)
+# localization.py (v1.2)
 
 TEXTS = {
     "it": {
-        # ... [Titoli, Sidebar, Messaggi UI base come prima] ...
-        "PAGE_TITLE": "EvilProf 😈 - Per Blocchi",
-        "MAIN_TITLE": "EvilProf 😈 - Generatore per Blocchi",
+        # Titoli e Header principali
+        "PAGE_TITLE": "EvilProf 😈 v1.2 - Per Blocchi", # Aggiornato v1.2
+        "MAIN_TITLE": "EvilProf 😈 v1.2 - Generatore per Blocchi", # Aggiornato v1.2
         "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel/CSV.",
         "INSTRUCTIONS_HEADER": "ℹ️ Istruzioni e Preparazione File Excel/CSV (Logica a Blocchi)",
         "GENERATION_PARAMS_HEADER": "Parametri di Generazione",
@@ -12,7 +12,9 @@ TEXTS = {
         "OUTPUT_AREA_HEADER": "Output e Messaggi",
         "VALIDATION_RESULTS_HEADER": "--- Risultato Test Funzionale ---",
         "GENERATION_MESSAGES_HEADER": "--- Messaggi dalla Generazione ---",
-        "FOOTER_TEXT": "EvilProf v1.1 (Blocchi) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
+        "FOOTER_TEXT": "EvilProf v1.2 (Blocchi) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit", # Aggiornato v1.2
+
+        # Widget e Label
         "UPLOAD_LABEL": "1. Carica File Excel/CSV",
         "UPLOAD_HELP": "Trascina o seleziona il file (.xlsx, .xls, .csv) con le domande organizzate in blocchi separati da righe vuote.",
         "SUBJECT_LABEL": "2. Nome della Materia",
@@ -26,6 +28,8 @@ TEXTS = {
         "GENERATE_BUTTON_LABEL": "🚀 Genera Verifiche PDF",
         "VALIDATE_BUTTON_LABEL": "🧪 Esegui Test Funzionale",
         "VALIDATE_BUTTON_HELP_NEW": "Esegue l'analisi statistica Monte Carlo (usando 'test_set_4_by_12_questions.xlsx') sulla similarità dei test.",
+
+        # Messaggi di stato, errore, warning
         "WEASYPRINT_ERROR": "🚨 **Attenzione:** La libreria WeasyPrint non è disponibile o funzionante...",
         "IMAGE_CAPTION": "Esempio di struttura file Excel valida (con blocchi separati)",
         "ANALYSIS_IMAGE_CAPTION": "Esempio di analisi di similarità generata dal test funzionale",
@@ -49,7 +53,7 @@ TEXTS = {
         "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Scarica PDF Generato",
         "PDF_DOWNLOAD_BUTTON_HELP": "Clicca per scaricare il file '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Errore durante la creazione del file PDF.",
-        "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nella sidebar e premi 'Genera Verifiche PDF'.",
+        "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nei campi appositi e premi 'Genera Verifiche PDF'.", # Modificato per non riferirsi alla sidebar
         "VALIDATION_NO_MESSAGES": "Il test funzionale non ha prodotto messaggi specifici.",
 
         # Testo Intro (STRUTTURA CORRETTA)
@@ -61,7 +65,7 @@ EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto d
 - **Input da Excel/CSV:** Carica un file `.xlsx`, `.xls` o `.csv`.
 - **Struttura a Blocchi:** Organizza le domande in blocchi separati da **una riga completamente vuota**.
 - **Tipi di Blocco:** Ogni blocco deve contenere **solo domande a scelta multipla** OPPURE **solo domande aperte**. L'app rileva automaticamente il tipo. Non mischiare i tipi nello stesso blocco.
-- **Selezione Esatta:** Dopo aver caricato il file, potrai specificare nella sidebar **quante domande esatte (`k`)** vuoi selezionare da ciascun blocco identificato (che contiene `n` domande).
+- **Selezione Esatta:** Dopo aver caricato il file, potrai specificare **quante domande esatte (`k`)** vuoi selezionare da ciascun blocco identificato (che contiene `n` domande).
 - **Randomizzazione e Diversità:**
     - Se per un blocco il numero totale di domande disponibili (`n`) è **strettamente maggiore** del doppio delle domande richieste (`k`) (cioè, **`n > 2k`**), l'applicazione userà un **Campionamento Ponderato (WRSwOR)** per selezionare le `k` domande da quel blocco. Questo metodo **garantisce** che le domande usate in una verifica non vengano ripetute nella verifica *immediatamente successiva* (per quel blocco) e favorisce la selezione di domande meno recenti.
     - Se invece **`n <= 2k`** (cioè se chiedi la metà o più delle domande disponibili nel blocco), l'applicazione userà un **Campionamento Casuale Semplice** per selezionare le `k` domande da quel blocco, perdendo la garanzia di diversità tra test consecutivi per quel blocco.
@@ -98,7 +102,7 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
 * **Soglia `k=6` (n=2k):** Questo test permette di osservare il comportamento al limite e oltre la soglia dove il campionamento passa da WRSwOR a Simple Random.
 * **Consiglio Pratico:** Per massimizzare la diversità tra test consecutivi usando WRSwOR, è consigliabile scegliere un numero di domande per blocco (`k`) tale che `n > 2k` (cioè `k < n/2`), idealmente `k <= n/3` per una rotazione ottimale (es. `k=4` per un blocco da 12).
 
-*Vedi immagini di esempio qui sotto.*
+*Vedi immagini di esempio nella sidebar.*
 """,
         # Testi usati nel PDF
         "PDF_TEST_TITLE": "Verifica di {subject_name}",
@@ -163,8 +167,8 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
     },
     "en": {
         # Titles & Headers
-        "PAGE_TITLE": "EvilProf 😈 - By Blocks",
-        "MAIN_TITLE": "EvilProf 😈 - Block-Based Generator",
+        "PAGE_TITLE": "EvilProf 😈 v1.2 - By Blocks", # Updated v1.2
+        "MAIN_TITLE": "EvilProf 😈 v1.2 - Block-Based Generator", # Updated v1.2
         "SUBHEADER_NEW": "Generate tests by selecting the exact number of questions per block from Excel/CSV.",
         "INSTRUCTIONS_HEADER": "ℹ️ Instructions & Excel/CSV File Preparation (Block Logic)",
         "GENERATION_PARAMS_HEADER": "Generation Parameters",
@@ -172,9 +176,9 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
         "OUTPUT_AREA_HEADER": "Output & Messages",
         "VALIDATION_RESULTS_HEADER": "--- Functional Test Results ---",
         "GENERATION_MESSAGES_HEADER": "--- Messages from Generation ---",
-        "FOOTER_TEXT": "EvilProf v1.1 (Blocks) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
+        "FOOTER_TEXT": "EvilProf v1.2 (Blocks) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit", # Updated v1.2
 
-        # Widget Sidebar
+        # Widget Sidebar (now Main Body for these) & Labels
         "UPLOAD_LABEL": "1. Upload Excel/CSV File",
         "UPLOAD_HELP": "Drag and drop or select the Excel/CSV file (.xlsx, .xls, .csv) with questions organized in blocks separated by empty rows.",
         "SUBJECT_LABEL": "2. Subject Name",
@@ -213,10 +217,10 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
         "PDF_DOWNLOAD_BUTTON_LABEL": "📥 Download Generated PDF",
         "PDF_DOWNLOAD_BUTTON_HELP": "Click to download '{pdf_filename}'",
         "PDF_GENERATION_ERROR": "❌ Error during PDF creation.",
-        "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the sidebar, and press 'Generate PDF Tests'.",
+        "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the respective fields, and press 'Generate PDF Tests'.", # Modified to not refer to sidebar
         "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
 
-        # Intro Text (UPDATED WITH STATS ANALYSIS & CORRECTED WRSwOR CONDITION)
+        # Intro Text
         "INTRO_TEXT_NEW": """
 EvilProf (Block Version) generates PDF tests by selecting an exact number of questions from blocks defined in your Excel or CSV file.
 
@@ -225,7 +229,7 @@ EvilProf (Block Version) generates PDF tests by selecting an exact number of que
 - **Input from Excel/CSV:** Load an `.xlsx`, `.xls`, or `.csv` file.
 - **Block Structure:** Organize questions into blocks separated by **a completely empty row**.
 - **Block Types:** Each block must contain **only multiple-choice questions** OR **only open-ended questions**. The app detects the type automatically. Do not mix types within the same block.
-- **Exact Selection:** After uploading the file, you can specify in the sidebar **exactly how many questions (`k`)** you want to select from each identified block (which contains `n` questions).
+- **Exact Selection:** After uploading the file, you can specify **exactly how many questions (`k`)** you want to select from each identified block (which contains `n` questions).
 - **Randomization and Diversity:**
     - If, for a block, the total number of available questions (`n`) is **strictly greater** than twice the requested questions (`k`) (i.e., **`n > 2k`**), the application will use **Weighted Sampling (WRSwOR)** to select the `k` questions from that block. This method **guarantees** that questions used in one test are not repeated in the *immediately following* test (for that block) and favors selecting less recently used questions.
     - If **`n <= 2k`** (i.e., if you request half or more of the available questions in the block), the application will use **Simple Random Sampling** to select the `k` questions from that block, losing the diversity guarantee between consecutive tests for that block.
@@ -262,7 +266,7 @@ The application includes a functional test that performs an in-depth statistical
 * **Threshold `k=6` (n=2k):** This test allows observing the behavior at and beyond the threshold where sampling switches from WRSwOR to Simple Random.
 * **Practical Advice:** To maximize diversity between consecutive tests using WRSwOR, it's advisable to choose a number of questions per block (`k`) such that `n > 2k` (i.e., `k < n/2`), ideally `k <= n/3` for optimal rotation (e.g., `k=4` for a block of 12).
 
-*See example images below.*
+*See example images in the sidebar.*
 """,
         # Texts used in PDF
         "PDF_TEST_TITLE": "Test for {subject_name}",
@@ -324,20 +328,26 @@ The application includes a functional test that performs an in-depth statistical
         "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Download Statistical Results (.xlsx)",
         "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis (WRSwOR/Simple) by distance and k/block.",
         "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during functional test execution: {error}",
-        "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
     }
 }
 
 # Funzioni get_text e format_text (invariate)
 def get_text(lang_code, key):
     """Recupera il testo per una data chiave nella lingua specificata."""
-    lang_dict = TEXTS.get(lang_code, TEXTS.get("en", {}))
-    return lang_dict.get(key, f"MISSING_TEXT[{key}]")
+    lang_dict = TEXTS.get(lang_code, TEXTS.get("en", {})) # Fallback a Inglese se lang_code non trovato
+    return lang_dict.get(key, f"MISSING_TEXT[{key}]") # Fallback a chiave mancante
 
 def format_text(lang_code, key, **kwargs):
      """Recupera testo e lo formatta con i parametri forniti."""
      raw_text = get_text(lang_code, key)
-     if raw_text == f"MISSING_TEXT[{key}]": return raw_text
-     try: return raw_text.format(**kwargs)
-     except KeyError as e: print(f"WARN: Missing placeholder key {e} in text key '{key}' for lang '{lang_code}' when formatting with {kwargs}"); return raw_text
-     except Exception as e: print(f"WARN: Generic formatting error for text key '{key}' with args {kwargs} for lang '{lang_code}': {e}"); return raw_text
+     if raw_text == f"MISSING_TEXT[{key}]": # Se la chiave è mancante, restituisci il placeholder
+         print(f"WARN: Text key '{key}' not found for lang '{lang_code}'.")
+         return raw_text
+     try:
+         return raw_text.format(**kwargs)
+     except KeyError as e:
+         print(f"WARN: Missing placeholder key {e} in text key '{key}' for lang '{lang_code}' when formatting with {kwargs}")
+         return raw_text # Restituisce il testo grezzo se manca un placeholder
+     except Exception as e:
+         print(f"WARN: Generic formatting error for text key '{key}' with args {kwargs} for lang '{lang_code}': {e}")
+         return raw_text # Restituisce il testo grezzo per altri errori di formattazione
