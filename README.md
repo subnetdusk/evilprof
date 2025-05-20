@@ -1,5 +1,5 @@
 # EvilProf 😈 - v1.1.2
-[Click here to go the app!](evilprof.strealit.app)
+[Click here to go the app!](evilprof.streamlit.app)
 
 Generatore di verifiche PDF diverse con campionamento casuale ponderato delle domande. Test adiacenti sono  _completamente_ diversi!
 
