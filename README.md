@@ -1,7 +1,7 @@
-# EvilProf 😈 - v1.1
+# EvilProf 😈 - v1.1.2
 [Click here to go the app!](evilprof.strealit.app)
 
-Generatore di verifiche PDF selezionando un numero esatto di domande per blocco da Excel/CSV (Streamlit App)
+Generatore di verifiche PDF diverse con campionamento casuale ponderato delle domande. Test adiacenti sono  _completamente_ diversi!
 
 [English](#english-version)
 
@@ -10,6 +10,8 @@ Generatore di verifiche PDF selezionando un numero esatto di domande per blocco 
 ## 🇮🇹 Istruzioni e Preparazione File Excel/CSV (Logica a Blocchi)
 
 EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto di domande da blocchi definiti nel tuo file Excel o CSV.
+
+I test hanno la garanzia della completa diversità se adiacenti, e le domande scelte hanno una minore probabilità di essere selezionate per i test successivi con una pesatura esponenziale decrescente.
 
 **Caratteristiche:**
 
