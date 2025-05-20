@@ -1,8 +1,8 @@
-# localization.py (Corretta struttura testo INTRO_TEXT_NEW)
+# localization.py (Corretta struttura testo INTRO_TEXT_NEW e aggiunta nuova chiave)
 
 TEXTS = {
     "it": {
-        # ... [Titoli, Sidebar, Messaggi UI base come prima] ...
+        # ... (tutte le altre chiavi esistenti rimangono invariate) ...
         "PAGE_TITLE": "EvilProf 😈 - Per Blocchi",
         "MAIN_TITLE": "EvilProf 😈 - Generatore per Blocchi",
         "SUBHEADER_NEW": "Genera verifiche selezionando il numero esatto di domande per blocco dall'Excel/CSV.",
@@ -52,7 +52,6 @@ TEXTS = {
         "INITIAL_INFO_NEW": "Carica un file Excel/CSV, specifica quante domande prendere da ogni blocco nella sidebar e premi 'Genera Verifiche PDF'.",
         "VALIDATION_NO_MESSAGES": "Il test funzionale non ha prodotto messaggi specifici.",
 
-        # Testo Intro (STRUTTURA CORRETTA)
         "INTRO_TEXT_NEW": """
 EvilProf (Versione Blocchi) genera verifiche PDF selezionando un numero esatto di domande da blocchi definiti nel tuo file Excel o CSV.
 
@@ -100,15 +99,12 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
 
 *Vedi immagini di esempio qui sotto.*
 """,
-        # Testi usati nel PDF
         "PDF_TEST_TITLE": "Verifica di {subject_name}",
         "PDF_NAME_LABEL": "Nome e Cognome:",
         "PDF_DATE_LABEL": "Data:",
         "PDF_CLASS_LABEL": "Classe:",
         "PDF_MISSING_QUESTION": "DOMANDA MANCANTE",
         "PDF_NO_OPTIONS": "<em>(Nessuna opzione di risposta fornita)</em>",
-
-        # Messaggi file_handler
         "FH_READING_EXCEL": "⏳ Analisi file: {filename}...",
         "FH_USING_CACHE": "ℹ️ Utilizzo dati già analizzati per: {filename}",
         "FH_ROW_WARNING_ANSWERS_ONLY": "Attenzione: Riga {row_num} ha risposte ma manca la domanda e sarà ignorata.",
@@ -119,8 +115,6 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
         "FH_BLOCK_MIXED_TYPES": "⚠️ Attenzione Blocco {block_id}: Trovata domanda di tipo '{found}' (riga {row_num}), ma il blocco era stato identificato come '{expected}'. La domanda verrà ignorata.",
         "FH_CSV_READ_ERROR": "Errore lettura CSV '{filename}'. Controlla delimitatore (virgola/punto e virgola) e codifica. Dettagli: {error}",
         "FH_UNSUPPORTED_FORMAT": "ERRORE: Formato file non supportato '{extension}' per il file '{filename}'. Usare .xlsx, .xls o .csv.",
-
-        # Messaggi core_logic
         "BLOCK_FALLBACK_WARNING": "[Blocco {block_id} - Test {test_num}] Fallback WRSwOR: non abbastanza domande nuove ({candidates} < {k}). Campiono da tutte ({total}) nel blocco.",
         "BLOCK_NOT_FOUND_OR_EMPTY": "ERRORE Interno: Blocco {block_id} richiesto ma non trovato o vuoto.",
         "BLOCK_REQUEST_EXCEEDS_AVAILABLE": "ERRORE Interno: Richieste {k} domande dal Blocco {block_id}, ma ne sono disponibili solo {n}.",
@@ -128,8 +122,6 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
         "BLOCK_WRSWOR_ERROR": "Errore Critico WRSwOR Blocco {block_id} (k={k}): {error}",
         "CL_FINAL_FALLBACK_ACTIVE": "‼️ ATTENZIONE GENERALE: Il fallback WRSwOR è stato attivato per almeno un blocco durante la generazione. La diversità *all'interno* di quei blocchi potrebbe non essere garantita per tutti i test.",
         "BLOCK_K_ADJUSTED_IN_FALLBACK": "⚠️ Attenzione Blocco {block_id}: Richieste {requested} domande, ma solo {actual} disponibili durante il fallback. Numero adattato.",
-
-        # Messaggi pdf_generator
         "PG_PDF_GENERATION_START": "⚙️ Inizio generazione PDF...",
         "PG_WEASYPRINT_UNAVAILABLE": "Libreria WeasyPrint non trovata o non funzionante. Impossibile generare PDF.",
         "PG_HTML_BUILDING": "⚙️ Costruzione documento HTML...",
@@ -137,8 +129,6 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
         "PG_PDF_CONVERSION_COMPLETE": "⚙️ Conversione PDF completata.",
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERRORE WeasyPrint: Dipendenze mancanti (GTK+/Pango/Cairo?). Dettagli: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERRORE durante la generazione PDF con WeasyPrint: {error}",
-
-        # Chiavi per test.py (Test Statistici e Monte Carlo)
         "TEST_FILE_NOT_FOUND": "ERRORE: File di test '{filename}' non trovato. Assicurati che sia nella stessa cartella dell'app.",
         "TEST_LOADING_DATA": "Caricamento dati dal file di test '{filename}'...",
         "TEST_NO_QUESTIONS_FOUND": "ERRORE: Nessuna domanda valida trovata nel file di test '{filename}'.",
@@ -160,9 +150,11 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
         "DOWNLOAD_STATS_EXCEL_LABEL": "📊 Scarica Risultati Statistici (.xlsx)",
         "DOWNLOAD_STATS_EXCEL_HELP": "Scarica il file Excel con l'analisi di similarità Dice (WRSwOR/Semplice) per distanza e k/blocco.",
         "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Errore imprevisto durante l'esecuzione del test funzionale: {error}",
+        # NUOVA CHIAVE PER WARNING CAMPIONAMENTO SEMPLICE
+        "BLOCK_SWITCH_TO_SIMPLE_SAMPLING_WARNING": "⚠️ Blocco {block_id}: Selezionando {k_selected} su {n_available} domande, si userà il campionamento casuale semplice (diversità ridotta)."
     },
     "en": {
-        # Titles & Headers
+        # ... (tutte le altre chiavi esistenti rimangono invariate) ...
         "PAGE_TITLE": "EvilProf 😈 - By Blocks",
         "MAIN_TITLE": "EvilProf 😈 - Block-Based Generator",
         "SUBHEADER_NEW": "Generate tests by selecting the exact number of questions per block from Excel/CSV.",
@@ -173,8 +165,6 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
         "VALIDATION_RESULTS_HEADER": "--- Functional Test Results ---",
         "GENERATION_MESSAGES_HEADER": "--- Messages from Generation ---",
         "FOOTER_TEXT": "EvilProf v1.1 (Blocks) - [subnetdusk GitHub](https://github.com/subnetdusk/evilprof) - Streamlit",
-
-        # Widget Sidebar
         "UPLOAD_LABEL": "1. Upload Excel/CSV File",
         "UPLOAD_HELP": "Drag and drop or select the Excel/CSV file (.xlsx, .xls, .csv) with questions organized in blocks separated by empty rows.",
         "SUBJECT_LABEL": "2. Subject Name",
@@ -188,8 +178,6 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
         "GENERATE_BUTTON_LABEL": "🚀 Generate PDF Tests",
         "VALIDATE_BUTTON_LABEL": "🧪 Run Functional Test",
         "VALIDATE_BUTTON_HELP_NEW": "Runs the Monte Carlo statistical analysis (using 'test_set_4_by_12_questions.xlsx') on test similarity.",
-
-        # Status / Error / Warning Messages
         "WEASYPRINT_ERROR": "🚨 **Warning:** The WeasyPrint library is not available or not functional. PDF generation is blocked...",
         "IMAGE_CAPTION": "Example of valid Excel file structure (with separated blocks)",
         "ANALYSIS_IMAGE_CAPTION": "Example of similarity analysis generated by the functional test",
@@ -215,8 +203,6 @@ L'applicazione include un test funzionale che esegue un'analisi statistica appro
         "PDF_GENERATION_ERROR": "❌ Error during PDF creation.",
         "INITIAL_INFO_NEW": "Upload an Excel/CSV file, specify how many questions to take from each block in the sidebar, and press 'Generate PDF Tests'.",
         "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
-
-        # Intro Text (UPDATED WITH STATS ANALYSIS & CORRECTED WRSwOR CONDITION)
         "INTRO_TEXT_NEW": """
 EvilProf (Block Version) generates PDF tests by selecting an exact number of questions from blocks defined in your Excel or CSV file.
 
@@ -264,15 +250,12 @@ The application includes a functional test that performs an in-depth statistical
 
 *See example images below.*
 """,
-        # Texts used in PDF
         "PDF_TEST_TITLE": "Test for {subject_name}",
         "PDF_NAME_LABEL": "Name:",
         "PDF_DATE_LABEL": "Date:",
         "PDF_CLASS_LABEL": "Class:",
         "PDF_MISSING_QUESTION": "MISSING QUESTION",
         "PDF_NO_OPTIONS": "<em>(No answer options provided)</em>",
-
-        # file_handler messages
         "FH_READING_EXCEL": "⏳ Analyzing file: {filename}...",
         "FH_USING_CACHE": "ℹ️ Using already analyzed data for: {filename}",
         "FH_ROW_WARNING_ANSWERS_ONLY": "Warning: Row {row_num} has answers but is missing the question and will be ignored.",
@@ -283,8 +266,6 @@ The application includes a functional test that performs an in-depth statistical
         "FH_BLOCK_MIXED_TYPES": "⚠️ Warning Block {block_id}: Found question of type '{found}' (row {row_num}), but block was identified as '{expected}'. Question will be ignored.",
         "FH_CSV_READ_ERROR": "Error reading CSV '{filename}'. Check delimiter (comma/semicolon) and encoding. Details: {error}",
         "FH_UNSUPPORTED_FORMAT": "ERROR: Unsupported file format '{extension}' for file '{filename}'. Use .xlsx, .xls, or .csv.",
-
-        # core_logic messages
         "BLOCK_FALLBACK_WARNING": "[Block {block_id} - Test {test_num}] WRSwOR Fallback: not enough new questions ({candidates} < {k}). Sampling from all ({total}) in block.",
         "BLOCK_NOT_FOUND_OR_EMPTY": "Internal ERROR: Block {block_id} requested but not found or empty.",
         "BLOCK_REQUEST_EXCEEDS_AVAILABLE": "Internal ERROR: Requested {k} questions from Block {block_id}, but only {n} are available.",
@@ -292,8 +273,6 @@ The application includes a functional test that performs an in-depth statistical
         "BLOCK_WRSWOR_ERROR": "Critical WRSwOR Error Block {block_id} (k={k}): {error}",
         "CL_FINAL_FALLBACK_ACTIVE": "‼️ GENERAL WARNING: WRSwOR fallback was activated for at least one block during generation. Diversity *within* those blocks might not be guaranteed for all tests.",
         "BLOCK_K_ADJUSTED_IN_FALLBACK": "⚠️ Warning Block {block_id}: Requested {requested} questions, but only {actual} available during fallback. Number adjusted.",
-
-        # pdf_generator messages
         "PG_PDF_GENERATION_START": "⚙️ Starting PDF generation...",
         "PG_WEASYPRINT_UNAVAILABLE": "WeasyPrint library not found or not functional. Cannot generate PDF.",
         "PG_HTML_BUILDING": "⚙️ Building HTML document...",
@@ -301,8 +280,6 @@ The application includes a functional test that performs an in-depth statistical
         "PG_PDF_CONVERSION_COMPLETE": "⚙️ PDF conversion complete.",
         "PG_WEASYPRINT_DEPENDENCY_ERROR": "ERROR WeasyPrint: Missing dependencies (GTK+/Pango/Cairo?). Details: {error}",
         "PG_WEASYPRINT_OTHER_ERROR": "ERROR during PDF generation with WeasyPrint: {error}",
-
-        # Keys for test.py (Statistical Tests and Monte Carlo)
         "TEST_FILE_NOT_FOUND": "ERROR: Test file '{filename}' not found. Ensure it's in the same folder as the app.",
         "TEST_LOADING_DATA": "Loading data from test file '{filename}'...",
         "TEST_NO_QUESTIONS_FOUND": "ERROR: No valid questions found in test file '{filename}'.",
@@ -325,19 +302,39 @@ The application includes a functional test that performs an in-depth statistical
         "DOWNLOAD_STATS_EXCEL_HELP": "Download the Excel file with the Dice similarity analysis (WRSwOR/Simple) by distance and k/block.",
         "CL_VALIDATION_UNEXPECTED_ERROR": "❌ Unexpected error during functional test execution: {error}",
         "VALIDATION_NO_MESSAGES": "The functional test produced no specific messages.",
+        # NEW KEY FOR SIMPLE SAMPLING WARNING
+        "BLOCK_SWITCH_TO_SIMPLE_SAMPLING_WARNING": "⚠️ Block {block_id}: Selecting {k_selected} out of {n_available} questions will use simple random sampling (reduced diversity)."
     }
 }
 
 # Funzioni get_text e format_text (invariate)
 def get_text(lang_code, key):
     """Recupera il testo per una data chiave nella lingua specificata."""
-    lang_dict = TEXTS.get(lang_code, TEXTS.get("en", {}))
-    return lang_dict.get(key, f"MISSING_TEXT[{key}]")
+    lang_dict = TEXTS.get(lang_code, TEXTS.get("en", {})) # Default to English if lang_code not found
+    return lang_dict.get(key, f"MISSING_TEXT[{key}]") # Default to key if key not found in selected language
 
 def format_text(lang_code, key, **kwargs):
      """Recupera testo e lo formatta con i parametri forniti."""
      raw_text = get_text(lang_code, key)
-     if raw_text == f"MISSING_TEXT[{key}]": return raw_text
-     try: return raw_text.format(**kwargs)
-     except KeyError as e: print(f"WARN: Missing placeholder key {e} in text key '{key}' for lang '{lang_code}' when formatting with {kwargs}"); return raw_text
-     except Exception as e: print(f"WARN: Generic formatting error for text key '{key}' with args {kwargs} for lang '{lang_code}': {e}"); return raw_text
+     if raw_text == f"MISSING_TEXT[{key}]":
+         # Fallback to English if key is missing in the current language but exists in English
+         if lang_code != "en":
+             raw_text_en = TEXTS.get("en", {}).get(key)
+             if raw_text_en:
+                 try:
+                     return raw_text_en.format(**kwargs)
+                 except KeyError as e_en:
+                     print(f"WARN (EN Fallback): Missing placeholder key {e_en} in text key '{key}' for lang 'en' when formatting with {kwargs}")
+                     return raw_text_en # Return raw English text if formatting fails
+                 except Exception as e_en_gen:
+                     print(f"WARN (EN Fallback): Generic formatting error for text key '{key}' with args {kwargs} for lang 'en': {e_en_gen}")
+                     return raw_text_en
+         return raw_text # Return "MISSING_TEXT[key]" if not in English either
+     try:
+         return raw_text.format(**kwargs)
+     except KeyError as e:
+         print(f"WARN: Missing placeholder key {e} in text key '{key}' for lang '{lang_code}' when formatting with {kwargs}")
+         return raw_text # Return raw text if specific placeholder is missing
+     except Exception as e_gen: # Catch other potential formatting errors
+         print(f"WARN: Generic formatting error for text key '{key}' with args {kwargs} for lang '{lang_code}': {e_gen}")
+         return raw_text
